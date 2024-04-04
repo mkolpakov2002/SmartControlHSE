@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">GCS 2.0</string>
+    <string name="name">Name</string>
+    <string name="alert_connect">Connect</string>
+    <string name="error">Application Error</string>
+    <string name="suggestionEnableBluetooth">Please enable bluetooth to select deviceOlds!</string>
+    <string name="add_device">Add deviceOld</string>
+    <string name="paired_devices">List of paired deviceOlds</string>
+    <string name="favorites_devices">List of saved deviceOlds</string>
+    <string name="no_devices_added">No deviceOlds paired</string>
+    <string name="go_to_settings">New Mate</string>
+    <string name="protocol_name">Name</string>
+    <string name="protocol_length">Message length in bytes</string>
+    <string name="protocol_xml">XML code view</string>
+    <string name="TAG_default_protocol">arduino_default</string>
+    <string name="alert_information">Information</string>
+    <string name="alert_device_name">Device name:\u00A0</string>
+    <string name="alert_MAC">MAC address:\u00A0</string>
+    <string name="alert_protocol">Connection protocol:\u00A0</string>
+    <string name="alert_class">Class:\u00A0</string>
+    <string name="alert_type">Type:\u00A0</string>
+    <string name="alert_save">Save</string>
+    <string name="alert_delete">Delete</string>
+    <string name="alert_connection_attempt">Connecting…</string>
+    <string name="drawer_item_data_base">Delete deviceOld database</string>
+    <string name="robot_item_image">Robot Appearance</string>
+    <string name="instruction_alert">Hint</string>
+    <string name="ok">OK</string>
+    <string name="instruction_for_app">Use this app to connect to your robotic deviceOlds. If the list of deviceOlds is empty, add them by clicking on the appropriate button. You can add deviceOlds either manually or using the list of paired Bluetooth deviceOlds from the Android deviceOld settings. To connect, you can select several deviceOlds at once, to start the connection, select them with a long press in the list of available deviceOlds. Before starting the connection, you need to select the type of connection - WiFi or Bluetooth. Bluetooth connection requires all deviceOlds to have MAC addresses. For a WiFi connection, the deviceOlds must have an Ip and a port. For convenience, the indication of Bluetooth and WiFi connectivity for each deviceOld is displayed as an icon. \nThe application was created as part of the project work of IWT MIEM NRU HSE.</string>
+    <string name="instruction_for_app_settings">Use the settings window to control the added protocols and deviceOld database.</string>
+    <string name="instruction_for_app_device_menu">Use this window to edit and save deviceOlds, connect to an already saved deviceOld.</string>
+    <string name="instruction_for_app_add_device">Use this window to save Bluetooth enabled deviceOlds. To add a new one to this list, go to settings and set up a new pairing.</string>
+    <string name="button_add_device">Add Device</string>
+    <string name="button_save_protocol">Add protocol</string>
+    <string name="button_add_protocol">Add new protocol</string>
+    <string name="button_delete_protocols">Delete custom protocols</string>
+    <string name="error_incorrect">Invalid data</string>
+    <!-- Strings used for fragments for navigation -->
+
+    <string name="button_choose_file">Choose an existing file</string>
+    <string name="button_choose_theme">Choose an app theme</string>
+    <string name="alert_device_port_tint">Trigger port</string>
+    <string name="alert_device_ip_hint">Device Ip</string>
+
+    <string name="button_main">Main</string>
+    <string name="button_settings">Settings</string>
+    <string name="button_add_new_device">Adding new deviceOlds</string>
+    <string name="button_list_of_paired">From paired list</string>
+    <string name="button_manually_by_MAC">Manually</string>
+    <string name="button_select_type_connection">Select connection type</string>
+    <string name="wi_fi_connection">Wi-Fi connection</string>
+    <string name="bluetooth_connection">Bluetooth connection</string>
+    <string name="floating_action_button_connection">Connecting</string>
+    <string name="protocol_control_settings">Settings</string>
+    <string name="text_protocol_output">To display all available protocols, click the OUTPUT button</string>
+    <string name="button_add_device_label">Add deviceOld</string>
+    <string name="list_of_available_protocols">List of available protocols</string>
+    <string name="no_available_protocols">No protocols available</string>
+
+    <string name="settings_fragment_confirm">Confirmation</string>
+    <string name="settings_fragment_delete_protocols">Are you sure you want to delete all custom protocols?</string>
+    <string name="settings_fragment_button_ok">OK</string>
+    <string name="settings_fragment_button_cancel">Cancel</string>
+    <string name="suggestionNoBtAdapter">Your deviceOld does not have a Bluetooth adapter, Bluetooth connection is not possible</string>
+    <string name="selection_class_device_error">Devices with the same protocol, class, type are needed</string>
+    <string name="en_bt_for_list">Please enable Bluetooth to open this menu</string>
+    <string name="double_back_click">Press a second time to exit the application</string>
+    <string name="label_connection_activity">ConnectionActivity</string>
+    <string name="command_for_video_stream">Command for video stream</string>
+    <string name="send_string">Send text</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!-- TODO: Remove or change this placeholder text -->
+
+    <string name="add_widget">Add widget</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="add_widgets_to_your_configuration">Add one or more widgets to this configuration.</string>
+    <string name="delete">delete</string>
+    <string name="widget_undo">%1$s removed from config!</string>
+    <string name="add_configuration">Add configuration</string>
+
+    <!-- Master view -->
+    <string name="master_ip_hint">Master URL</string>
+    <string name="master_port_hint">Master port</string>
+    <string name="need_help_button">Need help connecting?</string>
+    <string name="connection_checklist_title">Have you checked before connecting: </string>
+    <string-array name="connection_checklist">
+        <item>Valid and active WIFI connection?</item>
+        <item>Correct IP and PORT of the ROS Master entered?</item>
+        <item>Is this deviceOld in the same network as the Master system?</item>
+        <item>Changed the environment variables of the Master system?</item>
+        <item>Master is running?</item>
+        <item>Correct topic names subscribed / published?</item>
+    </string-array>
+
+    <!-- Buttons -->
+    <string name="button_connect">Connect</string>
+    <string name="button_send">Send</string>
+    <string name="viz_options_open_content">Show viz options</string>
+
+    <!-- SSH Connection -->
+    <string name="ssh_connection">SSH Connection Data</string>
+    <string name="ssh_terminal">SSH Terminal</string>
+    <string name="ip_address_hint">IP Address</string>
+    <string name="port_hint">Port</string>
+    <string name="username_hint">Username</string>
+    <string name="password_hint">Password</string>
+    <string name="terminal_hint">Terminal Input</string>
+
+    <!-- Default config -->
+    <string name="default_config_name">New Config</string>
+    <string name="default_master_ip">123.456.789.01</string>
+    <string name="default_master_ticker_title">Default ticker title</string>
+    <string name="default_master_notification_title">Default title</string>
+
+    <!--Default SSH Settings -->
+    <string name="default_ip_address">192.168.1.1</string>
+    <string name="default_port">22</string>
+    <string name="default_username">pi</string>
+    <string name="default_password">raspberry</string>
+
+    <!-- Preference key -->
+    <string name="preference_file_key">prefs_configs</string>
+    <string name="new_config_name">New config name</string>
+    <string name="button_disconnect">Disconnect</string>
+    <string name="really_delete">Do you really want to delete the current configuration permanently?</string>
+    <string name="yes">YES</string>
+    <string name="no">NO</string>
+    <string name="rename_config">Rename Config</string>
+    <string name="rename_widget">Rename Widget</string>
+    <string name="no_config">No config</string>
+
+    <!-- Details -->
+    <string name="widget_list_type">(%s)</string>
+    <string name="connected">Connected</string>
+    <string name="disconnected">Disconnected</string>
+    <string name="pending">Pending</string>
+
+    <!-- SSH Autocompletion -->
+    <string-array name="ssh_autocmpletion">
+        <item>rostopic list </item>
+        <item>rostopic echo </item>
+        <item>rostopic info </item>
+        <item>rostopic hz </item>
+        <item>rosnode info </item>
+        <item>rosnode list </item>
+        <item>roslaunch </item>
+        <item>roscore</item>
+    </string-array>
+
+    <string name="dialog_permissions_bluetooth_connect_rationale">Application requires permission to connect to Bluetooth to work with deviceOlds.</string>
+    <string name="dialog_permissions_bluetooth_admin_rationale">Application requires permission to manage Bluetooth to work with deviceOlds.</string>
+    <string name="dialog_permissions_change_wifi_state_rationale">Application needs permission to change Wi-Fi state to work with deviceOlds.</string>
+    <string name="dialog_permissions_manage_wifi_network_selection_rationale">Application needs permission to manage Wi-Fi network selection to work with deviceOlds.</string>
+    <string name="dialog_permissions_write_external_storage_rationale">Application needs permission to write to external storage to save data.</string>
+    <string name="dialog_permissions_general_rationale">Application requires the necessary permissions to work correctly.</string>
+
+    <!-- Диалоги -->
+    <string name="dialog_permissions_bluetooth_rationale">To use the HSE Robots app, grant Bluetooth and storage permissions.</string>
+    <string name="encryption_method">Encryption method:</string>
+    <string name="suggestionNoBtWiFiAdapter">No Bluetooth or WiFi adapter detected on your deviceOld!</string>
+</resources>

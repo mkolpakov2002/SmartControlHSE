@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/mainMenuFragment">
+
+    <fragment
+        android:id="@+id/mainMenuFragment"
+        android:name="ru.hse.control_system_v2.ui.fragments.home.MainMenuFragment"
+        android:label="main"
+        app:defaultNavHost="true"
+        tools:layout="@layout/fragment_main">
+        <action
+            android:id="@+id/action_mainMenuFragment_to_settings_Fragment"
+            app:destination="@id/settingsFragment" />
+        <action
+            android:id="@+id/action_mainMenuFragment_to_oneButtonAlertDialogFragment"
+            app:destination="@id/oneButtonAlertDialogFragment" />
+        <action
+            android:id="@+id/action_mainMenuFragment_to_deviceMenuFragment"
+            app:destination="@id/deviceMenuFragment" />
+        <action
+            android:id="@+id/action_mainMenuFragment_to_addDeviceFragment"
+            app:destination="@id/addDeviceFragment" />
+        <action
+            android:id="@+id/action_mainMenuFragment_to_connectionTypeFragment"
+            app:destination="@id/connectionTypeFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="ru.hse.control_system_v2.ui.fragments.settings.SettingsFragment"
+        android:label="settings"
+        tools:layout="@layout/fragment_settings">
+        <action
+            android:id="@+id/action_settings_Fragment_to_mainMenuFragment"
+            app:destination="@id/mainMenuFragment" />
+        <action
+            android:id="@+id/action_settingsFragment_to_navigationDialog"
+            app:destination="@id/navigationDialog" />
+    </fragment>
+    <dialog
+        android:id="@+id/connection_dialog"
+        android:name="ru.hse.control_system_v2.ui.fragments.dialog.DialogConnection"
+        tools:layout="@layout/dialog_connection"
+        android:label="dialog_connection">
+        <action
+            android:id="@+id/action_connection_dialog_to_mainMenuFragment"
+            app:destination="@id/mainMenuFragment" />
+        <action
+            android:id="@+id/action_connection_dialog_to_oneButtonAlertDialogFragment"
+            app:destination="@id/oneButtonAlertDialogFragment" />
+        <action
+            android:id="@+id/action_connection_dialog_to_connectionActivity"
+            app:destination="@id/commandsFragment" />
+    </dialog>
+    <dialog
+        android:id="@+id/oneButtonAlertDialogFragment"
+        android:name="ru.hse.control_system_v2.ui.fragments.dialog.OneButtonAlertDialogFragment"
+        android:label="OneButtonAlertDialogFragment">
+
+        <action
+            android:id="@+id/action_oneButtonAlertDialogFragment_to_mainMenuFragment"
+            app:destination="@id/mainMenuFragment" />
+    </dialog>
+    <fragment
+        android:id="@+id/deviceMenuFragment"
+        android:name="ru.hse.control_system_v2.ui.fragments.device_settings.DeviceMenuFragment"
+        android:label="DeviceMenuFragment"
+        tools:layout="@layout/fragment_device_menu">
+        <action
+            android:id="@+id/action_deviceMenuFragment_to_mainMenuFragment"
+            app:destination="@id/mainMenuFragment" />
+        <action
+            android:id="@+id/action_deviceMenuFragment_to_addDeviceFragment"
+            app:destination="@id/addDeviceFragment" />
+        <action
+            android:id="@+id/action_deviceMenuFragment_to_connectionTypeFragment"
+            app:destination="@id/connectionTypeFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/addDeviceFragment"
+        android:name="ru.hse.control_system_v2.ui.fragments.device_settings.BluetoothPairedDevicesFragment"
+        android:label="AddDeviceFragment"
+        tools:layout="@layout/fragment_bluetooth_paired_devices">
+        <action
+            android:id="@+id/action_addDeviceFragment_to_deviceMenuFragment"
+            app:destination="@id/deviceMenuFragment" />
+        <action
+            android:id="@+id/action_addDeviceFragment_to_mainMenuFragment"
+            app:destination="@id/mainMenuFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/connectionTypeFragment"
+        android:name="ru.hse.control_system_v2.ui.fragments.connection_settings.ConnectionTypeFragment"
+        android:label="ConnectionTypeFragment"
+        tools:layout="@layout/fragment_connection_type">
+        <action
+            android:id="@+id/action_connectionTypeFragment_to_connection_dialog"
+            app:destination="@id/connection_dialog" />
+        <action
+            android:id="@+id/action_connectionTypeFragment_to_deviceMenuFragment"
+            app:destination="@id/deviceMenuFragment" />
+    </fragment>
+    <dialog
+        android:id="@+id/navigationDialog"
+        android:name="ru.hse.control_system_v2.ui.packages.NavigationDialog"
+        android:label="NavigationDialog" />
+    <fragment
+        android:id="@+id/commandsFragment"
+        android:name="ru.hse.control_system_v2.ui.fragments.connection.CommandsFragment"
+        android:label="CommandsFragment" />
+</navigation>

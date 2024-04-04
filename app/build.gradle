@@ -1,0 +1,140 @@
+plugins {
+    id("com.android.application")
+    id("androidx.navigation.safeargs")
+    id("kotlin-android")
+    id("com.google.devtools.ksp")
+    id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.serialization")
+}
+
+android {
+    compileSdk = 34
+
+    defaultConfig {
+        applicationId = "ru.hse.control_system_v2"
+        minSdk = 29
+        targetSdk = 34
+        versionCode = 17
+        versionName = "3.0.0"
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        javaCompileOptions {
+            annotationProcessorOptions.arguments["room.schemaLocation"] = "$projectDir/schemas".toString()
+        }
+        vectorDrawables.useSupportLibrary = true
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    buildFeatures {
+        viewBinding = true
+        compose = false
+    }
+    android {
+        packagingOptions {
+            exclude 'META-INF/INDEX.LIST'
+            pickFirst 'META-INF/io.netty.versions.properties'
+        }
+    }
+    buildFeatures {
+        buildConfig = true
+    }
+    namespace("ru.hse.control_system_v2")
+    kotlinOptions.jvmTarget = "17"
+    composeOptions.kotlinCompilerExtensionVersion = "1.4.0-alpha02"
+    packagingOptions.excludes.add("META-INF/library_release.kotlin_module")
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
+    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.preference:preference-ktx:1.2.1'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    implementation "androidx.navigation:navigation-fragment-ktx:$rootProject.navVersion"
+    implementation "androidx.navigation:navigation-ui-ktx:$rootProject.navVersion"
+    implementation "androidx.appcompat:appcompat:$rootProject.appCompatVersion"
+    implementation "androidx.activity:activity-ktx:$rootProject.activityVersion"
+
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0'
+
+    // Room components
+    implementation "androidx.room:room-runtime:$rootProject.roomVersion"
+    implementation project(path: ':jcraft')
+    implementation 'androidx.recyclerview:recyclerview:1.3.2'
+    ksp "androidx.room:room-compiler:$rootProject.roomVersion"
+    implementation "androidx.room:room-ktx:$rootProject.roomVersion"
+    testImplementation "androidx.room:room-testing:$rootProject.roomVersion"
+
+    // UI
+    implementation "androidx.constraintlayout:constraintlayout:$rootProject.constraintLayoutVersion"
+    implementation "com.google.android.material:material:$rootProject.materialVersion"
+
+    // mavlink
+    implementation "com.divpundir.mavlink:mavlink-kotlin:$rootProject.mavlinkVersion"
+    implementation "com.divpundir.mavlink:mavlink-kotlin:$rootProject.mavlinkVersion"
+    implementation "com.divpundir.mavlink:mavlink-kotlin:$rootProject.mavlinkVersion"
+
+    // kotlin
+    implementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:$kotlin_version"
+//    implementation "org.jetbrains.kotlin:kotlin-script-util:$kotlin_version"
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3'
+
+    //View Model
+    def lifecycle_version = "2.7.0"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
+    implementation 'pub.devrel:easypermissions:3.0.0'
+
+    // ExoPlayer video
+    implementation "com.google.android.exoplayer:exoplayer-core:$rootProject.exoPlayerVersion"
+    implementation "com.google.android.exoplayer:exoplayer-ui:$rootProject.exoPlayerVersion"
+    implementation "com.google.android.exoplayer:exoplayer-smoothstreaming:$rootProject.exoPlayerVersion"
+
+    // UVC video
+    //implementation 'com.github.jiangdongguo.AndroidUSBCamera:libausbc:3.3.3'
+
+    // View Binding
+    implementation 'com.github.kirich1409:viewbindingpropertydelegate-full:1.5.9'
+    implementation 'com.github.kirich1409:viewbindingpropertydelegate-noreflection:1.5.9'
+
+    // Fragment ktx
+    implementation 'androidx.fragment:fragment-ktx:1.6.2'
+
+    // USB serial for usb arduino communication
+    implementation 'com.github.mik3y:usb-serial-for-android:3.5.1'
+
+    implementation("com.beepiz.blegattcoroutines:blegattcoroutines-core:0.5.0")
+    implementation("com.beepiz.blegattcoroutines:blegattcoroutines-genericaccess:0.5.0")
+    implementation("com.juul.kable:core:0.29.1")
+
+    def ktor_version = "2.3.9"
+    implementation ("io.ktor:ktor-client-core:$ktor_version")
+    implementation("io.ktor:ktor-client-android:$ktor_version")
+    implementation ("io.ktor:ktor-client-json:$ktor_version")
+    implementation ("io.ktor:ktor-client-serialization:$ktor_version")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktor_version")
+    implementation("io.ktor:ktor-client-auth:$ktor_version")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    implementation("io.ktor:ktor-client-cio:$ktor_version")
+    implementation("io.ktor:ktor-client-okhttp:$ktor_version")
+    implementation("io.ktor:ktor-client-content-negotiation:$ktor_version")
+    implementation("io.ktor:ktor-client-logging:$ktor_version")
+
+    implementation 'io.github.oshai:kotlin-logging-jvm:5.1.0'
+}

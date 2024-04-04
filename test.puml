@@ -1,0 +1,258 @@
+@startuml
+enum ru.hse.control_system_v2.model.entities.universal.scheme.FloatPropertyInstance {
+}
+enum ru.hse.control_system_v2.model.entities.universal.scheme.FloatUnit {
+}
+enum ru.hse.control_system_v2.model.entities.universal.scheme.PressureUnit {
+}
+enum ru.hse.control_system_v2.model.entities.universal.scheme.TemperatureUnit {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.FloatPropertyParameters {
+}
+interface ru.hse.control_system_v2.model.entities.universal.scheme.FloatPropertyAboveZeroMixin {
++ Pair<Int?, Int?> range
+}
+
+abstract class ru.hse.control_system_v2.model.entities.universal.scheme.APIModel {
++ String asJson()
++ Map<String, Any?> asMap()
+}
+
+abstract class ru.hse.control_system_v2.model.entities.universal.scheme.GenericAPIModel {
+}
+enum ru.hse.control_system_v2.model.entities.universal.scheme.VideoStreamCapabilityInstance {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.VideoStreamCapabilityParameters {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.GetStreamInstanceActionStateValue {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.GetStreamInstanceActionState {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.GetStreamInstanceActionResultValue {
+}
+enum ru.hse.control_system_v2.model.entities.universal.scheme.PropertyType {
++ String short
+}
+
+class ru.hse.control_system_v2.model.entities.universal.scheme.PropertyDescription {
++ PropertyType type
++ Boolean retrievable
++ Boolean reportable
+}
+
+class ru.hse.control_system_v2.model.entities.universal.scheme.FloatPropertyDescription {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.EventPropertyDescription {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.PropertyInstance {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.EventValue {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.PropertyInstanceStateValue {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.PropertyInstanceState {
+}
+enum ru.hse.control_system_v2.model.entities.universal.scheme.EventPropertyInstance {
+}
+enum ru.hse.control_system_v2.model.entities.universal.scheme.VibrationInstanceEvent {
+}
+enum ru.hse.control_system_v2.model.entities.universal.scheme.OpenInstanceEvent {
+}
+enum ru.hse.control_system_v2.model.entities.universal.scheme.ButtonInstanceEvent {
+}
+enum ru.hse.control_system_v2.model.entities.universal.scheme.MotionInstanceEvent {
+}
+enum ru.hse.control_system_v2.model.entities.universal.scheme.SmokeInstanceEvent {
+}
+enum ru.hse.control_system_v2.model.entities.universal.scheme.GasInstanceEvent {
+}
+enum ru.hse.control_system_v2.model.entities.universal.scheme.BatteryLevelInstanceEvent {
+}
+enum ru.hse.control_system_v2.model.entities.universal.scheme.FoodLevelInstanceEvent {
+}
+enum ru.hse.control_system_v2.model.entities.universal.scheme.WaterLevelInstanceEvent {
+}
+enum ru.hse.control_system_v2.model.entities.universal.scheme.WaterLeakInstanceEvent {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.EventPropertyParameters {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.VibrationEventPropertyParameters {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.OpenEventPropertyParameters {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.ButtonEventPropertyParameters {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.MotionEventPropertyParameters {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.SmokeEventPropertyParameters {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.GasEventPropertyParameters {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.BatteryLevelEventPropertyParameters {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.FoodLevelEventPropertyParameters {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.WaterLevelEventPropertyParameters {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.WaterLeakEventPropertyParameters {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.CallbackStatesRequestPayload {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.CallbackStatesRequest {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.CallbackDiscoveryRequestPayload {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.CallbackDiscoveryRequest {
+}
+enum ru.hse.control_system_v2.model.entities.universal.scheme.CallbackResponseStatus {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.CallbackResponse {
+}
+enum ru.hse.control_system_v2.model.entities.universal.scheme.ModeCapabilityInstance {
+}
+enum ru.hse.control_system_v2.model.entities.universal.scheme.ModeCapabilityMode {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.ModeCapabilityParameters {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.null {
++ ModeCapabilityParameters fromList(ModeCapabilityInstance,List<ModeCapabilityMode>)
+}
+
+class ru.hse.control_system_v2.model.entities.universal.scheme.ModeCapabilityInstanceActionState {
+}
+enum ru.hse.control_system_v2.model.entities.universal.scheme.CapabilityType {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.CapabilityParameters {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.CapabilityDescription {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.CapabilityInstance {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.CapabilityInstanceStateValue {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.CapabilityInstanceState {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.OnOffCapabilityInstanceAction {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.ColorSettingCapabilityInstanceAction {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.ModeCapabilityInstanceAction {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.RangeCapabilityInstanceAction {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.ToggleCapabilityInstanceAction {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.VideoStreamCapabilityInstanceAction {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.CapabilityInstanceAction {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.CapabilityInstanceActionState {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.CapabilityInstanceActionResultValue {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.DynamicSerializer {
++ SerialDescriptor descriptor
++ void serialize(Encoder,Any)
++ Any deserialize(Decoder)
+- JsonElement serializeToJsonElement(Any)
+- Any deserializeFromJsonElement(JsonElement)
+}
+
+
+class ru.hse.control_system_v2.model.entities.universal.scheme.ColorSceneSerializer {
++ JsonElement serializeToJsonElement(ColorScene)
++ ColorScene deserializeFromJsonElement(JsonElement)
+}
+
+enum ru.hse.control_system_v2.model.entities.universal.scheme.RangeCapabilityUnit {
+}
+enum ru.hse.control_system_v2.model.entities.universal.scheme.RangeCapabilityInstance {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.RangeCapabilityRange {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.RangeCapabilityParameters {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.RangeCapabilityInstanceActionState {
+}
+enum ru.hse.control_system_v2.model.entities.universal.scheme.OnOffCapabilityInstance {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.OnOffCapabilityParameters {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.OnOffCapabilityInstanceActionState {
+}
+enum ru.hse.control_system_v2.model.entities.universal.scheme.DeviceType {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.DeviceInfo {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.DeviceDescription {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.DeviceState {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.DeviceList {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.DeviceStates {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.ActionRequestDevice {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.ActionRequestPayload {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.ActionRequest {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.SuccessActionResult {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.FailedActionResult {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.ActionResultCapabilityState {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.ActionResultCapability {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.ActionResultDevice {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.ActionResult {
+}
+enum ru.hse.control_system_v2.model.entities.universal.scheme.ResponseCode {
+}
+abstract class ru.hse.control_system_v2.model.entities.universal.scheme.ResponsePayload {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.Error {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.Response {
+}
+enum ru.hse.control_system_v2.model.entities.universal.scheme.ToggleCapabilityInstance {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.ToggleCapabilityParameters {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.ToggleCapabilityInstanceActionState {
+}
+enum ru.hse.control_system_v2.model.entities.universal.scheme.ColorSettingCapabilityInstance {
+}
+enum ru.hse.control_system_v2.model.entities.universal.scheme.ColorScene {
+}
+enum ru.hse.control_system_v2.model.entities.universal.scheme.CapabilityParameterColorModel {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.CapabilityParameterTemperatureK {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.CapabilityParameterColorScene {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.null {
++ CapabilityParameterColorScene fromList(List<ColorScene>)
+}
+
+class ru.hse.control_system_v2.model.entities.universal.scheme.ColorSettingCapabilityParameters {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.RGBInstanceActionState {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.TemperatureKInstanceActionState {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.SceneInstanceActionState {
+}
+class ru.hse.control_system_v2.model.entities.universal.scheme.ColorSettingCapabilityInstanceActionState {
++ ColorSettingCapabilityInstance instance
+}
+
+
+
+ru.hse.control_system_v2.model.entities.universal.scheme.APIModel <|-- ru.hse.control_system_v2.model.entities.universal.scheme.GenericAPIModel
+kotlinx.serialization.KSerializer <|.. ru.hse.control_system_v2.model.entities.universal.scheme.DynamicSerializer
+ru.hse.control_system_v2.model.entities.universal.scheme.APIModel <|-- ru.hse.control_system_v2.model.entities.universal.scheme.ResponsePayload
+@enduml

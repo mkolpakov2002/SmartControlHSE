@@ -2,8 +2,6 @@ package ru.hse.control_system_v2.model.entities.universal
 
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
-import ru.hse.control_system_v2.model.entities.universal.scheme.UserHomeInfoApiResponse
-import ru.hse.control_system_v2.model.entities.universal.scheme.UserInfoModel
 
 class YandexSmartHomeAPITest {
     private val accessToken = "y0_AgAEA7qkJBRwAAtNHQAAAAD7NOpOAABZXzInfHtFAoIVc4SUjPlw0bda8g"
@@ -16,7 +14,7 @@ class YandexSmartHomeAPITest {
 //        classDiscriminator = "#class"
     }
 
-    fun testGetUserInfo() = runBlocking {
+    suspend fun testGetUserInfo() {
         val userInfo = YandexSmartHomeAPI.getUserInfo(accessToken)
         println("User Info: $userInfo")
 //        userInfo?.let {
@@ -25,7 +23,7 @@ class YandexSmartHomeAPITest {
 //        }
     }
 
-    fun testAll() {
+    suspend fun testAll() {
         testGetUserInfo()
     }
 }

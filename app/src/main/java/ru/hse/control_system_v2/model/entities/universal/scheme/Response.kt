@@ -8,14 +8,6 @@ import kotlinx.serialization.Serializable
  * https://yandex.ru/dev/dialogs/smart-home/doc/concepts/response-codes.html
  * https://raw.githubusercontent.com/dext0r/yandex_smart_home/master/custom_components/yandex_smart_home/schema/response.py
  */
-@Serializable
-enum class ResponseCode {
-    DOOR_OPEN, LID_OPEN, REMOTE_CONTROL_DISABLED, NOT_ENOUGH_WATER, LOW_CHARGE_LEVEL,
-    CONTAINER_FULL, CONTAINER_EMPTY, DRIP_TRAY_FULL, DEVICE_STUCK, DEVICE_OFF,
-    FIRMWARE_OUT_OF_DATE, NOT_ENOUGH_DETERGENT, HUMAN_INVOLVEMENT_NEEDED, DEVICE_UNREACHABLE,
-    DEVICE_BUSY, INTERNAL_ERROR, INVALID_ACTION, INVALID_VALUE, NOT_SUPPORTED_IN_CURRENT_MODE,
-    ACCOUNT_LINKING_ERROR, DEVICE_NOT_FOUND
-}
 
 /**
  * Базовый класс для полезной нагрузки ответа API.
@@ -32,7 +24,7 @@ open class ResponsePayload: APIModel
  */
 @Serializable
 data class Error(
-    @SerialName("error_code") val errorCode: ResponseCode,
+    @SerialName("error_code") val errorCode: ErrorCode,
     @SerialName("error_message") val errorMessage: String? = null
 ): ResponsePayload()
 
@@ -41,9 +33,3 @@ data class Error(
  * https://yandex.ru/dev/dialogs/smart-home/doc/concepts/response-codes.html
  * https://raw.githubusercontent.com/dext0r/yandex_smart_home/master/custom_components/yandex_smart_home/schema/response.py
  */
-@Serializable
-sealed interface Response: APIModel {
-    @SerialName("request_id")
-    val requestId: String?
-    val payload: ResponsePayload?
-}

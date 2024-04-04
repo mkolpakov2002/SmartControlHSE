@@ -19,7 +19,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import ru.hse.control_system_v2.model.entities.universal.scheme.UserHomeInfoApiResponse
 import ru.hse.control_system_v2.model.entities.universal.scheme.UserInfoErrorModel
-import ru.hse.control_system_v2.model.entities.universal.scheme.UserInfoModel
+import ru.hse.control_system_v2.model.entities.universal.scheme.UserInfoResponse
 
 object YandexSmartHomeAPI {
     private const val BASE_URL = "https://api.iot.yandex.net/v1.0"
@@ -53,7 +53,7 @@ object YandexSmartHomeAPI {
             Log.d("YandexSmartHomeAPI", "User info response: $responseBody")
             when (response.status) {
                 HttpStatusCode.OK -> {
-                    val successResponse = json.decodeFromString<UserInfoModel>(responseBody)
+                    val successResponse = json.decodeFromString<UserInfoResponse>(responseBody)
                     UserHomeInfoApiResponse.Success(successResponse)
                 }
                 else -> {

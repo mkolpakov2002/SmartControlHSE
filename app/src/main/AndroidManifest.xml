@@ -7,8 +7,10 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.INTERNET" />
 
     <uses-feature android:name="android.hardware.wifi" />
@@ -29,11 +31,6 @@
         android:usesCleartextTraffic="true"
         tools:replace="android:icon"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity
-            android:name=".ui.connection.ConnectionActivity"
-            android:exported="true"
-            android:label="@string/label_connection_activity"
-            android:screenOrientation="sensorLandscape" />
 
         <activity
             android:name=".ui.MainActivity"

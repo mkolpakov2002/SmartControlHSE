@@ -22,6 +22,7 @@ dependencyResolutionManagement {
         maven { url 'https://github.com/rosjava/rosjava_mvn_repo/raw/master' }
     }
 }
-rootProject.name = "Control_system_v2"
+
+rootProject.name = "SmartControlHSE"
 include ':app'
 include ':jcraft'

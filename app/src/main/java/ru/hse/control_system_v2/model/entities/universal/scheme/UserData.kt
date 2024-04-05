@@ -2,6 +2,9 @@ package ru.hse.control_system_v2.model.entities.universal.scheme
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonContentPolymorphicSerializer
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.jsonObject
 
 @Serializable
 sealed interface Response {
@@ -20,14 +23,14 @@ sealed class UserHomeInfoApiResponse {
 
 @Serializable
 data class UserInfoErrorModel(
-    override val status: String,
-    override val requestId: String,
+    @SerialName("status") override val status: String,
+    @SerialName("request_id") override val requestId: String,
     val error: String
 ): Response
 
 @Serializable
 data class UserInfoResponse(
-    override val requestId: String,
+    @SerialName("request_id") override val requestId: String,
     @SerialName("status") override val status: String,
     @SerialName("rooms") val rooms: List<RoomObject>,
     @SerialName("groups") val groups: List<GroupObject>,
@@ -332,7 +335,12 @@ data class PropertyObject(
 @Serializable
 sealed class CapabilityParameterObject
 
+/**
+ * make KSerializable
+ */
+
 @Serializable
+@SerialName("color_setting")
 data class ColorSettingCapabilityParameterObject(
     @SerialName("color_model") val colorModel: ColorModel? = null,
     @SerialName("temperature_k") val temperatureK: TemperatureK? = null,
@@ -394,11 +402,13 @@ enum class SceneObject {
 }
 
 @Serializable
+@SerialName("on_off")
 data class OnOffCapabilityParameterObject(
     val split: Boolean
 ): CapabilityParameterObject()
 
 @Serializable
+@SerialName("mode_setting")
 data class ModeCapabilityParameterObject(
     val instance: ModeCapabilityInstance,
     val modes: List<ModeObject>
@@ -507,6 +517,7 @@ enum class ModeCapabilityInstance : CapabilityStateObjectInstance{
 }
 
 @Serializable
+@SerialName("range")
 data class RangeCapabilityParameterObject(
     val instance: RangeCapabilityParameterObjectFunction,
     var unit: RangeCapabilityParameterObjectUnit? = null,
@@ -552,6 +563,7 @@ data class Range(
 }
 
 @Serializable
+@SerialName("toggle")
 data class ToggleCapabilityParameterObject(
     val instance: ToggleCapabilityParameterObjectFunction
 ): CapabilityParameterObject()
@@ -568,6 +580,7 @@ enum class ToggleCapabilityParameterObjectFunction : CapabilityStateObjectInstan
 }
 
 @Serializable
+@SerialName("video_stream")
 data class VideoStreamCapabilityParameterObject(
     val protocols: List<VideoStreamCapabilityParameterObjectStreamProtocol>
 ): CapabilityParameterObject()

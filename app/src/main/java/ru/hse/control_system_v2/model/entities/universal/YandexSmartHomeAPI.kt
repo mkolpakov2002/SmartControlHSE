@@ -34,10 +34,12 @@ object YandexSmartHomeAPI {
         }
     }
     private val json = Json {
-        ignoreUnknownKeys = true
+        ignoreUnknownKeys = false
         isLenient = true
         prettyPrint = true
         encodeDefaults = true
+        classDiscriminator = "type"
+        allowStructuredMapKeys = true
     }
 
     suspend fun getUserInfo(accessToken: String): UserHomeInfoApiResponse? {

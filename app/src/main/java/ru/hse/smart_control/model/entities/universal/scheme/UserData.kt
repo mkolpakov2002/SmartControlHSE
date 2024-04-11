@@ -744,17 +744,12 @@ data class OnOffCapabilityParameterObject(
 data class ModeCapabilityParameterObject(
     val instance: ModeCapabilityInstance,
     val modes: List<ModeObject>
-): CapabilityParameterObject() {
-    companion object {
-        fun fromList(instance: ModeCapabilityInstance, modes: List<ModeCapabilityMode>) =
-            ModeCapabilityParameterObject(instance, modes.map { ModeObject(it) })
-    }
-}
+): CapabilityParameterObject()
 
 @Serializable
 data class RangeCapabilityParameterObject(
     val instance: RangeCapabilityParameterObjectFunction,
-    var unit: RangeCapabilityParameterObjectUnit? = null,
+    var unit: MeasurementUnit? = null,
     @SerialName("random_access") val randomAccess: Boolean,
     val range: Range? = null,
     val looped: Boolean
@@ -763,10 +758,10 @@ data class RangeCapabilityParameterObject(
         unit = when (instance) {
             RangeCapabilityParameterObjectFunction.Brightness,
             RangeCapabilityParameterObjectFunction.Humidity,
-            RangeCapabilityParameterObjectFunction.Open -> RangeCapabilityParameterObjectUnit.Percent
+            RangeCapabilityParameterObjectFunction.Open -> MeasurementUnit.Percent
             else -> {
                 //RangeCapabilityInstanceOld.TEMPERATURE
-                RangeCapabilityParameterObjectUnit.TemperatureCelsius
+                MeasurementUnit.TemperatureCelsius
             }
         }
     }
@@ -807,11 +802,7 @@ data class TemperatureK(
 @Serializable
 data class ColorScene(
     val scenes: List<Scene>
-) {
-    companion object {
-        fun fromList(scenes: List<SceneObject>) = ColorScene(scenes.map { Scene(it) })
-    }
-}
+)
 
 @Serializable
 data class Scene(
@@ -895,12 +886,9 @@ sealed class SceneObject {
 }
 
 @Serializable
-data class ModeObject(
-    val value: ModeCapabilityMode
-)
+data class ModeObject(val value: ModeCapabilityMode)
 
 @Serializable
-@Polymorphic
 sealed class ModeCapabilityMode : CapabilityStateObjectValue() {
     @Serializable
     @SerialName("auto")
@@ -1272,18 +1260,6 @@ sealed class RangeCapabilityParameterObjectFunction : CapabilityStateObjectInsta
 }
 
 @Serializable
-@Polymorphic
-sealed class RangeCapabilityParameterObjectUnit : MeasurementUnit {
-    @Serializable
-    @SerialName("unit.percent")
-    data object Percent : RangeCapabilityParameterObjectUnit()
-
-    @Serializable
-    @SerialName("unit.temperature.celsius")
-    data object TemperatureCelsius : RangeCapabilityParameterObjectUnit()
-}
-
-@Serializable
 data class Range(
     val min: Float,
     val max: Float,
@@ -1336,7 +1312,7 @@ sealed class VideoStreamCapabilityParameterObjectStreamProtocol {
 @Serializable
 @Polymorphic
 sealed interface CapabilityState {
-    abstract val instance: CapabilityStateObjectInstance
+    val instance: CapabilityStateObjectInstance
 }
 
 //@Serializable(CapabilityStateObjectDataSerializer::class)
@@ -1513,9 +1489,7 @@ sealed class Status {
 
 @Serializable
 @Polymorphic
-sealed interface CapabilityStateObjectInstance{
-
-}
+sealed interface CapabilityStateObjectInstance
 
 @Serializable
 @Polymorphic
@@ -1629,7 +1603,7 @@ data class HSVObject(val h: Int, val s: Int, val v: Int)
 @Serializable
 data class VideoStreamCapabilityStateObjectData(
     override val instance: VideoStreamCapabilityStateObjectInstance,
-    override val value: VideoStreamCapabilityStateObjectValue.VideoStreamCapabilityStateObjectDataValue
+    override val value: VideoStreamCapabilityStateObjectDataValue
 ): CapabilityStateObjectData()
 
 @Serializable
@@ -1640,24 +1614,20 @@ sealed class VideoStreamCapabilityStateObjectInstance : CapabilityStateObjectIns
 }
 
 @Serializable
-@Polymorphic
-sealed class VideoStreamCapabilityStateObjectValue : CapabilityStateObjectValue(){
-    @Serializable
-    data class VideoStreamCapabilityStateObjectDataValue(
-        val protocols: List<VideoStreamCapabilityParameterObjectStreamProtocol>
-    ) : VideoStreamCapabilityStateObjectValue()
+data class VideoStreamCapabilityStateObjectDataValue(
+    val protocols: List<VideoStreamCapabilityParameterObjectStreamProtocol>
+) : CapabilityStateObjectValue()
 
-    @Serializable
-    data class VideoStreamCapabilityStateObjectActionResultValue(
-        val protocol: VideoStreamCapabilityParameterObjectStreamProtocol,
-        @SerialName("stream_url") val streamUrl: String
-    ) : VideoStreamCapabilityStateObjectValue()
-}
+@Serializable
+data class VideoStreamCapabilityStateObjectActionResultValue(
+    val protocol: VideoStreamCapabilityParameterObjectStreamProtocol,
+    @SerialName("stream_url") val streamUrl: String
+) : CapabilityStateObjectValue()
 
 @Serializable
 data class VideoStreamCapabilityStateObjectActionResult(
     override val instance: VideoStreamCapabilityStateObjectInstance,
-    val value: VideoStreamCapabilityStateObjectValue.VideoStreamCapabilityStateObjectDataValue,
+    val value: VideoStreamCapabilityStateObjectDataValue,
     override val actionResult: ActionResult
 ): CapabilityStateObjectActionResult
 
@@ -1710,8 +1680,8 @@ data class ToggleCapabilityStateObjectActionResult(
 
 //@Serializable(with = PropertyParameterObjectSerializer::class)
 @Serializable
-sealed interface PropertyParameterObject {
-    val instance: PropertyFunction
+sealed class PropertyParameterObject {
+    abstract val instance: PropertyFunction
 }
 
 object PropertyParameterObjectSerializer : KSerializer<PropertyParameterObject> {
@@ -1740,54 +1710,56 @@ object PropertyParameterObjectSerializer : KSerializer<PropertyParameterObject> 
 @SerialName("float")
 data class FloatPropertyParameterObject(
     override val instance: FloatFunctions,
-    val unit: FloatPropertyParameterObjectUnit
-) : PropertyParameterObject
+    val unit: MeasurementUnit
+) : PropertyParameterObject()
 
 @Serializable
-sealed interface MeasurementUnit
+sealed class MeasurementUnit{
 
-@Serializable
-@Polymorphic
-sealed class FloatPropertyParameterObjectUnit : MeasurementUnit {
+    @Serializable
+    @SerialName("unit.temperature.celsius")
+    data object TemperatureCelsius : MeasurementUnit()
+
     @Serializable
     @SerialName("unit.ampere")
-    data object Ampere : FloatPropertyParameterObjectUnit()
+    data object Ampere : MeasurementUnit()
 
     @Serializable
     @SerialName("unit.cubic_meter")
-    data object CubicMeter : FloatPropertyParameterObjectUnit()
+    data object CubicMeter : MeasurementUnit()
 
     @Serializable
     @SerialName("unit.gigacalorie")
-    data object Gigacalorie : FloatPropertyParameterObjectUnit()
+    data object Gigacalorie : MeasurementUnit()
 
     @Serializable
     @SerialName("unit.kilowatt_hour")
-    data object KilowattHour : FloatPropertyParameterObjectUnit()
+    data object KilowattHour : MeasurementUnit()
 
     @Serializable
     @SerialName("unit.illumination.lux")
-    data object Lux : FloatPropertyParameterObjectUnit()
+    data object Lux : MeasurementUnit()
 
     @Serializable
     @SerialName("unit.density.mcg_m3")
-    data object McgM3 : FloatPropertyParameterObjectUnit()
+    data object McgM3 : MeasurementUnit()
 
     @Serializable
     @SerialName("unit.percent")
-    data object Percent : FloatPropertyParameterObjectUnit()
+    data object Percent : MeasurementUnit()
 
     @Serializable
     @SerialName("unit.ppm")
-    data object Ppm : FloatPropertyParameterObjectUnit()
+    data object Ppm : MeasurementUnit()
 
     @Serializable
     @SerialName("unit.volt")
-    data object Volt : FloatPropertyParameterObjectUnit()
+    data object Volt : MeasurementUnit()
 
     @Serializable
     @SerialName("unit.watt")
-    data object Watt : FloatPropertyParameterObjectUnit()
+    data object Watt : MeasurementUnit()
+
 }
 
 @Serializable
@@ -1795,9 +1767,10 @@ sealed class FloatPropertyParameterObjectUnit : MeasurementUnit {
 data class EventPropertyParameterObject(
     override val instance: EventFunctions,
     val events: List<EventObject>
-) : PropertyParameterObject
+) : PropertyParameterObject()
 
 @Serializable
+@Polymorphic
 sealed interface PropertyValue
 
 //@Serializable(with = EventObjectValueSerializer::class)
@@ -1964,11 +1937,11 @@ sealed interface WaterLevelEventObjectValue : EventObjectValue
 sealed interface WaterLeakEventObjectValue : EventObjectValue
 
 @Serializable
-sealed interface PropertyFunction
+@Polymorphic
+sealed class PropertyFunction
 
 @Serializable
-@Polymorphic
-sealed class FloatFunctions : PropertyFunction {
+sealed class FloatFunctions : PropertyFunction() {
     @Serializable
     @SerialName("amperage")
     data object Amperage : FloatFunctions()
@@ -2052,7 +2025,7 @@ sealed class FloatFunctions : PropertyFunction {
 
 //@Serializable(with = EventFunctionsSerializer::class)
 @Serializable
-sealed class EventFunctions : PropertyFunction {
+sealed class EventFunctions : PropertyFunction() {
     @Serializable
     @SerialName("vibration")
     data object Vibration : EventFunctions()

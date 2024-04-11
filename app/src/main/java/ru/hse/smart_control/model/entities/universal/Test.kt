@@ -1,6 +1,5 @@
 package ru.hse.smart_control.model.entities.universal
 
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Polymorphic
 import kotlinx.serialization.SerialName
@@ -8,14 +7,10 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonClassDiscriminator
-import kotlinx.serialization.json.JsonContentPolymorphicSerializer
 import kotlinx.serialization.json.JsonDecoder
-import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.decodeFromJsonElement
@@ -25,8 +20,6 @@ import kotlinx.serialization.json.longOrNull
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
-import ru.hse.smart_control.model.entities.universal.scheme.BatteryLevelEventObjectValue
-import ru.hse.smart_control.model.entities.universal.scheme.ButtonEventObjectValue
 import ru.hse.smart_control.model.entities.universal.scheme.CapabilityParameterObject
 import ru.hse.smart_control.model.entities.universal.scheme.CapabilityState
 import ru.hse.smart_control.model.entities.universal.scheme.CapabilityStateObjectActionResult
@@ -41,7 +34,6 @@ import ru.hse.smart_control.model.entities.universal.scheme.ColorSettingCapabili
 import ru.hse.smart_control.model.entities.universal.scheme.ColorSettingCapabilityStateObjectValueInteger
 import ru.hse.smart_control.model.entities.universal.scheme.ColorSettingCapabilityStateObjectValueObjectHSV
 import ru.hse.smart_control.model.entities.universal.scheme.ColorSettingCapabilityStateObjectValueObjectScene
-import ru.hse.smart_control.model.entities.universal.scheme.DeviceCapabilityObject
 import ru.hse.smart_control.model.entities.universal.scheme.DeviceState
 import ru.hse.smart_control.model.entities.universal.scheme.DeviceStateResponse
 import ru.hse.smart_control.model.entities.universal.scheme.DeviceType
@@ -52,34 +44,26 @@ import ru.hse.smart_control.model.entities.universal.scheme.EventPropertyParamet
 import ru.hse.smart_control.model.entities.universal.scheme.FloatFunctions
 import ru.hse.smart_control.model.entities.universal.scheme.FloatObjectValue
 import ru.hse.smart_control.model.entities.universal.scheme.FloatPropertyParameterObject
-import ru.hse.smart_control.model.entities.universal.scheme.FloatPropertyParameterObjectUnit
-import ru.hse.smart_control.model.entities.universal.scheme.FoodLevelEventObjectValue
-import ru.hse.smart_control.model.entities.universal.scheme.GasEventObjectValue
 import ru.hse.smart_control.model.entities.universal.scheme.MeasurementUnit
 import ru.hse.smart_control.model.entities.universal.scheme.ModeCapabilityInstance
 import ru.hse.smart_control.model.entities.universal.scheme.ModeCapabilityMode
 import ru.hse.smart_control.model.entities.universal.scheme.ModeCapabilityParameterObject
 import ru.hse.smart_control.model.entities.universal.scheme.ModeCapabilityStateObjectActionResult
 import ru.hse.smart_control.model.entities.universal.scheme.ModeCapabilityStateObjectData
-import ru.hse.smart_control.model.entities.universal.scheme.MotionEventObjectValue
 import ru.hse.smart_control.model.entities.universal.scheme.OnOffCapabilityParameterObject
 import ru.hse.smart_control.model.entities.universal.scheme.OnOffCapabilityStateObjectData
 import ru.hse.smart_control.model.entities.universal.scheme.OnOffCapabilityStateObjectInstance
 import ru.hse.smart_control.model.entities.universal.scheme.OnOffCapabilityStateObjectValue
-import ru.hse.smart_control.model.entities.universal.scheme.OpenInstanceObjectValue
 import ru.hse.smart_control.model.entities.universal.scheme.PropertyFunction
 import ru.hse.smart_control.model.entities.universal.scheme.PropertyParameterObject
-import ru.hse.smart_control.model.entities.universal.scheme.PropertyStateObject
 import ru.hse.smart_control.model.entities.universal.scheme.PropertyType
 import ru.hse.smart_control.model.entities.universal.scheme.PropertyValue
 import ru.hse.smart_control.model.entities.universal.scheme.RangeCapabilityParameterObject
 import ru.hse.smart_control.model.entities.universal.scheme.RangeCapabilityParameterObjectFunction
-import ru.hse.smart_control.model.entities.universal.scheme.RangeCapabilityParameterObjectUnit
 import ru.hse.smart_control.model.entities.universal.scheme.RangeCapabilityStateObjectActionResult
 import ru.hse.smart_control.model.entities.universal.scheme.RangeCapabilityStateObjectData
 import ru.hse.smart_control.model.entities.universal.scheme.RangeCapabilityStateObjectDataValue
 import ru.hse.smart_control.model.entities.universal.scheme.SceneObject
-import ru.hse.smart_control.model.entities.universal.scheme.SmokeEventObjectValue
 import ru.hse.smart_control.model.entities.universal.scheme.Status
 import ru.hse.smart_control.model.entities.universal.scheme.ToggleCapabilityParameterObject
 import ru.hse.smart_control.model.entities.universal.scheme.ToggleCapabilityParameterObjectFunction
@@ -87,16 +71,13 @@ import ru.hse.smart_control.model.entities.universal.scheme.ToggleCapabilityStat
 import ru.hse.smart_control.model.entities.universal.scheme.ToggleCapabilityStateObjectData
 import ru.hse.smart_control.model.entities.universal.scheme.ToggleCapabilityStateObjectDataValue
 import ru.hse.smart_control.model.entities.universal.scheme.UserInfoResponse
-import ru.hse.smart_control.model.entities.universal.scheme.VibrationEventObjectValue
 import ru.hse.smart_control.model.entities.universal.scheme.VideoStreamCapabilityParameterObject
 import ru.hse.smart_control.model.entities.universal.scheme.VideoStreamCapabilityParameterObjectStreamProtocol
 import ru.hse.smart_control.model.entities.universal.scheme.VideoStreamCapabilityStateObjectActionResult
+import ru.hse.smart_control.model.entities.universal.scheme.VideoStreamCapabilityStateObjectActionResultValue
 import ru.hse.smart_control.model.entities.universal.scheme.VideoStreamCapabilityStateObjectData
-
+import ru.hse.smart_control.model.entities.universal.scheme.VideoStreamCapabilityStateObjectDataValue
 import ru.hse.smart_control.model.entities.universal.scheme.VideoStreamCapabilityStateObjectInstance
-import ru.hse.smart_control.model.entities.universal.scheme.VideoStreamCapabilityStateObjectValue
-import ru.hse.smart_control.model.entities.universal.scheme.WaterLeakEventObjectValue
-import ru.hse.smart_control.model.entities.universal.scheme.WaterLevelEventObjectValue
 
 object CapabilitySerializer : KSerializer<Capability> {
     override val descriptor: SerialDescriptor = buildClassSerialDescriptor("Capability") {
@@ -490,6 +471,7 @@ val deviceStateJson = """
 fun main() {
     val module = SerializersModule {
         polymorphic(DeviceType::class) {
+            defaultDeserializer { DeviceType.serializer() }
             subclass(DeviceType.Light::class)
             subclass(DeviceType.Socket::class)
             subclass(DeviceType.Switch::class)
@@ -525,6 +507,7 @@ fun main() {
             subclass(DeviceType.CustomDeviceType::class)
         }
         polymorphic(CapabilityParameterObject::class) {
+            defaultDeserializer { CapabilityParameterObject.serializer() }
             subclass(ColorSettingCapabilityParameterObject::class)
             subclass(OnOffCapabilityParameterObject::class)
             subclass(ModeCapabilityParameterObject::class)
@@ -533,10 +516,12 @@ fun main() {
             subclass(VideoStreamCapabilityParameterObject::class)
         }
         polymorphic(PropertyParameterObject::class) {
+            defaultDeserializer { PropertyParameterObject.serializer() }
             subclass(FloatPropertyParameterObject::class)
             subclass(EventPropertyParameterObject::class)
         }
         polymorphic(CapabilityStateObjectData::class) {
+            defaultDeserializer { CapabilityStateObjectData.serializer() }
             subclass(ColorSettingCapabilityStateObjectData::class)
             subclass(OnOffCapabilityStateObjectData::class)
             subclass(ModeCapabilityStateObjectData::class)
@@ -545,6 +530,7 @@ fun main() {
             subclass(VideoStreamCapabilityStateObjectData::class)
         }
         polymorphic(CapabilityStateObjectInstance::class) {
+            defaultDeserializer { CapabilityStateObjectInstance.serializer() }
             subclass(ColorSettingCapabilityStateObjectInstance::class)
             subclass(OnOffCapabilityStateObjectInstance::class)
             subclass(ModeCapabilityInstance::class)
@@ -553,293 +539,307 @@ fun main() {
             subclass(VideoStreamCapabilityStateObjectInstance::class)
         }
         polymorphic(ColorSettingCapabilityStateObjectInstance::class) {
-            subclass(ColorSettingCapabilityStateObjectInstance.Base::class)
-            subclass(ColorSettingCapabilityStateObjectInstance.RGB::class)
-            subclass(ColorSettingCapabilityStateObjectInstance.HSV::class)
-            subclass(ColorSettingCapabilityStateObjectInstance.TemperatureK::class)
-            subclass(ColorSettingCapabilityStateObjectInstance.Scene::class)
+            defaultDeserializer { ColorSettingCapabilityStateObjectInstance.serializer() }
+            subclass(ColorSettingCapabilityStateObjectInstance.Base::class, ColorSettingCapabilityStateObjectInstance.Base.serializer())
+            subclass(ColorSettingCapabilityStateObjectInstance.RGB::class, ColorSettingCapabilityStateObjectInstance.RGB.serializer())
+            subclass(ColorSettingCapabilityStateObjectInstance.HSV::class, ColorSettingCapabilityStateObjectInstance.HSV.serializer())
+            subclass(ColorSettingCapabilityStateObjectInstance.TemperatureK::class, ColorSettingCapabilityStateObjectInstance.TemperatureK.serializer())
+            subclass(ColorSettingCapabilityStateObjectInstance.Scene::class, ColorSettingCapabilityStateObjectInstance.Scene.serializer())
         }
         polymorphic(VideoStreamCapabilityStateObjectInstance::class) {
-            subclass(VideoStreamCapabilityStateObjectInstance.GetStream::class)
+            defaultDeserializer { VideoStreamCapabilityStateObjectInstance.serializer() }
+            subclass(VideoStreamCapabilityStateObjectInstance.GetStream::class, VideoStreamCapabilityStateObjectInstance.GetStream.serializer())
         }
         polymorphic(OnOffCapabilityStateObjectInstance::class) {
-            subclass(OnOffCapabilityStateObjectInstance.On::class)
+            defaultDeserializer { OnOffCapabilityStateObjectInstance.serializer() }
+            subclass(OnOffCapabilityStateObjectInstance.On::class, OnOffCapabilityStateObjectInstance.On.serializer())
         }
         polymorphic(Status::class) {
-            subclass(Status.Done::class)
-            subclass(Status.Error::class)
-            subclass(Status.CustomStatus::class)
+            defaultDeserializer { Status.serializer() }
+            subclass(Status.Done::class, Status.Done.serializer())
+            subclass(Status.Error::class, Status.Error.serializer())
+            subclass(Status.CustomStatus::class, Status.CustomStatus.serializer())
         }
         polymorphic(ErrorCode::class) {
-            subclass(ErrorCode.DoorOpen::class)
-            subclass(ErrorCode.LidOpen::class)
-            subclass(ErrorCode.RemoteControlDisabled::class)
-            subclass(ErrorCode.NotEnoughWater::class)
-            subclass(ErrorCode.LowChargeLevel::class)
-            subclass(ErrorCode.ContainerFull::class)
-            subclass(ErrorCode.ContainerEmpty::class)
-            subclass(ErrorCode.DripTrayFull::class)
-            subclass(ErrorCode.DeviceStuck::class)
-            subclass(ErrorCode.DeviceOff::class)
-            subclass(ErrorCode.FirmwareOutOfDate::class)
-            subclass(ErrorCode.NotEnoughDetergent::class)
-            subclass(ErrorCode.HumanInvolvementNeeded::class)
-            subclass(ErrorCode.DeviceUnreachable::class)
-            subclass(ErrorCode.DeviceBusy::class)
-            subclass(ErrorCode.InternalError::class)
-            subclass(ErrorCode.InvalidAction::class)
-            subclass(ErrorCode.InvalidValue::class)
-            subclass(ErrorCode.NotSupportedInCurrentMode::class)
-            subclass(ErrorCode.AccountLinkingError::class)
-            subclass(ErrorCode.DeviceNotFound::class)
+            defaultDeserializer { ErrorCode.serializer() }
+            subclass(ErrorCode.DoorOpen::class, ErrorCode.DoorOpen.serializer())
+            subclass(ErrorCode.LidOpen::class, ErrorCode.LidOpen.serializer())
+            subclass(ErrorCode.RemoteControlDisabled::class, ErrorCode.RemoteControlDisabled.serializer())
+            subclass(ErrorCode.NotEnoughWater::class, ErrorCode.NotEnoughWater.serializer())
+            subclass(ErrorCode.LowChargeLevel::class, ErrorCode.LowChargeLevel.serializer())
+            subclass(ErrorCode.ContainerFull::class, ErrorCode.ContainerFull.serializer())
+            subclass(ErrorCode.ContainerEmpty::class, ErrorCode.ContainerEmpty.serializer())
+            subclass(ErrorCode.DripTrayFull::class, ErrorCode.DripTrayFull.serializer())
+            subclass(ErrorCode.DeviceStuck::class, ErrorCode.DeviceStuck.serializer())
+            subclass(ErrorCode.DeviceOff::class, ErrorCode.DeviceOff.serializer())
+            subclass(ErrorCode.FirmwareOutOfDate::class, ErrorCode.FirmwareOutOfDate.serializer())
+            subclass(ErrorCode.NotEnoughDetergent::class, ErrorCode.NotEnoughDetergent.serializer())
+            subclass(ErrorCode.HumanInvolvementNeeded::class, ErrorCode.HumanInvolvementNeeded.serializer())
+            subclass(ErrorCode.DeviceUnreachable::class, ErrorCode.DeviceUnreachable.serializer())
+            subclass(ErrorCode.DeviceBusy::class, ErrorCode.DeviceBusy.serializer())
+            subclass(ErrorCode.InternalError::class, ErrorCode.InternalError.serializer())
+            subclass(ErrorCode.InvalidAction::class, ErrorCode.InvalidAction.serializer())
+            subclass(ErrorCode.InvalidValue::class, ErrorCode.InvalidValue.serializer())
+            subclass(ErrorCode.NotSupportedInCurrentMode::class, ErrorCode.NotSupportedInCurrentMode.serializer())
+            subclass(ErrorCode.AccountLinkingError::class, ErrorCode.AccountLinkingError.serializer())
+            subclass(ErrorCode.DeviceNotFound::class, ErrorCode.DeviceNotFound.serializer())
         }
         polymorphic(VideoStreamCapabilityParameterObjectStreamProtocol::class) {
-            subclass(VideoStreamCapabilityParameterObjectStreamProtocol.HLS::class)
-            subclass(VideoStreamCapabilityParameterObjectStreamProtocol.RTMP::class)
+            defaultDeserializer { VideoStreamCapabilityParameterObjectStreamProtocol.serializer() }
+            subclass(VideoStreamCapabilityParameterObjectStreamProtocol.HLS::class, VideoStreamCapabilityParameterObjectStreamProtocol.HLS.serializer())
+            subclass(VideoStreamCapabilityParameterObjectStreamProtocol.RTMP::class, VideoStreamCapabilityParameterObjectStreamProtocol.RTMP.serializer())
         }
-        polymorphic(CapabilityState::class) {
-            subclass(CapabilityStateObjectData::class)
-        }
+//        polymorphic(CapabilityState::class) {
+//            defaultDeserializer { CapabilityStateObjectData.serializer() }
+//            subclass(CapabilityStateObjectData::class)
+//        }
         polymorphic(ToggleCapabilityParameterObjectFunction::class) {
-            subclass(ToggleCapabilityParameterObjectFunction.Backlight::class)
-            subclass(ToggleCapabilityParameterObjectFunction.ControlsLocked::class)
-            subclass(ToggleCapabilityParameterObjectFunction.Ionization::class)
-            subclass(ToggleCapabilityParameterObjectFunction.KeepWarm::class)
-            subclass(ToggleCapabilityParameterObjectFunction.Mute::class)
-            subclass(ToggleCapabilityParameterObjectFunction.Oscillation::class)
-            subclass(ToggleCapabilityParameterObjectFunction.Pause::class)
+            defaultDeserializer { ToggleCapabilityParameterObjectFunction.serializer() }
+            subclass(ToggleCapabilityParameterObjectFunction.Backlight::class, ToggleCapabilityParameterObjectFunction.Backlight.serializer())
+            subclass(ToggleCapabilityParameterObjectFunction.ControlsLocked::class, ToggleCapabilityParameterObjectFunction.ControlsLocked.serializer())
+            subclass(ToggleCapabilityParameterObjectFunction.Ionization::class, ToggleCapabilityParameterObjectFunction.Ionization.serializer())
+            subclass(ToggleCapabilityParameterObjectFunction.KeepWarm::class, ToggleCapabilityParameterObjectFunction.KeepWarm.serializer())
+            subclass(ToggleCapabilityParameterObjectFunction.Mute::class, ToggleCapabilityParameterObjectFunction.Mute.serializer())
+            subclass(ToggleCapabilityParameterObjectFunction.Oscillation::class, ToggleCapabilityParameterObjectFunction.Oscillation.serializer())
+            subclass(ToggleCapabilityParameterObjectFunction.Pause::class, ToggleCapabilityParameterObjectFunction.Pause.serializer())
         }
         polymorphic(RangeCapabilityParameterObjectFunction::class) {
-            subclass(RangeCapabilityParameterObjectFunction.Brightness::class)
-            subclass(RangeCapabilityParameterObjectFunction.Channel::class)
-            subclass(RangeCapabilityParameterObjectFunction.Humidity::class)
-            subclass(RangeCapabilityParameterObjectFunction.Open::class)
-            subclass(RangeCapabilityParameterObjectFunction.Temperature::class)
-            subclass(RangeCapabilityParameterObjectFunction.Volume::class)
+            defaultDeserializer { RangeCapabilityParameterObjectFunction.serializer() }
+            subclass(RangeCapabilityParameterObjectFunction.Brightness::class, RangeCapabilityParameterObjectFunction.Brightness.serializer())
+            subclass(RangeCapabilityParameterObjectFunction.Channel::class, RangeCapabilityParameterObjectFunction.Channel.serializer())
+            subclass(RangeCapabilityParameterObjectFunction.Humidity::class, RangeCapabilityParameterObjectFunction.Humidity.serializer())
+            subclass(RangeCapabilityParameterObjectFunction.Open::class, RangeCapabilityParameterObjectFunction.Open.serializer())
+            subclass(RangeCapabilityParameterObjectFunction.Temperature::class, RangeCapabilityParameterObjectFunction.Temperature.serializer())
+            subclass(RangeCapabilityParameterObjectFunction.Volume::class, RangeCapabilityParameterObjectFunction.Volume.serializer())
         }
         polymorphic(ModeCapabilityInstance::class) {
-            subclass(ModeCapabilityInstance.CleanupMode::class)
-            subclass(ModeCapabilityInstance.CoffeeMode::class)
-            subclass(ModeCapabilityInstance.Dishwashing::class)
-            subclass(ModeCapabilityInstance.FanSpeed::class)
-            subclass(ModeCapabilityInstance.Heat::class)
-            subclass(ModeCapabilityInstance.InputSource::class)
-            subclass(ModeCapabilityInstance.Program::class)
-            subclass(ModeCapabilityInstance.Swing::class)
-            subclass(ModeCapabilityInstance.TeaMode::class)
-            subclass(ModeCapabilityInstance.Thermostat::class)
-            subclass(ModeCapabilityInstance.WorkSpeed::class)
+            defaultDeserializer { ModeCapabilityInstance.serializer() }
+            subclass(ModeCapabilityInstance.CleanupMode::class, ModeCapabilityInstance.CleanupMode.serializer())
+            subclass(ModeCapabilityInstance.CoffeeMode::class, ModeCapabilityInstance.CoffeeMode.serializer())
+            subclass(ModeCapabilityInstance.Dishwashing::class, ModeCapabilityInstance.Dishwashing.serializer())
+            subclass(ModeCapabilityInstance.FanSpeed::class, ModeCapabilityInstance.FanSpeed.serializer())
+            subclass(ModeCapabilityInstance.Heat::class, ModeCapabilityInstance.Heat.serializer())
+            subclass(ModeCapabilityInstance.InputSource::class, ModeCapabilityInstance.InputSource.serializer())
+            subclass(ModeCapabilityInstance.Program::class, ModeCapabilityInstance.Program.serializer())
+            subclass(ModeCapabilityInstance.Swing::class, ModeCapabilityInstance.Swing.serializer())
+            subclass(ModeCapabilityInstance.TeaMode::class, ModeCapabilityInstance.TeaMode.serializer())
+            subclass(ModeCapabilityInstance.Thermostat::class, ModeCapabilityInstance.Thermostat.serializer())
+            subclass(ModeCapabilityInstance.WorkSpeed::class, ModeCapabilityInstance.WorkSpeed.serializer())
         }
         polymorphic(ModeCapabilityMode::class) {
-            subclass(ModeCapabilityMode.Auto::class)
-            subclass(ModeCapabilityMode.Eco::class)
-            subclass(ModeCapabilityMode.Smart::class)
-            subclass(ModeCapabilityMode.Turbo::class)
-            subclass(ModeCapabilityMode.Cool::class)
-            subclass(ModeCapabilityMode.Dry::class)
-            subclass(ModeCapabilityMode.FanOnly::class)
-            subclass(ModeCapabilityMode.Heat::class)
-            subclass(ModeCapabilityMode.Preheat::class)
-            subclass(ModeCapabilityMode.High::class)
-            subclass(ModeCapabilityMode.Low::class)
-            subclass(ModeCapabilityMode.Medium::class)
-            subclass(ModeCapabilityMode.Max::class)
-            subclass(ModeCapabilityMode.Min::class)
-            subclass(ModeCapabilityMode.Fast::class)
-            subclass(ModeCapabilityMode.Slow::class)
-            subclass(ModeCapabilityMode.Express::class)
-            subclass(ModeCapabilityMode.Normal::class)
-            subclass(ModeCapabilityMode.Quiet::class)
-            subclass(ModeCapabilityMode.Horizontal::class)
-            subclass(ModeCapabilityMode.Stationary::class)
-            subclass(ModeCapabilityMode.Vertical::class)
-            subclass(ModeCapabilityMode.One::class)
-            subclass(ModeCapabilityMode.Two::class)
-            subclass(ModeCapabilityMode.Three::class)
-            subclass(ModeCapabilityMode.Four::class)
-            subclass(ModeCapabilityMode.Five::class)
-            subclass(ModeCapabilityMode.Six::class)
-            subclass(ModeCapabilityMode.Seven::class)
-            subclass(ModeCapabilityMode.Eight::class)
-            subclass(ModeCapabilityMode.Nine::class)
-            subclass(ModeCapabilityMode.Ten::class)
-            subclass(ModeCapabilityMode.Americano::class)
-            subclass(ModeCapabilityMode.Cappuccino::class)
-            subclass(ModeCapabilityMode.Double::class)
-            subclass(ModeCapabilityMode.Espresso::class)
-            subclass(ModeCapabilityMode.DoubleEspresso::class)
-            subclass(ModeCapabilityMode.Latte::class)
-            subclass(ModeCapabilityMode.BlackTea::class)
-            subclass(ModeCapabilityMode.FlowerTea::class)
-            subclass(ModeCapabilityMode.GreenTea::class)
-            subclass(ModeCapabilityMode.HerbalTea::class)
-            subclass(ModeCapabilityMode.OolongTea::class)
-            subclass(ModeCapabilityMode.PuerhTea::class)
-            subclass(ModeCapabilityMode.RedTea::class)
-            subclass(ModeCapabilityMode.WhiteTea::class)
-            subclass(ModeCapabilityMode.Glass::class)
-            subclass(ModeCapabilityMode.Intensive::class)
-            subclass(ModeCapabilityMode.PreRinse::class)
-            subclass(ModeCapabilityMode.Aspic::class)
-            subclass(ModeCapabilityMode.BabyFood::class)
-            subclass(ModeCapabilityMode.Baking::class)
-            subclass(ModeCapabilityMode.Bread::class)
-            subclass(ModeCapabilityMode.Boiling::class)
-            subclass(ModeCapabilityMode.Cereals::class)
-            subclass(ModeCapabilityMode.Cheesecake::class)
-            subclass(ModeCapabilityMode.DeepFryer::class)
-            subclass(ModeCapabilityMode.Dessert::class)
-            subclass(ModeCapabilityMode.Fowl::class)
-            subclass(ModeCapabilityMode.Frying::class)
-            subclass(ModeCapabilityMode.Macaroni::class)
-            subclass(ModeCapabilityMode.MilkPorridge::class)
-            subclass(ModeCapabilityMode.Multicooker::class)
-            subclass(ModeCapabilityMode.Pasta::class)
-            subclass(ModeCapabilityMode.Pilaf::class)
-            subclass(ModeCapabilityMode.Pizza::class)
-            subclass(ModeCapabilityMode.Sauce::class)
-            subclass(ModeCapabilityMode.SlowCook::class)
-            subclass(ModeCapabilityMode.Soup::class)
-            subclass(ModeCapabilityMode.Steam::class)
-            subclass(ModeCapabilityMode.Stewing::class)
-            subclass(ModeCapabilityMode.Vacuum::class)
-            subclass(ModeCapabilityMode.Yogurt::class)
+            defaultDeserializer { ModeCapabilityMode.serializer() }
+            subclass(ModeCapabilityMode.Auto::class, ModeCapabilityMode.Auto.serializer())
+            subclass(ModeCapabilityMode.Eco::class, ModeCapabilityMode.Eco.serializer())
+            subclass(ModeCapabilityMode.Smart::class, ModeCapabilityMode.Smart.serializer())
+            subclass(ModeCapabilityMode.Turbo::class, ModeCapabilityMode.Turbo.serializer())
+            subclass(ModeCapabilityMode.Cool::class, ModeCapabilityMode.Cool.serializer())
+            subclass(ModeCapabilityMode.Dry::class, ModeCapabilityMode.Dry.serializer())
+            subclass(ModeCapabilityMode.FanOnly::class, ModeCapabilityMode.FanOnly.serializer())
+            subclass(ModeCapabilityMode.Heat::class, ModeCapabilityMode.Heat.serializer())
+            subclass(ModeCapabilityMode.Preheat::class, ModeCapabilityMode.Preheat.serializer())
+            subclass(ModeCapabilityMode.High::class, ModeCapabilityMode.High.serializer())
+            subclass(ModeCapabilityMode.Low::class, ModeCapabilityMode.Low.serializer())
+            subclass(ModeCapabilityMode.Medium::class, ModeCapabilityMode.Medium.serializer())
+            subclass(ModeCapabilityMode.Max::class, ModeCapabilityMode.Max.serializer())
+            subclass(ModeCapabilityMode.Min::class, ModeCapabilityMode.Min.serializer())
+            subclass(ModeCapabilityMode.Fast::class, ModeCapabilityMode.Fast.serializer())
+            subclass(ModeCapabilityMode.Slow::class, ModeCapabilityMode.Slow.serializer())
+            subclass(ModeCapabilityMode.Express::class, ModeCapabilityMode.Express.serializer())
+            subclass(ModeCapabilityMode.Normal::class, ModeCapabilityMode.Normal.serializer())
+            subclass(ModeCapabilityMode.Quiet::class, ModeCapabilityMode.Quiet.serializer())
+            subclass(ModeCapabilityMode.Horizontal::class, ModeCapabilityMode.Horizontal.serializer())
+            subclass(ModeCapabilityMode.Stationary::class, ModeCapabilityMode.Stationary.serializer())
+            subclass(ModeCapabilityMode.Vertical::class, ModeCapabilityMode.Vertical.serializer())
+            subclass(ModeCapabilityMode.One::class, ModeCapabilityMode.One.serializer())
+            subclass(ModeCapabilityMode.Two::class, ModeCapabilityMode.Two.serializer())
+            subclass(ModeCapabilityMode.Three::class, ModeCapabilityMode.Three.serializer())
+            subclass(ModeCapabilityMode.Four::class, ModeCapabilityMode.Four.serializer())
+            subclass(ModeCapabilityMode.Five::class, ModeCapabilityMode.Five.serializer())
+            subclass(ModeCapabilityMode.Six::class, ModeCapabilityMode.Six.serializer())
+            subclass(ModeCapabilityMode.Seven::class, ModeCapabilityMode.Seven.serializer())
+            subclass(ModeCapabilityMode.Eight::class, ModeCapabilityMode.Eight.serializer())
+            subclass(ModeCapabilityMode.Nine::class, ModeCapabilityMode.Nine.serializer())
+            subclass(ModeCapabilityMode.Ten::class, ModeCapabilityMode.Ten.serializer())
+            subclass(ModeCapabilityMode.Americano::class, ModeCapabilityMode.Americano.serializer())
+            subclass(ModeCapabilityMode.Cappuccino::class, ModeCapabilityMode.Cappuccino.serializer())
+            subclass(ModeCapabilityMode.Double::class, ModeCapabilityMode.Double.serializer())
+            subclass(ModeCapabilityMode.Espresso::class, ModeCapabilityMode.Espresso.serializer())
+            subclass(ModeCapabilityMode.DoubleEspresso::class, ModeCapabilityMode.DoubleEspresso.serializer())
+            subclass(ModeCapabilityMode.Latte::class, ModeCapabilityMode.Latte.serializer())
+            subclass(ModeCapabilityMode.BlackTea::class, ModeCapabilityMode.BlackTea.serializer())
+            subclass(ModeCapabilityMode.FlowerTea::class, ModeCapabilityMode.FlowerTea.serializer())
+            subclass(ModeCapabilityMode.GreenTea::class, ModeCapabilityMode.GreenTea.serializer())
+            subclass(ModeCapabilityMode.HerbalTea::class, ModeCapabilityMode.HerbalTea.serializer())
+            subclass(ModeCapabilityMode.OolongTea::class, ModeCapabilityMode.OolongTea.serializer())
+            subclass(ModeCapabilityMode.PuerhTea::class, ModeCapabilityMode.PuerhTea.serializer())
+            subclass(ModeCapabilityMode.RedTea::class, ModeCapabilityMode.RedTea.serializer())
+            subclass(ModeCapabilityMode.WhiteTea::class, ModeCapabilityMode.WhiteTea.serializer())
+            subclass(ModeCapabilityMode.Glass::class, ModeCapabilityMode.Glass.serializer())
+            subclass(ModeCapabilityMode.Intensive::class, ModeCapabilityMode.Intensive.serializer())
+            subclass(ModeCapabilityMode.PreRinse::class, ModeCapabilityMode.PreRinse.serializer())
+            subclass(ModeCapabilityMode.Aspic::class, ModeCapabilityMode.Aspic.serializer())
+            subclass(ModeCapabilityMode.BabyFood::class, ModeCapabilityMode.BabyFood.serializer())
+            subclass(ModeCapabilityMode.Baking::class, ModeCapabilityMode.Baking.serializer())
+            subclass(ModeCapabilityMode.Bread::class, ModeCapabilityMode.Bread.serializer())
+            subclass(ModeCapabilityMode.Boiling::class, ModeCapabilityMode.Boiling.serializer())
+            subclass(ModeCapabilityMode.Cereals::class, ModeCapabilityMode.Cereals.serializer())
+            subclass(ModeCapabilityMode.Cheesecake::class, ModeCapabilityMode.Cheesecake.serializer())
+            subclass(ModeCapabilityMode.DeepFryer::class, ModeCapabilityMode.DeepFryer.serializer())
+            subclass(ModeCapabilityMode.Dessert::class, ModeCapabilityMode.Dessert.serializer())
+            subclass(ModeCapabilityMode.Fowl::class, ModeCapabilityMode.Fowl.serializer())
+            subclass(ModeCapabilityMode.Frying::class, ModeCapabilityMode.Frying.serializer())
+            subclass(ModeCapabilityMode.Macaroni::class, ModeCapabilityMode.Macaroni.serializer())
+            subclass(ModeCapabilityMode.MilkPorridge::class, ModeCapabilityMode.MilkPorridge.serializer())
+            subclass(ModeCapabilityMode.Multicooker::class, ModeCapabilityMode.Multicooker.serializer())
+            subclass(ModeCapabilityMode.Pasta::class, ModeCapabilityMode.Pasta.serializer())
+            subclass(ModeCapabilityMode.Pilaf::class, ModeCapabilityMode.Pilaf.serializer())
+            subclass(ModeCapabilityMode.Pizza::class, ModeCapabilityMode.Pizza.serializer())
+            subclass(ModeCapabilityMode.Sauce::class, ModeCapabilityMode.Sauce.serializer())
+            subclass(ModeCapabilityMode.SlowCook::class, ModeCapabilityMode.SlowCook.serializer())
+            subclass(ModeCapabilityMode.Soup::class, ModeCapabilityMode.Soup.serializer())
+            subclass(ModeCapabilityMode.Steam::class, ModeCapabilityMode.Steam.serializer())
+            subclass(ModeCapabilityMode.Stewing::class, ModeCapabilityMode.Stewing.serializer())
+            subclass(ModeCapabilityMode.Vacuum::class, ModeCapabilityMode.Vacuum.serializer())
+            subclass(ModeCapabilityMode.Yogurt::class, ModeCapabilityMode.Yogurt.serializer())
         }
         polymorphic(SceneObject::class) {
-            subclass(SceneObject.Alarm::class)
-            subclass(SceneObject.Alice::class)
-            subclass(SceneObject.Candle::class)
-            subclass(SceneObject.Dinner::class)
-            subclass(SceneObject.Fantasy::class)
-            subclass(SceneObject.Garland::class)
-            subclass(SceneObject.Jungle::class)
-            subclass(SceneObject.Movie::class)
-            subclass(SceneObject.Neon::class)
-            subclass(SceneObject.Night::class)
-            subclass(SceneObject.Ocean::class)
-            subclass(SceneObject.Party::class)
-            subclass(SceneObject.Reading::class)
-            subclass(SceneObject.Rest::class)
-            subclass(SceneObject.Romance::class)
-            subclass(SceneObject.Siren::class)
-            subclass(SceneObject.Sunrise::class)
-            subclass(SceneObject.Sunset::class)
+            defaultDeserializer { SceneObject.serializer() }
+            subclass(SceneObject.Alarm::class, SceneObject.Alarm.serializer())
+            subclass(SceneObject.Alice::class, SceneObject.Alice.serializer())
+            subclass(SceneObject.Candle::class, SceneObject.Candle.serializer())
+            subclass(SceneObject.Dinner::class, SceneObject.Dinner.serializer())
+            subclass(SceneObject.Fantasy::class, SceneObject.Fantasy.serializer())
+            subclass(SceneObject.Garland::class, SceneObject.Garland.serializer())
+            subclass(SceneObject.Jungle::class, SceneObject.Jungle.serializer())
+            subclass(SceneObject.Movie::class, SceneObject.Movie.serializer())
+            subclass(SceneObject.Neon::class, SceneObject.Neon.serializer())
+            subclass(SceneObject.Night::class, SceneObject.Night.serializer())
+            subclass(SceneObject.Ocean::class, SceneObject.Ocean.serializer())
+            subclass(SceneObject.Party::class, SceneObject.Party.serializer())
+            subclass(SceneObject.Reading::class, SceneObject.Reading.serializer())
+            subclass(SceneObject.Rest::class, SceneObject.Rest.serializer())
+            subclass(SceneObject.Romance::class, SceneObject.Romance.serializer())
+            subclass(SceneObject.Siren::class, SceneObject.Siren.serializer())
+            subclass(SceneObject.Sunrise::class, SceneObject.Sunrise.serializer())
+            subclass(SceneObject.Sunset::class, SceneObject.Sunset.serializer())
         }
         polymorphic(ColorModel::class) {
-            subclass(ColorModel.RGB::class)
-            subclass(ColorModel.HSV::class)
+            defaultDeserializer { ColorModel.serializer() }
+            subclass(ColorModel.RGB::class, ColorModel.RGB.serializer())
+            subclass(ColorModel.HSV::class, ColorModel.HSV.serializer())
         }
         polymorphic(DeviceState::class) {
-            subclass(DeviceState.Online::class)
-            subclass(DeviceState.Offline::class)
-        }
-        polymorphic(RangeCapabilityParameterObjectUnit::class) {
-            subclass(RangeCapabilityParameterObjectUnit.Percent::class, RangeCapabilityParameterObjectUnit.Percent.serializer())
-            subclass(RangeCapabilityParameterObjectUnit.TemperatureCelsius::class, RangeCapabilityParameterObjectUnit.TemperatureCelsius.serializer())
-        }
-        polymorphic(FloatPropertyParameterObjectUnit::class) {
-            subclass(FloatPropertyParameterObjectUnit.Ampere::class)
-            subclass(FloatPropertyParameterObjectUnit.CubicMeter::class)
-            subclass(FloatPropertyParameterObjectUnit.Gigacalorie::class)
-            subclass(FloatPropertyParameterObjectUnit.KilowattHour::class)
-            subclass(FloatPropertyParameterObjectUnit.Lux::class)
-            subclass(FloatPropertyParameterObjectUnit.McgM3::class)
-            subclass(FloatPropertyParameterObjectUnit.Percent::class)
-            subclass(FloatPropertyParameterObjectUnit.Ppm::class)
-            subclass(FloatPropertyParameterObjectUnit.Volt::class)
-            subclass(FloatPropertyParameterObjectUnit.Watt::class)
-        }
-        polymorphic(EventObjectValue::class) {
-            subclass(EventObjectValue.Tilt::class)
-            subclass(EventObjectValue.Fall::class)
-            subclass(EventObjectValue.Vibration::class)
-            subclass(EventObjectValue.Opened::class)
-            subclass(EventObjectValue.Closed::class)
-            subclass(EventObjectValue.Click::class)
-            subclass(EventObjectValue.DoubleClick::class)
-            subclass(EventObjectValue.LongPress::class)
-            subclass(EventObjectValue.Detected::class)
-            subclass(EventObjectValue.NotDetected::class)
-            subclass(EventObjectValue.High::class)
-            subclass(EventObjectValue.Low::class)
-            subclass(EventObjectValue.Normal::class)
-            subclass(EventObjectValue.Empty::class)
-            subclass(EventObjectValue.Dry::class)
-            subclass(EventObjectValue.Leak::class)
-        }
-        polymorphic(PropertyType::class) {
-            subclass(PropertyType.Float::class)
-            subclass(PropertyType.Event::class)
-        }
-        polymorphic(FloatFunctions::class) {
-            subclass(FloatFunctions.Amperage::class)
-            subclass(FloatFunctions.BatteryLevel::class)
-            subclass(FloatFunctions.Co2Level::class)
-            subclass(FloatFunctions.ElectricityMeter::class)
-            subclass(FloatFunctions.FoodLevel::class)
-            subclass(FloatFunctions.GasMeter::class)
-            subclass(FloatFunctions.HeatMeter::class)
-            subclass(FloatFunctions.Humidity::class)
-            subclass(FloatFunctions.Illumination::class)
-            subclass(FloatFunctions.Meter::class)
-            subclass(FloatFunctions.Pm10Density::class)
-            subclass(FloatFunctions.Pm1Density::class)
-            subclass(FloatFunctions.Pm2_5Density::class)
-            subclass(FloatFunctions.Power::class)
-            subclass(FloatFunctions.Pressure::class)
-            subclass(FloatFunctions.Temperature::class)
-            subclass(FloatFunctions.Tvoc::class)
-            subclass(FloatFunctions.Voltage::class)
-            subclass(FloatFunctions.WaterLevel::class)
-            subclass(FloatFunctions.WaterMeter::class)
+            defaultDeserializer { DeviceState.serializer() }
+            subclass(DeviceState.Online::class, DeviceState.Online.serializer())
+            subclass(DeviceState.Offline::class, DeviceState.Offline.serializer())
         }
         polymorphic(MeasurementUnit::class) {
-            subclass(FloatPropertyParameterObjectUnit::class)
-            subclass(RangeCapabilityParameterObjectUnit::class)
+            defaultDeserializer { MeasurementUnit.serializer() }
+            subclass(MeasurementUnit.Ampere::class, MeasurementUnit.Ampere.serializer())
+            subclass(MeasurementUnit.CubicMeter::class, MeasurementUnit.CubicMeter.serializer())
+            subclass(MeasurementUnit.Gigacalorie::class, MeasurementUnit.Gigacalorie.serializer())
+            subclass(MeasurementUnit.KilowattHour::class, MeasurementUnit.KilowattHour.serializer())
+            subclass(MeasurementUnit.Lux::class, MeasurementUnit.Lux.serializer())
+            subclass(MeasurementUnit.McgM3::class, MeasurementUnit.McgM3.serializer())
+            subclass(MeasurementUnit.Percent::class, MeasurementUnit.Percent.serializer())
+            subclass(MeasurementUnit.Ppm::class, MeasurementUnit.Ppm.serializer())
+            subclass(MeasurementUnit.Volt::class, MeasurementUnit.Volt.serializer())
+            subclass(MeasurementUnit.Watt::class, MeasurementUnit.Watt.serializer())
+            subclass(MeasurementUnit.TemperatureCelsius::class, MeasurementUnit.TemperatureCelsius.serializer())
+        }
+        polymorphic(EventObjectValue::class) {
+            defaultDeserializer { EventObjectValue.serializer() }
+            subclass(EventObjectValue.Tilt::class, EventObjectValue.Tilt.serializer())
+            subclass(EventObjectValue.Fall::class, EventObjectValue.Fall.serializer())
+            subclass(EventObjectValue.Vibration::class, EventObjectValue.Vibration.serializer())
+            subclass(EventObjectValue.Opened::class, EventObjectValue.Opened.serializer())
+            subclass(EventObjectValue.Closed::class, EventObjectValue.Closed.serializer())
+            subclass(EventObjectValue.Click::class, EventObjectValue.Click.serializer())
+            subclass(EventObjectValue.DoubleClick::class, EventObjectValue.DoubleClick.serializer())
+            subclass(EventObjectValue.LongPress::class, EventObjectValue.LongPress.serializer())
+            subclass(EventObjectValue.Detected::class, EventObjectValue.Detected.serializer())
+            subclass(EventObjectValue.NotDetected::class, EventObjectValue.NotDetected.serializer())
+            subclass(EventObjectValue.High::class, EventObjectValue.High.serializer())
+            subclass(EventObjectValue.Low::class, EventObjectValue.Low.serializer())
+            subclass(EventObjectValue.Normal::class, EventObjectValue.Normal.serializer())
+            subclass(EventObjectValue.Empty::class, EventObjectValue.Empty.serializer())
+            subclass(EventObjectValue.Dry::class, EventObjectValue.Dry.serializer())
+            subclass(EventObjectValue.Leak::class, EventObjectValue.Leak.serializer())
+        }
+        polymorphic(PropertyType::class) {
+            defaultDeserializer { PropertyType.serializer() }
+            subclass(PropertyType.Float::class, PropertyType.Float.serializer())
+            subclass(PropertyType.Event::class, PropertyType.Event.serializer())
+        }
+        polymorphic(FloatFunctions::class) {
+            defaultDeserializer { FloatFunctions.serializer() }
+            subclass(FloatFunctions.Amperage::class, FloatFunctions.Amperage.serializer())
+            subclass(FloatFunctions.BatteryLevel::class, FloatFunctions.BatteryLevel.serializer())
+            subclass(FloatFunctions.Co2Level::class, FloatFunctions.Co2Level.serializer())
+            subclass(FloatFunctions.ElectricityMeter::class, FloatFunctions.ElectricityMeter.serializer())
+            subclass(FloatFunctions.FoodLevel::class, FloatFunctions.FoodLevel.serializer())
+            subclass(FloatFunctions.GasMeter::class, FloatFunctions.GasMeter.serializer())
+            subclass(FloatFunctions.HeatMeter::class, FloatFunctions.HeatMeter.serializer())
+            subclass(FloatFunctions.Humidity::class, FloatFunctions.Humidity.serializer())
+            subclass(FloatFunctions.Illumination::class, FloatFunctions.Illumination.serializer())
+            subclass(FloatFunctions.Meter::class, FloatFunctions.Meter.serializer())
+            subclass(FloatFunctions.Pm10Density::class, FloatFunctions.Pm10Density.serializer())
+            subclass(FloatFunctions.Pm1Density::class, FloatFunctions.Pm1Density.serializer())
+            subclass(FloatFunctions.Pm2_5Density::class, FloatFunctions.Pm2_5Density.serializer())
+            subclass(FloatFunctions.Power::class, FloatFunctions.Power.serializer())
+            subclass(FloatFunctions.Pressure::class, FloatFunctions.Pressure.serializer())
+            subclass(FloatFunctions.Temperature::class, FloatFunctions.Temperature.serializer())
+            subclass(FloatFunctions.Tvoc::class, FloatFunctions.Tvoc.serializer())
+            subclass(FloatFunctions.Voltage::class, FloatFunctions.Voltage.serializer())
+            subclass(FloatFunctions.WaterLevel::class, FloatFunctions.WaterLevel.serializer())
+            subclass(FloatFunctions.WaterMeter::class, FloatFunctions.WaterMeter.serializer())
         }
         polymorphic(PropertyValue::class) {
+            defaultDeserializer { PropertyValue.serializer() }
             subclass(EventObjectValue::class)
             subclass(FloatObjectValue::class)
         }
         polymorphic(PropertyFunction::class) {
-            subclass(FloatFunctions::class)
-            subclass(EventFunctions::class)
+            defaultDeserializer { PropertyFunction.serializer() }
+            subclass(FloatFunctions::class, FloatFunctions.serializer())
+            subclass(EventFunctions::class, EventFunctions.serializer())
         }
         polymorphic(CapabilityStateObjectValue::class) {
-            subclass(ColorSettingCapabilityStateObjectValue::class)
-            subclass(OnOffCapabilityStateObjectValue::class)
-            subclass(ModeCapabilityMode::class)
-            subclass(RangeCapabilityStateObjectDataValue::class)
-            subclass(ToggleCapabilityStateObjectDataValue::class)
-            subclass(VideoStreamCapabilityStateObjectValue::class)
+            defaultDeserializer { CapabilityStateObjectValue.serializer() }
+            subclass(ColorSettingCapabilityStateObjectValue::class, ColorSettingCapabilityStateObjectValue.serializer())
+            subclass(OnOffCapabilityStateObjectValue::class, OnOffCapabilityStateObjectValue.serializer())
+            subclass(ModeCapabilityMode::class, ModeCapabilityMode.serializer())
+            subclass(RangeCapabilityStateObjectDataValue::class, RangeCapabilityStateObjectDataValue.serializer())
+            subclass(ToggleCapabilityStateObjectDataValue::class, ToggleCapabilityStateObjectDataValue.serializer())
+            subclass(VideoStreamCapabilityStateObjectDataValue::class, VideoStreamCapabilityStateObjectDataValue.serializer())
+            subclass(VideoStreamCapabilityStateObjectActionResultValue::class, VideoStreamCapabilityStateObjectActionResultValue.serializer())
         }
         polymorphic(ColorSettingCapabilityStateObjectValue::class) {
+            defaultDeserializer { ColorSettingCapabilityStateObjectValue.serializer() }
             subclass(ColorSettingCapabilityStateObjectValueInteger::class, ColorSettingCapabilityStateObjectValueInteger.serializer())
             subclass(ColorSettingCapabilityStateObjectValueObjectScene::class, ColorSettingCapabilityStateObjectValueObjectScene.serializer())
             subclass(ColorSettingCapabilityStateObjectValueObjectHSV::class, ColorSettingCapabilityStateObjectValueObjectHSV.serializer())
         }
-        polymorphic(VideoStreamCapabilityStateObjectValue::class) {
-            subclass(VideoStreamCapabilityStateObjectValue.VideoStreamCapabilityStateObjectDataValue::class, VideoStreamCapabilityStateObjectValue.VideoStreamCapabilityStateObjectDataValue.serializer())
-            subclass(VideoStreamCapabilityStateObjectValue.VideoStreamCapabilityStateObjectActionResultValue::class, VideoStreamCapabilityStateObjectValue.VideoStreamCapabilityStateObjectActionResultValue.serializer())
-        }
         polymorphic(EventFunctions::class) {
-            subclass(EventFunctions.Vibration::class)
-            subclass(EventFunctions.Open::class)
-            subclass(EventFunctions.Button::class)
-            subclass(EventFunctions.Motion::class)
-            subclass(EventFunctions.Smoke::class)
-            subclass(EventFunctions.Gas::class)
-            subclass(EventFunctions.BatteryLevel::class)
-            subclass(EventFunctions.FoodLevel::class)
-            subclass(EventFunctions.WaterLevel::class)
-            subclass(EventFunctions.WaterLeak::class)
-            subclass(EventFunctions.Custom::class)
+            defaultDeserializer { EventFunctions.serializer() }
+            subclass(EventFunctions.Vibration::class, EventFunctions.Vibration.serializer())
+            subclass(EventFunctions.Open::class, EventFunctions.Open.serializer())
+            subclass(EventFunctions.Button::class, EventFunctions.Button.serializer())
+            subclass(EventFunctions.Motion::class, EventFunctions.Motion.serializer())
+            subclass(EventFunctions.Smoke::class, EventFunctions.Smoke.serializer())
+            subclass(EventFunctions.Gas::class, EventFunctions.Gas.serializer())
+            subclass(EventFunctions.BatteryLevel::class, EventFunctions.BatteryLevel.serializer())
+            subclass(EventFunctions.FoodLevel::class, EventFunctions.FoodLevel.serializer())
+            subclass(EventFunctions.WaterLevel::class, EventFunctions.WaterLevel.serializer())
+            subclass(EventFunctions.WaterLeak::class, EventFunctions.WaterLeak.serializer())
+            subclass(EventFunctions.Custom::class, EventFunctions.Custom.serializer())
         }
         polymorphic(CapabilityStateObjectActionResult::class) {
-            subclass(ToggleCapabilityStateObjectActionResult::class)
-            subclass(RangeCapabilityStateObjectActionResult::class)
-            subclass(ModeCapabilityStateObjectActionResult::class)
-            subclass(VideoStreamCapabilityStateObjectActionResult::class)
+            defaultDeserializer { CapabilityStateObjectActionResult.serializer() }
+            subclass(ToggleCapabilityStateObjectActionResult::class, ToggleCapabilityStateObjectActionResult.serializer())
+            subclass(RangeCapabilityStateObjectActionResult::class, RangeCapabilityStateObjectActionResult.serializer())
+            subclass(ModeCapabilityStateObjectActionResult::class, ModeCapabilityStateObjectActionResult.serializer())
+            subclass(VideoStreamCapabilityStateObjectActionResult::class, VideoStreamCapabilityStateObjectActionResult.serializer())
         }
     }
 

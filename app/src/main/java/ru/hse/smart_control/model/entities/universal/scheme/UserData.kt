@@ -2,26 +2,23 @@ package ru.hse.smart_control.model.entities.universal.scheme
 
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Polymorphic
 import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
-import kotlinx.serialization.Serializer
 import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.descriptors.PolymorphicKind
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
+import kotlinx.serialization.descriptors.buildSerialDescriptor
 import kotlinx.serialization.descriptors.element
-import kotlinx.serialization.encoding.CompositeDecoder
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import kotlinx.serialization.encoding.decodeStructure
-import kotlinx.serialization.encoding.encodeStructure
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonClassDiscriminator
 import kotlinx.serialization.json.JsonContentPolymorphicSerializer
 import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonElement
@@ -35,13 +32,8 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.float
 import kotlinx.serialization.json.int
-import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.json.long
-import ru.hse.smart_control.model.entities.universal.ColorSettingParameters
-import ru.hse.smart_control.model.entities.universal.OnOffParameters
-import ru.hse.smart_control.model.entities.universal.RangeParameters
 
 @Serializable
 sealed interface Response {
@@ -112,269 +104,374 @@ sealed interface BaseDeviceObject {
 }
 
 //@Serializable(with = DeviceTypeSerializer::class)
+//@Serializable
+//sealed class DeviceType {
+//    @Serializable
+//    @SerialName("devices.types.light")
+//    data object Light : DeviceType()
+//
+//    @Serializable
+//    @SerialName("devices.types.socket")
+//    data object Socket : DeviceType()
+//
+//    @Serializable
+//    @SerialName("devices.types.switch")
+//    data object Switch : DeviceType()
+//
+//    @Serializable
+//    @SerialName("devices.types.thermostat")
+//    data object Thermostat : DeviceType()
+//
+//    @Serializable
+//    @SerialName("devices.types.thermostat.ac")
+//    data object ThermostatAC : DeviceType()
+//
+//    @Serializable
+//    @SerialName("devices.types.media_device")
+//    data object MediaDevice : DeviceType()
+//
+//    @Serializable
+//    @SerialName("devices.types.media_device.tv")
+//    data object MediaDeviceTV : DeviceType()
+//
+//    @Serializable
+//    @SerialName("devices.types.media_device.tv_box")
+//    data object MediaDeviceTVBox : DeviceType()
+//
+//    @Serializable
+//    @SerialName("devices.types.media_device.receiver")
+//    data object MediaDeviceReceiver : DeviceType()
+//
+//    @Serializable
+//    @SerialName("devices.types.cooking")
+//    data object Cooking : DeviceType()
+//
+//    @Serializable
+//    @SerialName("devices.types.cooking.coffee_maker")
+//    data object CoffeeMaker : DeviceType()
+//
+//    @Serializable
+//    @SerialName("devices.types.cooking.kettle")
+//    data object Kettle : DeviceType()
+//
+//    @Serializable
+//    @SerialName("devices.types.cooking.multicooker")
+//    data object Multicooker : DeviceType()
+//
+//    @Serializable
+//    @SerialName("devices.types.openable")
+//    data object Openable : DeviceType()
+//
+//    @Serializable
+//    @SerialName("devices.types.openable.curtain")
+//    data object OpenableCurtain : DeviceType()
+//
+//    @Serializable
+//    @SerialName("devices.types.humidifier")
+//    data object Humidifier : DeviceType()
+//
+//    @Serializable
+//    @SerialName("devices.types.purifier")
+//    data object Purifier : DeviceType()
+//
+//    @Serializable
+//    @SerialName("devices.types.vacuum_cleaner")
+//    data object VacuumCleaner : DeviceType()
+//
+//    @Serializable
+//    @SerialName("devices.types.washing_machine")
+//    data object WashingMachine : DeviceType()
+//
+//    @Serializable
+//    @SerialName("devices.types.dishwasher")
+//    data object Dishwasher : DeviceType()
+//
+//    @Serializable
+//    @SerialName("devices.types.iron")
+//    data object Iron : DeviceType()
+//
+//    @Serializable
+//    @SerialName("devices.types.sensor")
+//    data object Sensor : DeviceType()
+//
+//    @Serializable
+//    @SerialName("devices.types.sensor.motion")
+//    data object SensorMotion : DeviceType()
+//
+//    @Serializable
+//    @SerialName("devices.types.sensor.door")
+//    data object SensorDoor : DeviceType()
+//
+//    @Serializable
+//    @SerialName("devices.types.sensor.window")
+//    data object SensorWindow : DeviceType()
+//
+//    @Serializable
+//    @SerialName("devices.types.sensor.water_leak")
+//    data object SensorWaterLeak : DeviceType()
+//
+//    @Serializable
+//    @SerialName("devices.types.sensor.smoke")
+//    data object SensorSmoke : DeviceType()
+//
+//    @Serializable
+//    @SerialName("devices.types.sensor.gas")
+//    data object SensorGas : DeviceType()
+//
+//    @Serializable
+//    @SerialName("devices.types.sensor.vibration")
+//    data object SensorVibration : DeviceType()
+//
+//    @Serializable
+//    @SerialName("devices.types.sensor.button")
+//    data object SensorButton : DeviceType()
+//
+//    @Serializable
+//    @SerialName("devices.types.sensor.illumination")
+//    data object SensorIllumination : DeviceType()
+//
+//    @Serializable
+//    @SerialName("devices.types.other")
+//    data object Other : DeviceType()
+//
+//    @Serializable
+//    data class CustomDeviceType(
+//        @SerialName(value = "serialName") val serialName: String
+//    ) : DeviceType()
+//}
+
 @Serializable
-sealed class DeviceType {
-    @Serializable
+enum class DeviceType(@SerialName("serialName") val serialName: String) {
+    @SerialName("devices.types.smart_speaker.yandex.station.micro")
+    YANDEX_SMART_SPEAKER("devices.types.smart_speaker.yandex.station.micro"),
     @SerialName("devices.types.light")
-    data object Light : DeviceType()
+    LIGHT("devices.types.light"),
 
-    @Serializable
     @SerialName("devices.types.socket")
-    data object Socket : DeviceType()
+    SOCKET("devices.types.socket"),
 
-    @Serializable
     @SerialName("devices.types.switch")
-    data object Switch : DeviceType()
+    SWITCH("devices.types.switch"),
 
-    @Serializable
     @SerialName("devices.types.thermostat")
-    data object Thermostat : DeviceType()
+    THERMOSTAT("devices.types.thermostat"),
 
-    @Serializable
     @SerialName("devices.types.thermostat.ac")
-    data object ThermostatAC : DeviceType()
+    THERMOSTAT_AC("devices.types.thermostat.ac"),
 
-    @Serializable
     @SerialName("devices.types.media_device")
-    data object MediaDevice : DeviceType()
+    MEDIA_DEVICE("devices.types.media_device"),
 
-    @Serializable
     @SerialName("devices.types.media_device.tv")
-    data object MediaDeviceTV : DeviceType()
+    MEDIA_DEVICE_TV("devices.types.media_device.tv"),
 
-    @Serializable
     @SerialName("devices.types.media_device.tv_box")
-    data object MediaDeviceTVBox : DeviceType()
+    MEDIA_DEVICE_TV_BOX("devices.types.media_device.tv_box"),
 
-    @Serializable
     @SerialName("devices.types.media_device.receiver")
-    data object MediaDeviceReceiver : DeviceType()
+    MEDIA_DEVICE_RECEIVER("devices.types.media_device.receiver"),
 
-    @Serializable
     @SerialName("devices.types.cooking")
-    data object Cooking : DeviceType()
+    COOKING("devices.types.cooking"),
 
-    @Serializable
     @SerialName("devices.types.cooking.coffee_maker")
-    data object CoffeeMaker : DeviceType()
+    COFFEE_MAKER("devices.types.cooking.coffee_maker"),
 
-    @Serializable
     @SerialName("devices.types.cooking.kettle")
-    data object Kettle : DeviceType()
+    KETTLE("devices.types.cooking.kettle"),
 
-    @Serializable
     @SerialName("devices.types.cooking.multicooker")
-    data object Multicooker : DeviceType()
+    MULTICOOKER("devices.types.cooking.multicooker"),
 
-    @Serializable
     @SerialName("devices.types.openable")
-    data object Openable : DeviceType()
+    OPENABLE("devices.types.openable"),
 
-    @Serializable
     @SerialName("devices.types.openable.curtain")
-    data object OpenableCurtain : DeviceType()
+    OPENABLE_CURTAIN("devices.types.openable.curtain"),
 
-    @Serializable
     @SerialName("devices.types.humidifier")
-    data object Humidifier : DeviceType()
+    HUMIDIFIER("devices.types.humidifier"),
 
-    @Serializable
     @SerialName("devices.types.purifier")
-    data object Purifier : DeviceType()
+    PURIFIER("devices.types.purifier"),
 
-    @Serializable
     @SerialName("devices.types.vacuum_cleaner")
-    data object VacuumCleaner : DeviceType()
+    VACUUM_CLEANER("devices.types.vacuum_cleaner"),
 
-    @Serializable
     @SerialName("devices.types.washing_machine")
-    data object WashingMachine : DeviceType()
+    WASHING_MACHINE("devices.types.washing_machine"),
 
-    @Serializable
     @SerialName("devices.types.dishwasher")
-    data object Dishwasher : DeviceType()
+    DISHWASHER("devices.types.dishwasher"),
 
-    @Serializable
     @SerialName("devices.types.iron")
-    data object Iron : DeviceType()
+    IRON("devices.types.iron"),
 
-    @Serializable
     @SerialName("devices.types.sensor")
-    data object Sensor : DeviceType()
+    SENSOR("devices.types.sensor"),
 
-    @Serializable
     @SerialName("devices.types.sensor.motion")
-    data object SensorMotion : DeviceType()
+    SENSOR_MOTION("devices.types.sensor.motion"),
 
-    @Serializable
     @SerialName("devices.types.sensor.door")
-    data object SensorDoor : DeviceType()
+    SENSOR_DOOR("devices.types.sensor.door"),
 
-    @Serializable
     @SerialName("devices.types.sensor.window")
-    data object SensorWindow : DeviceType()
+    SENSOR_WINDOW("devices.types.sensor.window"),
 
-    @Serializable
     @SerialName("devices.types.sensor.water_leak")
-    data object SensorWaterLeak : DeviceType()
+    SENSOR_WATER_LEAK("devices.types.sensor.water_leak"),
 
-    @Serializable
     @SerialName("devices.types.sensor.smoke")
-    data object SensorSmoke : DeviceType()
+    SENSOR_SMOKE("devices.types.sensor.smoke"),
 
-    @Serializable
     @SerialName("devices.types.sensor.gas")
-    data object SensorGas : DeviceType()
+    SENSOR_GAS("devices.types.sensor.gas"),
 
-    @Serializable
     @SerialName("devices.types.sensor.vibration")
-    data object SensorVibration : DeviceType()
+    SENSOR_VIBRATION("devices.types.sensor.vibration"),
 
-    @Serializable
     @SerialName("devices.types.sensor.button")
-    data object SensorButton : DeviceType()
+    SENSOR_BUTTON("devices.types.sensor.button"),
 
-    @Serializable
     @SerialName("devices.types.sensor.illumination")
-    data object SensorIllumination : DeviceType()
+    SENSOR_ILLUMINATION("devices.types.sensor.illumination"),
 
-    @Serializable
     @SerialName("devices.types.other")
-    data object Other : DeviceType()
+    OTHER("devices.types.other"),
 
-    @Serializable
-    data class CustomDeviceType(
-        @SerialName(value = "serialName") val serialName: String
-    ) : DeviceType()
+    @SerialName("custom")
+    CUSTOM("custom");
+
 }
 
-object DeviceTypeSerializer : KSerializer<DeviceType> {
-    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("DeviceType", PrimitiveKind.STRING)
-
-    override fun serialize(encoder: Encoder, value: DeviceType) {
-        when (value) {
-            is DeviceType.Light -> encoder.encodeString("devices.types.light")
-            is DeviceType.Socket -> encoder.encodeString("devices.types.socket")
-            is DeviceType.Switch -> encoder.encodeString("devices.types.switch")
-            is DeviceType.Thermostat -> encoder.encodeString("devices.types.thermostat")
-            is DeviceType.ThermostatAC -> encoder.encodeString("devices.types.thermostat.ac")
-            is DeviceType.MediaDevice -> encoder.encodeString("devices.types.media_device")
-            is DeviceType.MediaDeviceTV -> encoder.encodeString("devices.types.media_device.tv")
-            is DeviceType.MediaDeviceTVBox -> encoder.encodeString("devices.types.media_device.tv_box")
-            is DeviceType.MediaDeviceReceiver -> encoder.encodeString("devices.types.media_device.receiver")
-            is DeviceType.Cooking -> encoder.encodeString("devices.types.cooking")
-            is DeviceType.CoffeeMaker -> encoder.encodeString("devices.types.cooking.coffee_maker")
-            is DeviceType.Kettle -> encoder.encodeString("devices.types.cooking.kettle")
-            is DeviceType.Multicooker -> encoder.encodeString("devices.types.cooking.multicooker")
-            is DeviceType.Openable -> encoder.encodeString("devices.types.openable")
-            is DeviceType.OpenableCurtain -> encoder.encodeString("devices.types.openable.curtain")
-            is DeviceType.Humidifier -> encoder.encodeString("devices.types.humidifier")
-            is DeviceType.Purifier -> encoder.encodeString("devices.types.purifier")
-            is DeviceType.VacuumCleaner -> encoder.encodeString("devices.types.vacuum_cleaner")
-            is DeviceType.WashingMachine -> encoder.encodeString("devices.types.washing_machine")
-            is DeviceType.Dishwasher -> encoder.encodeString("devices.types.dishwasher")
-            is DeviceType.Iron -> encoder.encodeString("devices.types.iron")
-            is DeviceType.Sensor -> encoder.encodeString("devices.types.sensor")
-            is DeviceType.SensorMotion -> encoder.encodeString("devices.types.sensor.motion")
-            is DeviceType.SensorDoor -> encoder.encodeString("devices.types.sensor.door")
-            is DeviceType.SensorWindow -> encoder.encodeString("devices.types.sensor.window")
-            is DeviceType.SensorWaterLeak -> encoder.encodeString("devices.types.sensor.water_leak")
-            is DeviceType.SensorSmoke -> encoder.encodeString("devices.types.sensor.smoke")
-            is DeviceType.SensorGas -> encoder.encodeString("devices.types.sensor.gas")
-            is DeviceType.SensorVibration -> encoder.encodeString("devices.types.sensor.vibration")
-            is DeviceType.SensorButton -> encoder.encodeString("devices.types.sensor.button")
-            is DeviceType.SensorIllumination -> encoder.encodeString("devices.types.sensor.illumination")
-            is DeviceType.Other -> encoder.encodeString("devices.types.other")
-            is DeviceType.CustomDeviceType -> encoder.encodeString(value.serialName)
-        }
-    }
-
-    override fun deserialize(decoder: Decoder): DeviceType {
-        return when (decoder) {
-            is JsonDecoder -> {
-                val element = decoder.decodeJsonElement()
-                when (element) {
-                    is JsonPrimitive -> {
-                        when (element.content) {
-                            "devices.types.light" -> DeviceType.Light
-                            "devices.types.socket" -> DeviceType.Socket
-                            "devices.types.switch" -> DeviceType.Switch
-                            "devices.types.thermostat" -> DeviceType.Thermostat
-                            "devices.types.thermostat.ac" -> DeviceType.ThermostatAC
-                            "devices.types.media_device" -> DeviceType.MediaDevice
-                            "devices.types.media_device.tv" -> DeviceType.MediaDeviceTV
-                            "devices.types.media_device.tv_box" -> DeviceType.MediaDeviceTVBox
-                            "devices.types.media_device.receiver" -> DeviceType.MediaDeviceReceiver
-                            "devices.types.cooking" -> DeviceType.Cooking
-                            "devices.types.cooking.coffee_maker" -> DeviceType.CoffeeMaker
-                            "devices.types.cooking.kettle" -> DeviceType.Kettle
-                            "devices.types.cooking.multicooker" -> DeviceType.Multicooker
-                            "devices.types.openable" -> DeviceType.Openable
-                            "devices.types.openable.curtain" -> DeviceType.OpenableCurtain
-                            "devices.types.humidifier" -> DeviceType.Humidifier
-                            "devices.types.purifier" -> DeviceType.Purifier
-                            "devices.types.vacuum_cleaner" -> DeviceType.VacuumCleaner
-                            "devices.types.washing_machine" -> DeviceType.WashingMachine
-                            "devices.types.dishwasher" -> DeviceType.Dishwasher
-                            "devices.types.iron" -> DeviceType.Iron
-                            "devices.types.sensor" -> DeviceType.Sensor
-                            "devices.types.sensor.motion" -> DeviceType.SensorMotion
-                            "devices.types.sensor.door" -> DeviceType.SensorDoor
-                            "devices.types.sensor.window" -> DeviceType.SensorWindow
-                            "devices.types.sensor.water_leak" -> DeviceType.SensorWaterLeak
-                            "devices.types.sensor.smoke" -> DeviceType.SensorSmoke
-                            "devices.types.sensor.gas" -> DeviceType.SensorGas
-                            "devices.types.sensor.vibration" -> DeviceType.SensorVibration
-                            "devices.types.sensor.button" -> DeviceType.SensorButton
-                            "devices.types.sensor.illumination" -> DeviceType.SensorIllumination
-                            "devices.types.other" -> DeviceType.Other
-                            else -> DeviceType.CustomDeviceType(element.content)
-                        }
-                    }
-                    is JsonObject -> DeviceType.CustomDeviceType(element["serialName"]?.jsonPrimitive?.contentOrNull ?: throw SerializationException("Expected 'serialName' field"))
-                    else -> throw SerializationException("Expected JsonObject or JsonPrimitive")
-                }
-            }
-            else -> {
-                when (val value = decoder.decodeString()) {
-                    "devices.types.light" -> DeviceType.Light
-                    "devices.types.socket" -> DeviceType.Socket
-                    "devices.types.switch" -> DeviceType.Switch
-                    "devices.types.thermostat" -> DeviceType.Thermostat
-                    "devices.types.thermostat.ac" -> DeviceType.ThermostatAC
-                    "devices.types.media_device" -> DeviceType.MediaDevice
-                    "devices.types.media_device.tv" -> DeviceType.MediaDeviceTV
-                    "devices.types.media_device.tv_box" -> DeviceType.MediaDeviceTVBox
-                    "devices.types.media_device.receiver" -> DeviceType.MediaDeviceReceiver
-                    "devices.types.cooking" -> DeviceType.Cooking
-                    "devices.types.cooking.coffee_maker" -> DeviceType.CoffeeMaker
-                    "devices.types.cooking.kettle" -> DeviceType.Kettle
-                    "devices.types.cooking.multicooker" -> DeviceType.Multicooker
-                    "devices.types.openable" -> DeviceType.Openable
-                    "devices.types.openable.curtain" -> DeviceType.OpenableCurtain
-                    "devices.types.humidifier" -> DeviceType.Humidifier
-                    "devices.types.purifier" -> DeviceType.Purifier
-                    "devices.types.vacuum_cleaner" -> DeviceType.VacuumCleaner
-                    "devices.types.washing_machine" -> DeviceType.WashingMachine
-                    "devices.types.dishwasher" -> DeviceType.Dishwasher
-                    "devices.types.iron" -> DeviceType.Iron
-                    "devices.types.sensor" -> DeviceType.Sensor
-                    "devices.types.sensor.motion" -> DeviceType.SensorMotion
-                    "devices.types.sensor.door" -> DeviceType.SensorDoor
-                    "devices.types.sensor.window" -> DeviceType.SensorWindow
-                    "devices.types.sensor.water_leak" -> DeviceType.SensorWaterLeak
-                    "devices.types.sensor.smoke" -> DeviceType.SensorSmoke
-                    "devices.types.sensor.gas" -> DeviceType.SensorGas
-                    "devices.types.sensor.vibration" -> DeviceType.SensorVibration
-                    "devices.types.sensor.button" -> DeviceType.SensorButton
-                    "devices.types.sensor.illumination" -> DeviceType.SensorIllumination
-                    "devices.types.other" -> DeviceType.Other
-                    else -> DeviceType.CustomDeviceType(value)
-                }
-            }
-        }
-    }
-}
+//object DeviceTypeSerializer : KSerializer<DeviceType> {
+//    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("DeviceType", PrimitiveKind.STRING)
+//
+//    override fun serialize(encoder: Encoder, value: DeviceType) {
+//        when (value) {
+//            is DeviceType.Light -> encoder.encodeString("devices.types.light")
+//            is DeviceType.Socket -> encoder.encodeString("devices.types.socket")
+//            is DeviceType.Switch -> encoder.encodeString("devices.types.switch")
+//            is DeviceType.Thermostat -> encoder.encodeString("devices.types.thermostat")
+//            is DeviceType.ThermostatAC -> encoder.encodeString("devices.types.thermostat.ac")
+//            is DeviceType.MediaDevice -> encoder.encodeString("devices.types.media_device")
+//            is DeviceType.MediaDeviceTV -> encoder.encodeString("devices.types.media_device.tv")
+//            is DeviceType.MediaDeviceTVBox -> encoder.encodeString("devices.types.media_device.tv_box")
+//            is DeviceType.MediaDeviceReceiver -> encoder.encodeString("devices.types.media_device.receiver")
+//            is DeviceType.Cooking -> encoder.encodeString("devices.types.cooking")
+//            is DeviceType.CoffeeMaker -> encoder.encodeString("devices.types.cooking.coffee_maker")
+//            is DeviceType.Kettle -> encoder.encodeString("devices.types.cooking.kettle")
+//            is DeviceType.Multicooker -> encoder.encodeString("devices.types.cooking.multicooker")
+//            is DeviceType.Openable -> encoder.encodeString("devices.types.openable")
+//            is DeviceType.OpenableCurtain -> encoder.encodeString("devices.types.openable.curtain")
+//            is DeviceType.Humidifier -> encoder.encodeString("devices.types.humidifier")
+//            is DeviceType.Purifier -> encoder.encodeString("devices.types.purifier")
+//            is DeviceType.VacuumCleaner -> encoder.encodeString("devices.types.vacuum_cleaner")
+//            is DeviceType.WashingMachine -> encoder.encodeString("devices.types.washing_machine")
+//            is DeviceType.Dishwasher -> encoder.encodeString("devices.types.dishwasher")
+//            is DeviceType.Iron -> encoder.encodeString("devices.types.iron")
+//            is DeviceType.Sensor -> encoder.encodeString("devices.types.sensor")
+//            is DeviceType.SensorMotion -> encoder.encodeString("devices.types.sensor.motion")
+//            is DeviceType.SensorDoor -> encoder.encodeString("devices.types.sensor.door")
+//            is DeviceType.SensorWindow -> encoder.encodeString("devices.types.sensor.window")
+//            is DeviceType.SensorWaterLeak -> encoder.encodeString("devices.types.sensor.water_leak")
+//            is DeviceType.SensorSmoke -> encoder.encodeString("devices.types.sensor.smoke")
+//            is DeviceType.SensorGas -> encoder.encodeString("devices.types.sensor.gas")
+//            is DeviceType.SensorVibration -> encoder.encodeString("devices.types.sensor.vibration")
+//            is DeviceType.SensorButton -> encoder.encodeString("devices.types.sensor.button")
+//            is DeviceType.SensorIllumination -> encoder.encodeString("devices.types.sensor.illumination")
+//            is DeviceType.Other -> encoder.encodeString("devices.types.other")
+//            is DeviceType.CustomDeviceType -> encoder.encodeString(value.serialName)
+//        }
+//    }
+//
+//    override fun deserialize(decoder: Decoder): DeviceType {
+//        return when (decoder) {
+//            is JsonDecoder -> {
+//                val element = decoder.decodeJsonElement()
+//                when (element) {
+//                    is JsonPrimitive -> {
+//                        when (element.content) {
+//                            "devices.types.light" -> DeviceType.Light
+//                            "devices.types.socket" -> DeviceType.Socket
+//                            "devices.types.switch" -> DeviceType.Switch
+//                            "devices.types.thermostat" -> DeviceType.Thermostat
+//                            "devices.types.thermostat.ac" -> DeviceType.ThermostatAC
+//                            "devices.types.media_device" -> DeviceType.MediaDevice
+//                            "devices.types.media_device.tv" -> DeviceType.MediaDeviceTV
+//                            "devices.types.media_device.tv_box" -> DeviceType.MediaDeviceTVBox
+//                            "devices.types.media_device.receiver" -> DeviceType.MediaDeviceReceiver
+//                            "devices.types.cooking" -> DeviceType.Cooking
+//                            "devices.types.cooking.coffee_maker" -> DeviceType.CoffeeMaker
+//                            "devices.types.cooking.kettle" -> DeviceType.Kettle
+//                            "devices.types.cooking.multicooker" -> DeviceType.Multicooker
+//                            "devices.types.openable" -> DeviceType.Openable
+//                            "devices.types.openable.curtain" -> DeviceType.OpenableCurtain
+//                            "devices.types.humidifier" -> DeviceType.Humidifier
+//                            "devices.types.purifier" -> DeviceType.Purifier
+//                            "devices.types.vacuum_cleaner" -> DeviceType.VacuumCleaner
+//                            "devices.types.washing_machine" -> DeviceType.WashingMachine
+//                            "devices.types.dishwasher" -> DeviceType.Dishwasher
+//                            "devices.types.iron" -> DeviceType.Iron
+//                            "devices.types.sensor" -> DeviceType.Sensor
+//                            "devices.types.sensor.motion" -> DeviceType.SensorMotion
+//                            "devices.types.sensor.door" -> DeviceType.SensorDoor
+//                            "devices.types.sensor.window" -> DeviceType.SensorWindow
+//                            "devices.types.sensor.water_leak" -> DeviceType.SensorWaterLeak
+//                            "devices.types.sensor.smoke" -> DeviceType.SensorSmoke
+//                            "devices.types.sensor.gas" -> DeviceType.SensorGas
+//                            "devices.types.sensor.vibration" -> DeviceType.SensorVibration
+//                            "devices.types.sensor.button" -> DeviceType.SensorButton
+//                            "devices.types.sensor.illumination" -> DeviceType.SensorIllumination
+//                            "devices.types.other" -> DeviceType.Other
+//                            else -> DeviceType.CustomDeviceType(element.content)
+//                        }
+//                    }
+//                    is JsonObject -> DeviceType.CustomDeviceType(element["serialName"]?.jsonPrimitive?.contentOrNull ?: throw SerializationException("Expected 'serialName' field"))
+//                    else -> throw SerializationException("Expected JsonObject or JsonPrimitive")
+//                }
+//            }
+//            else -> {
+//                when (val value = decoder.decodeString()) {
+//                    "devices.types.light" -> DeviceType.Light
+//                    "devices.types.socket" -> DeviceType.Socket
+//                    "devices.types.switch" -> DeviceType.Switch
+//                    "devices.types.thermostat" -> DeviceType.Thermostat
+//                    "devices.types.thermostat.ac" -> DeviceType.ThermostatAC
+//                    "devices.types.media_device" -> DeviceType.MediaDevice
+//                    "devices.types.media_device.tv" -> DeviceType.MediaDeviceTV
+//                    "devices.types.media_device.tv_box" -> DeviceType.MediaDeviceTVBox
+//                    "devices.types.media_device.receiver" -> DeviceType.MediaDeviceReceiver
+//                    "devices.types.cooking" -> DeviceType.Cooking
+//                    "devices.types.cooking.coffee_maker" -> DeviceType.CoffeeMaker
+//                    "devices.types.cooking.kettle" -> DeviceType.Kettle
+//                    "devices.types.cooking.multicooker" -> DeviceType.Multicooker
+//                    "devices.types.openable" -> DeviceType.Openable
+//                    "devices.types.openable.curtain" -> DeviceType.OpenableCurtain
+//                    "devices.types.humidifier" -> DeviceType.Humidifier
+//                    "devices.types.purifier" -> DeviceType.Purifier
+//                    "devices.types.vacuum_cleaner" -> DeviceType.VacuumCleaner
+//                    "devices.types.washing_machine" -> DeviceType.WashingMachine
+//                    "devices.types.dishwasher" -> DeviceType.Dishwasher
+//                    "devices.types.iron" -> DeviceType.Iron
+//                    "devices.types.sensor" -> DeviceType.Sensor
+//                    "devices.types.sensor.motion" -> DeviceType.SensorMotion
+//                    "devices.types.sensor.door" -> DeviceType.SensorDoor
+//                    "devices.types.sensor.window" -> DeviceType.SensorWindow
+//                    "devices.types.sensor.water_leak" -> DeviceType.SensorWaterLeak
+//                    "devices.types.sensor.smoke" -> DeviceType.SensorSmoke
+//                    "devices.types.sensor.gas" -> DeviceType.SensorGas
+//                    "devices.types.sensor.vibration" -> DeviceType.SensorVibration
+//                    "devices.types.sensor.button" -> DeviceType.SensorButton
+//                    "devices.types.sensor.illumination" -> DeviceType.SensorIllumination
+//                    "devices.types.other" -> DeviceType.Other
+//                    else -> DeviceType.CustomDeviceType(value)
+//                }
+//            }
+//        }
+//    }
+//}
 
 @Serializable
 data class DeviceObject(
@@ -406,8 +503,7 @@ data class HouseholdObject(
     @SerialName("type") val type: String
 )
 
-//@Serializable(with = GroupCapabilityObjectSerializer::class)
-@Serializable
+@Serializable(with = GroupCapabilityObjectSerializer::class)
 data class GroupCapabilityObject(
     @SerialName("type") val type: String,
     @SerialName("retrievable") val retrievable: Boolean,
@@ -452,14 +548,22 @@ data class DeviceStateResponse(
     override val properties: List<PropertyObject>
 ) : BaseDeviceObject, Response
 
+//@Serializable
+//sealed class DeviceState {
+//    @Serializable
+//    @SerialName("online")
+//    data object Online : DeviceState()
+//    @Serializable
+//    @SerialName("offline")
+//    data object Offline : DeviceState()
+//}
+
 @Serializable
-sealed class DeviceState {
-    @Serializable
+enum class DeviceState {
     @SerialName("online")
-    data object Online : DeviceState()
-    @Serializable
+    ONLINE,
     @SerialName("offline")
-    data object Offline : DeviceState()
+    OFFLINE
 }
 
 sealed interface Capability{
@@ -470,8 +574,7 @@ sealed interface Capability{
     @SerialName("last_updated") val lastUpdated: Float
 }
 
-//@Serializable(with = DeviceCapabilityObjectSerializer::class)
-@Serializable
+@Serializable(with = DeviceCapabilityObjectSerializer::class)
 data class DeviceCapabilityObject(
     override val type: String,
     val reportable: Boolean,
@@ -579,148 +682,160 @@ data class PropertyObject(
     @SerialName("last_updated") override val lastUpdated: Float
 ) : Property
 
-//object GroupCapabilityObjectSerializer : KSerializer<GroupCapabilityObject> {
-//    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("GroupCapabilityObject") {
-//        element("type", String.serializer().descriptor)
-//        element("retrievable", Boolean.serializer().descriptor)
-//        element("parameters", CapabilityParameterObject.serializer().descriptor)
-//        element("state", CapabilityStateObjectData.serializer().descriptor)
-//    }
+object GroupCapabilityObjectSerializer : KSerializer<GroupCapabilityObject> {
+    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("GroupCapabilityObject") {
+        element("type", String.serializer().descriptor)
+        element("retrievable", Boolean.serializer().descriptor)
+        element("parameters", CapabilityParameterObject.serializer().descriptor)
+        element("state", CapabilityStateObjectData.serializer().descriptor)
+    }
+
+    @OptIn(ExperimentalSerializationApi::class)
+    override fun serialize(encoder: Encoder, value: GroupCapabilityObject) {
+        val compositeOutput = encoder.beginStructure(descriptor)
+        compositeOutput.encodeStringElement(descriptor, 0, value.type)
+        compositeOutput.encodeBooleanElement(descriptor, 1, value.retrievable)
+        compositeOutput.encodeSerializableElement(descriptor, 2, CapabilityParameterObject.serializer(), value.parameters)
+        compositeOutput.encodeNullableSerializableElement(descriptor, 3, CapabilityStateObjectData.serializer(), value.state)
+        compositeOutput.endStructure(descriptor)
+    }
+
+    override fun deserialize(decoder: Decoder): GroupCapabilityObject {
+        val input = decoder as? JsonDecoder ?: throw SerializationException("Expected JsonDecoder")
+        val jsonObject = input.decodeJsonElement().jsonObject
+
+        val type = jsonObject["type"]?.jsonPrimitive?.content ?: throw SerializationException("Missing type")
+        val retrievable = jsonObject["retrievable"]?.jsonPrimitive?.boolean ?: throw SerializationException("Missing retrievable")
+
+        val paramsJson = jsonObject["parameters"]?.jsonObject ?: throw SerializationException("Missing parameters")
+        val params = when (type) {
+            "devices.capabilities.color_setting" -> input.json.decodeFromJsonElement<ColorSettingCapabilityParameterObject>(paramsJson)
+            "devices.capabilities.on_off" -> input.json.decodeFromJsonElement<OnOffCapabilityParameterObject>(paramsJson)
+            "devices.capabilities.range" -> input.json.decodeFromJsonElement<RangeCapabilityParameterObject>(paramsJson)
+            "devices.capabilities.mode" -> input.json.decodeFromJsonElement<ModeCapabilityParameterObject>(paramsJson)
+            "devices.capabilities.toggle" -> input.json.decodeFromJsonElement<ToggleCapabilityParameterObject>(paramsJson)
+            "devices.capabilities.video_stream" -> input.json.decodeFromJsonElement<VideoStreamCapabilityParameterObject>(paramsJson)
+            else -> throw SerializationException("Unknown Capability type")
+        }
+
+        val stateJson = jsonObject["state"]?.jsonObject ?: throw SerializationException("Missing state")
+        val state = when (type) {
+                "devices.capabilities.color_setting" -> input.json.decodeFromJsonElement<ColorSettingCapabilityStateObjectData>(stateJson)
+                "devices.capabilities.on_off" -> input.json.decodeFromJsonElement<OnOffCapabilityStateObjectData>(stateJson)
+                "devices.capabilities.range" -> input.json.decodeFromJsonElement<RangeCapabilityStateObjectData>(stateJson)
+                "devices.capabilities.mode" -> input.json.decodeFromJsonElement<ModeCapabilityStateObjectData>(stateJson)
+                "devices.capabilities.toggle" -> input.json.decodeFromJsonElement<ToggleCapabilityStateObjectData>(stateJson)
+                "devices.capabilities.video_stream" -> input.json.decodeFromJsonElement<VideoStreamCapabilityStateObjectData>(stateJson)
+                else -> throw SerializationException("Unknown Capability type")
+            }
+
+        return GroupCapabilityObject(type = type, retrievable = retrievable, parameters = params, state = state)
+    }
+}
 //
-//    @OptIn(ExperimentalSerializationApi::class)
-//    override fun serialize(encoder: Encoder, value: GroupCapabilityObject) {
-//        val compositeOutput = encoder.beginStructure(descriptor)
-//        compositeOutput.encodeStringElement(descriptor, 0, value.type)
-//        compositeOutput.encodeBooleanElement(descriptor, 1, value.retrievable)
-//        compositeOutput.encodeSerializableElement(descriptor, 2, CapabilityParameterObject.serializer(), value.parameters)
-//        compositeOutput.encodeNullableSerializableElement(descriptor, 3, CapabilityStateObjectData.serializer(), value.state)
-//        compositeOutput.endStructure(descriptor)
-//    }
-//
-//    override fun deserialize(decoder: Decoder): GroupCapabilityObject {
-//        val input = decoder as? JsonDecoder ?: throw SerializationException("Expected JsonDecoder")
-//        val jsonObject = input.decodeJsonElement().jsonObject
-//
-//        val type = jsonObject["type"]?.jsonPrimitive?.content ?: throw SerializationException("Missing type")
-//        val retrievable = jsonObject["retrievable"]?.jsonPrimitive?.boolean ?: throw SerializationException("Missing retrievable")
-//
-//        val paramsJson = jsonObject["parameters"]?.jsonObject ?: throw SerializationException("Missing parameters")
-//        val params = when (type) {
-//            "devices.capabilities.color_setting" -> input.json.decodeFromJsonElement<ColorSettingCapabilityParameterObject>(paramsJson)
-//            "devices.capabilities.on_off" -> input.json.decodeFromJsonElement<OnOffCapabilityParameterObject>(paramsJson)
-//            "devices.capabilities.range" -> input.json.decodeFromJsonElement<RangeCapabilityParameterObject>(paramsJson)
-//            "devices.capabilities.mode" -> input.json.decodeFromJsonElement<ModeCapabilityParameterObject>(paramsJson)
-//            "devices.capabilities.toggle" -> input.json.decodeFromJsonElement<ToggleCapabilityParameterObject>(paramsJson)
-//            "devices.capabilities.video_stream" -> input.json.decodeFromJsonElement<VideoStreamCapabilityParameterObject>(paramsJson)
-//            else -> throw SerializationException("Unknown Capability type")
-//        }
-//
-//        val stateJson = jsonObject["state"]?.jsonObject ?: throw SerializationException("Missing state")
-//        val state = when (type) {
-//                "devices.capabilities.color_setting" -> input.json.decodeFromJsonElement<ColorSettingCapabilityStateObjectData>(stateJson)
-//                "devices.capabilities.on_off" -> input.json.decodeFromJsonElement<OnOffCapabilityStateObjectData>(stateJson)
-//                "devices.capabilities.range" -> input.json.decodeFromJsonElement<RangeCapabilityStateObjectData>(stateJson)
-//                "devices.capabilities.mode" -> input.json.decodeFromJsonElement<ModeCapabilityStateObjectData>(stateJson)
-//                "devices.capabilities.toggle" -> input.json.decodeFromJsonElement<ToggleCapabilityStateObjectData>(stateJson)
-//                "devices.capabilities.video_stream" -> input.json.decodeFromJsonElement<VideoStreamCapabilityStateObjectData>(stateJson)
-//                else -> throw SerializationException("Unknown Capability type")
-//            }
-//
-//        return GroupCapabilityObject(type = type, retrievable = retrievable, parameters = params, state = state)
-//    }
-//}
-//
-//object DeviceCapabilityObjectSerializer : KSerializer<DeviceCapabilityObject> {
-//    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("DeviceCapabilityObject") {
-//    }
-//
-//    override fun serialize(encoder: Encoder, value: DeviceCapabilityObject) {
-//    }
-//
-//    override fun deserialize(decoder: Decoder): DeviceCapabilityObject {
-//        val input = decoder as? JsonDecoder ?: throw SerializationException("Expected JsonDecoder")
-//        val jsonObject = input.decodeJsonElement().jsonObject
-//
-//        val reportable = jsonObject["reportable"]?.jsonPrimitive?.boolean ?: throw SerializationException("Missing reportable")
-//        val retrievable = jsonObject["retrievable"]?.jsonPrimitive?.boolean ?: throw SerializationException("Missing retrievable")
-//        val type = jsonObject["type"]?.jsonPrimitive?.contentOrNull ?: throw SerializationException("Missing type")
-//        val stateJson = jsonObject["state"]
-//        val state: CapabilityStateObjectData?
-//        when (stateJson) {
-//            null -> state = null
-//            is JsonNull -> state = null
-//            else -> {
-//                state = when (type) {
-//                    "devices.capabilities.on_off" -> {
-//                        val instance = input.json.decodeFromJsonElement<OnOffCapabilityStateObjectInstance>(stateJson.jsonObject["instance"]!!)
-//                        val value = input.json.decodeFromJsonElement<OnOffCapabilityStateObjectValue>(stateJson.jsonObject["value"]!!)
-//                        OnOffCapabilityStateObjectData(instance, value)
-//                    }
-//                    "devices.capabilities.color_setting" -> {
-//                        val instance = input.json.decodeFromJsonElement<ColorSettingCapabilityStateObjectInstance>(stateJson.jsonObject["instance"]!!)
-//                        val value = input.json.decodeFromJsonElement<ColorSettingCapabilityStateObjectValue>(stateJson.jsonObject["value"]!!)
-//                        ColorSettingCapabilityStateObjectData(instance, value)
-//                    }
-//                    "devices.capabilities.video_stream" -> {
-//                        val instance = input.json.decodeFromJsonElement<VideoStreamCapabilityStateObjectInstance>(stateJson.jsonObject["instance"]!!)
-//                        val value = input.json.decodeFromJsonElement<VideoStreamCapabilityStateObjectDataValue>(stateJson.jsonObject["value"]!!)
-//                        VideoStreamCapabilityStateObjectData(instance, value)
-//                    }
-//                    "devices.capabilities.mode" -> {
-//                        val instance = input.json.decodeFromJsonElement<ModeCapabilityInstance>(stateJson.jsonObject["instance"]!!)
-//                        val value = input.json.decodeFromJsonElement<ModeCapabilityMode>(stateJson.jsonObject["value"]!!)
-//                        ModeCapabilityStateObjectData(instance, value)
-//                    }
-//                    "devices.capabilities.range" -> {
-//                        val instance = input.json.decodeFromJsonElement<RangeCapabilityParameterObjectFunction>(stateJson.jsonObject["instance"]!!)
-//                        val value = input.json.decodeFromJsonElement<RangeCapabilityStateObjectDataValue>(stateJson.jsonObject["value"]!!)
-//                        RangeCapabilityStateObjectData(instance, value)
-//                    }
-//                    "devices.capabilities.toggle" -> {
-//                        val instance = input.json.decodeFromJsonElement<ToggleCapabilityParameterObjectFunction>(stateJson.jsonObject["instance"]!!)
-//                        val value = input.json.decodeFromJsonElement<ToggleCapabilityStateObjectDataValue>(stateJson.jsonObject["value"]!!)
-//                        ToggleCapabilityStateObjectData(instance, value)
-//                    }
-//                    else -> throw SerializationException("Unknown CapabilityStateObjectData type: $type")
-//                }
-//            }
-//        }
-//        val lastUpdated = jsonObject["last_updated"]?.jsonPrimitive?.float ?: throw SerializationException("Missing lastUpdated")
-//
-//        val paramsJson = jsonObject["parameters"]?.jsonObject ?: throw SerializationException("Missing parameters")
-//        val params = when (type) {
-//            "devices.capabilities.color_setting" -> input.json.decodeFromJsonElement<ColorSettingCapabilityParameterObject>(paramsJson)
-//            "devices.capabilities.on_off" -> input.json.decodeFromJsonElement<OnOffCapabilityParameterObject>(paramsJson)
-//            "devices.capabilities.range" -> input.json.decodeFromJsonElement<RangeCapabilityParameterObject>(paramsJson)
-//            "devices.capabilities.mode" -> input.json.decodeFromJsonElement<ModeCapabilityParameterObject>(paramsJson)
-//            "devices.capabilities.toggle" -> input.json.decodeFromJsonElement<ToggleCapabilityParameterObject>(paramsJson)
-//            "devices.capabilities.video_stream" -> input.json.decodeFromJsonElement<VideoStreamCapabilityParameterObject>(paramsJson)
-//            else -> throw SerializationException("Unknown Capability type")
-//        }
-//
-//        return DeviceCapabilityObject(reportable = reportable, retrievable = retrievable, type = type, parameters = params, state = state, lastUpdated = lastUpdated)
-//    }
-//}
+object DeviceCapabilityObjectSerializer : KSerializer<DeviceCapabilityObject> {
+    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("DeviceCapabilityObject") {
+    }
+
+    override fun serialize(encoder: Encoder, value: DeviceCapabilityObject) {
+    }
+
+    override fun deserialize(decoder: Decoder): DeviceCapabilityObject {
+        val input = decoder as? JsonDecoder ?: throw SerializationException("Expected JsonDecoder")
+        val jsonObject = input.decodeJsonElement().jsonObject
+
+        val reportable = jsonObject["reportable"]?.jsonPrimitive?.boolean ?: throw SerializationException("Missing reportable")
+        val retrievable = jsonObject["retrievable"]?.jsonPrimitive?.boolean ?: throw SerializationException("Missing retrievable")
+        val type = jsonObject["type"]?.jsonPrimitive?.contentOrNull ?: throw SerializationException("Missing type")
+        val stateJson = jsonObject["state"]
+        val state: CapabilityStateObjectData?
+        when (stateJson) {
+            null -> state = null
+            is JsonNull -> state = null
+            else -> {
+                state = when (type) {
+                    "devices.capabilities.on_off" -> {
+                        val instance = input.json.decodeFromJsonElement<OnOffCapabilityStateObjectInstance>(stateJson.jsonObject["instance"]!!)
+                        val value = input.json.decodeFromJsonElement<OnOffCapabilityStateObjectValue>(stateJson.jsonObject["value"]!!)
+                        OnOffCapabilityStateObjectData(instance, value)
+                    }
+                    "devices.capabilities.color_setting" -> {
+                        val instance = input.json.decodeFromJsonElement<ColorSettingCapabilityStateObjectInstance>(stateJson.jsonObject["instance"]!!)
+                        val value = input.json.decodeFromJsonElement<ColorSettingCapabilityStateObjectValue>(stateJson.jsonObject["value"]!!)
+                        ColorSettingCapabilityStateObjectData(instance, value)
+                    }
+                    "devices.capabilities.video_stream" -> {
+                        val instance = input.json.decodeFromJsonElement<VideoStreamCapabilityStateObjectInstance>(stateJson.jsonObject["instance"]!!)
+                        val value = input.json.decodeFromJsonElement<VideoStreamCapabilityStateObjectDataValue>(stateJson.jsonObject["value"]!!)
+                        VideoStreamCapabilityStateObjectData(instance, value)
+                    }
+                    "devices.capabilities.mode" -> {
+                        val instance = input.json.decodeFromJsonElement<ModeCapabilityInstance>(stateJson.jsonObject["instance"]!!)
+                        val value = input.json.decodeFromJsonElement<ModeCapabilityMode>(stateJson.jsonObject["value"]!!)
+                        ModeCapabilityStateObjectData(instance, value)
+                    }
+                    "devices.capabilities.range" -> {
+                        val instance = input.json.decodeFromJsonElement<RangeCapabilityParameterObjectFunction>(stateJson.jsonObject["instance"]!!)
+                        val value = input.json.decodeFromJsonElement<RangeCapabilityStateObjectDataValue>(stateJson.jsonObject["value"]!!)
+                        RangeCapabilityStateObjectData(instance, value)
+                    }
+                    "devices.capabilities.toggle" -> {
+                        val instance = input.json.decodeFromJsonElement<ToggleCapabilityParameterObjectFunction>(stateJson.jsonObject["instance"]!!)
+                        val value = input.json.decodeFromJsonElement<ToggleCapabilityStateObjectDataValue>(stateJson.jsonObject["value"]!!)
+                        ToggleCapabilityStateObjectData(instance, value)
+                    }
+                    else -> throw SerializationException("Unknown CapabilityStateObjectData type: $type")
+                }
+            }
+        }
+        val lastUpdated = jsonObject["last_updated"]?.jsonPrimitive?.float ?: throw SerializationException("Missing lastUpdated")
+
+        val paramsJson = jsonObject["parameters"]?.jsonObject ?: throw SerializationException("Missing parameters")
+        val params = when (type) {
+            "devices.capabilities.color_setting" -> input.json.decodeFromJsonElement<ColorSettingCapabilityParameterObject>(paramsJson)
+            "devices.capabilities.on_off" -> input.json.decodeFromJsonElement<OnOffCapabilityParameterObject>(paramsJson)
+            "devices.capabilities.range" -> input.json.decodeFromJsonElement<RangeCapabilityParameterObject>(paramsJson)
+            "devices.capabilities.mode" -> input.json.decodeFromJsonElement<ModeCapabilityParameterObject>(paramsJson)
+            "devices.capabilities.toggle" -> input.json.decodeFromJsonElement<ToggleCapabilityParameterObject>(paramsJson)
+            "devices.capabilities.video_stream" -> input.json.decodeFromJsonElement<VideoStreamCapabilityParameterObject>(paramsJson)
+            else -> throw SerializationException("Unknown Capability type")
+        }
+
+        return DeviceCapabilityObject(reportable = reportable, retrievable = retrievable, type = type, parameters = params, state = state, lastUpdated = lastUpdated)
+    }
+}
 
 @OptIn(ExperimentalSerializationApi::class)
-@Serializable
+@Serializable(with = CapabilityParameterObjectSerializer::class)
 @Polymorphic
 sealed class CapabilityParameterObject
 
-@OptIn(ExperimentalSerializationApi::class)
-object CapabilityParameterObjectSerializer : KSerializer<CapabilityParameterObject> {
-    override val descriptor: SerialDescriptor = PolymorphicSerializer(CapabilityParameterObject::class).descriptor
-
-    override fun serialize(encoder: Encoder, value: CapabilityParameterObject) {
-        val polymorphicSerializer = PolymorphicSerializer(CapabilityParameterObject::class)
-        polymorphicSerializer.serialize(encoder, value)
-    }
-
-    override fun deserialize(decoder: Decoder): CapabilityParameterObject {
-        val polymorphicSerializer = PolymorphicSerializer(CapabilityParameterObject::class)
-        return polymorphicSerializer.deserialize(decoder)
+object CapabilityParameterObjectSerializer : JsonContentPolymorphicSerializer<CapabilityParameterObject>(CapabilityParameterObject::class) {
+    override fun selectDeserializer(element: JsonElement): DeserializationStrategy<CapabilityParameterObject> = when {
+        "color_model" in element.jsonObject || "temperature_k" in element.jsonObject || "color_scene" in element.jsonObject -> ColorSettingCapabilityParameterObject.serializer()
+        "split" in element.jsonObject -> OnOffCapabilityParameterObject.serializer()
+        "instance" in element.jsonObject && element.jsonObject["instance"]?.jsonPrimitive?.content == "modes" -> ModeCapabilityParameterObject.serializer()
+        "instance" in element.jsonObject && (element.jsonObject["instance"]?.jsonPrimitive?.content == "brightness" || element.jsonObject["instance"]?.jsonPrimitive?.content == "temperature") -> RangeCapabilityParameterObject.serializer()
+        "instance" in element.jsonObject && (element.jsonObject["instance"]?.jsonPrimitive?.content == "ionization" || element.jsonObject["instance"]?.jsonPrimitive?.content == "backlight") -> ToggleCapabilityParameterObject.serializer()
+        "protocols" in element.jsonObject -> VideoStreamCapabilityParameterObject.serializer()
+        else -> throw SerializationException("Unknown CapabilityParameterObject type")
     }
 }
+
+//@OptIn(ExperimentalSerializationApi::class)
+//object CapabilityParameterObjectSerializer : KSerializer<CapabilityParameterObject> {
+//    override val descriptor: SerialDescriptor = PolymorphicSerializer(CapabilityParameterObject::class).descriptor
+//
+//    override fun serialize(encoder: Encoder, value: CapabilityParameterObject) {
+//        val polymorphicSerializer = PolymorphicSerializer(CapabilityParameterObject::class)
+//        polymorphicSerializer.serialize(encoder, value)
+//    }
+//
+//    override fun deserialize(decoder: Decoder): CapabilityParameterObject {
+//        val polymorphicSerializer = PolymorphicSerializer(CapabilityParameterObject::class)
+//        return polymorphicSerializer.deserialize(decoder)
+//    }
+//}
 
 @Serializable
 data class ColorSettingCapabilityParameterObject(
@@ -756,12 +871,12 @@ data class RangeCapabilityParameterObject(
 ): CapabilityParameterObject() {
     init {
         unit = when (instance) {
-            RangeCapabilityParameterObjectFunction.Brightness,
-            RangeCapabilityParameterObjectFunction.Humidity,
-            RangeCapabilityParameterObjectFunction.Open -> MeasurementUnit.Percent
+            RangeCapabilityParameterObjectFunction.BRIGHTNESS,
+            RangeCapabilityParameterObjectFunction.HUMIDITY,
+            RangeCapabilityParameterObjectFunction.OPEN -> MeasurementUnit.PERCENT
             else -> {
                 //RangeCapabilityInstanceOld.TEMPERATURE
-                MeasurementUnit.TemperatureCelsius
+                MeasurementUnit.TEMPERATURE_CELSIUS
             }
         }
     }
@@ -784,14 +899,47 @@ data class VideoStreamCapabilityParameterObject(
  */
 
 @Serializable
-sealed class ColorModel {
-    @Serializable
-    @SerialName("rgb")
-    data object RGB : ColorModel()
-    @Serializable
-    @SerialName("hsv")
-    data object HSV : ColorModel()
+enum class ColorModel {
+    @SerialName("rgb") RGB,
+    @SerialName("hsv") HSV
 }
+
+//interface ColorModel {
+//    val stringValue: String
+//
+//    companion object {
+//        fun fromString(value: String): ColorModel = when (value.uppercase()) {
+//            RGB.stringValue -> RGB
+//            HSV.stringValue -> HSV
+//            else -> throw IllegalArgumentException("Unknown ColorModel value: $value")
+//        }
+//    }
+//}
+//
+//@Serializable
+//@SerialName("rgb")
+//object RGB : ColorModel {
+//    override val stringValue: String = "RGB"
+//}
+//
+//@Serializable
+//@SerialName("hsv")
+//object HSV : ColorModel {
+//    override val stringValue: String = "HSV"
+//}
+
+//object ColorModelSerializer : KSerializer<ColorModel> {
+//    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("ColorModel", PrimitiveKind.STRING)
+//
+//    override fun deserialize(decoder: Decoder): ColorModel {
+//        val value = decoder.decodeString()
+//        return ColorModel.fromString(value)
+//    }
+//
+//    override fun serialize(encoder: Encoder, value: ColorModel) {
+//        encoder.encodeString(value.stringValue.lowercase())
+//    }
+//}
 
 @Serializable
 data class TemperatureK(
@@ -809,454 +957,578 @@ data class Scene(
     @SerialName("id") val id: SceneObject
 )
 
+//@Serializable
+//@Polymorphic
+//sealed class SceneObject {
+//    @Serializable
+//    @SerialName("alarm")
+//    data object Alarm : SceneObject()
+//
+//    @Serializable
+//    @SerialName("alice")
+//    data object Alice : SceneObject()
+//
+//    @Serializable
+//    @SerialName("candle")
+//    data object Candle : SceneObject()
+//
+//    @Serializable
+//    @SerialName("dinner")
+//    data object Dinner : SceneObject()
+//
+//    @Serializable
+//    @SerialName("fantasy")
+//    data object Fantasy : SceneObject()
+//
+//    @Serializable
+//    @SerialName("garland")
+//    data object Garland : SceneObject()
+//
+//    @Serializable
+//    @SerialName("jungle")
+//    data object Jungle : SceneObject()
+//
+//    @Serializable
+//    @SerialName("movie")
+//    data object Movie : SceneObject()
+//
+//    @Serializable
+//    @SerialName("neon")
+//    data object Neon : SceneObject()
+//
+//    @Serializable
+//    @SerialName("night")
+//    data object Night : SceneObject()
+//
+//    @Serializable
+//    @SerialName("ocean")
+//    data object Ocean : SceneObject()
+//
+//    @Serializable
+//    @SerialName("party")
+//    data object Party : SceneObject()
+//
+//    @Serializable
+//    @SerialName("reading")
+//    data object Reading : SceneObject()
+//
+//    @Serializable
+//    @SerialName("rest")
+//    data object Rest : SceneObject()
+//
+//    @Serializable
+//    @SerialName("romance")
+//    data object Romance : SceneObject()
+//
+//    @Serializable
+//    @SerialName("siren")
+//    data object Siren : SceneObject()
+//
+//    @Serializable
+//    @SerialName("sunrise")
+//    data object Sunrise : SceneObject()
+//
+//    @Serializable
+//    @SerialName("sunset")
+//    data object Sunset : SceneObject()
+//}
+
 @Serializable
-@Polymorphic
-sealed class SceneObject {
-    @Serializable
-    @SerialName("alarm")
-    data object Alarm : SceneObject()
-
-    @Serializable
-    @SerialName("alice")
-    data object Alice : SceneObject()
-
-    @Serializable
-    @SerialName("candle")
-    data object Candle : SceneObject()
-
-    @Serializable
-    @SerialName("dinner")
-    data object Dinner : SceneObject()
-
-    @Serializable
-    @SerialName("fantasy")
-    data object Fantasy : SceneObject()
-
-    @Serializable
-    @SerialName("garland")
-    data object Garland : SceneObject()
-
-    @Serializable
-    @SerialName("jungle")
-    data object Jungle : SceneObject()
-
-    @Serializable
-    @SerialName("movie")
-    data object Movie : SceneObject()
-
-    @Serializable
-    @SerialName("neon")
-    data object Neon : SceneObject()
-
-    @Serializable
-    @SerialName("night")
-    data object Night : SceneObject()
-
-    @Serializable
-    @SerialName("ocean")
-    data object Ocean : SceneObject()
-
-    @Serializable
-    @SerialName("party")
-    data object Party : SceneObject()
-
-    @Serializable
-    @SerialName("reading")
-    data object Reading : SceneObject()
-
-    @Serializable
-    @SerialName("rest")
-    data object Rest : SceneObject()
-
-    @Serializable
-    @SerialName("romance")
-    data object Romance : SceneObject()
-
-    @Serializable
-    @SerialName("siren")
-    data object Siren : SceneObject()
-
-    @Serializable
-    @SerialName("sunrise")
-    data object Sunrise : SceneObject()
-
-    @Serializable
-    @SerialName("sunset")
-    data object Sunset : SceneObject()
+enum class SceneObject {
+    @SerialName("alarm") ALARM,
+    @SerialName("alice") ALICE,
+    @SerialName("candle") CANDLE,
+    @SerialName("dinner") DINNER,
+    @SerialName("fantasy") FANTASY,
+    @SerialName("garland") GARLAND,
+    @SerialName("jungle") JUNGLE,
+    @SerialName("movie") MOVIE,
+    @SerialName("neon") NEON,
+    @SerialName("night") NIGHT,
+    @SerialName("ocean") OCEAN,
+    @SerialName("party") PARTY,
+    @SerialName("reading") READING,
+    @SerialName("rest") REST,
+    @SerialName("romance") ROMANCE,
+    @SerialName("siren") SIREN,
+    @SerialName("sunrise") SUNRISE,
+    @SerialName("sunset") SUNSET
 }
 
 @Serializable
 data class ModeObject(val value: ModeCapabilityMode)
 
+//@Serializable
+//sealed class ModeCapabilityMode : CapabilityStateObjectValue() {
+//    @Serializable
+//    @SerialName("auto")
+//    data object Auto : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("eco")
+//    data object Eco : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("smart")
+//    data object Smart : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("turbo")
+//    data object Turbo : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("cool")
+//    data object Cool : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("dry")
+//    data object Dry : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("fan_only")
+//    data object FanOnly : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("heat")
+//    data object Heat : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("preheat")
+//    data object Preheat : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("high")
+//    data object High : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("low")
+//    data object Low : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("medium")
+//    data object Medium : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("max")
+//    data object Max : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("min")
+//    data object Min : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("fast")
+//    data object Fast : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("slow")
+//    data object Slow : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("express")
+//    data object Express : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("normal")
+//    data object Normal : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("quiet")
+//    data object Quiet : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("horizontal")
+//    data object Horizontal : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("stationary")
+//    data object Stationary : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("vertical")
+//    data object Vertical : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("one")
+//    data object One : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("two")
+//    data object Two : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("three")
+//    data object Three : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("four")
+//    data object Four : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("five")
+//    data object Five : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("six")
+//    data object Six : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("seven")
+//    data object Seven : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("eight")
+//    data object Eight : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("nine")
+//    data object Nine : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("ten")
+//    data object Ten : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("americano")
+//    data object Americano : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("cappuccino")
+//    data object Cappuccino : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("double")
+//    data object Double : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("espresso")
+//    data object Espresso : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("double_espresso")
+//    data object DoubleEspresso : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("latte")
+//    data object Latte : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("black_tea")
+//    data object BlackTea : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("flower_tea")
+//    data object FlowerTea : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("green_tea")
+//    data object GreenTea : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("herbal_tea")
+//    data object HerbalTea : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("oolong_tea")
+//    data object OolongTea : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("puerh_tea")
+//    data object PuerhTea : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("red_tea")
+//    data object RedTea : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("white_tea")
+//    data object WhiteTea : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("glass")
+//    data object Glass : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("intensive")
+//    data object Intensive : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("pre_rinse")
+//    data object PreRinse : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("aspic")
+//    data object Aspic : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("baby_food")
+//    data object BabyFood : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("baking")
+//    data object Baking : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("bread")
+//    data object Bread : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("boiling")
+//    data object Boiling : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("cereals")
+//    data object Cereals : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("cheesecake")
+//    data object Cheesecake : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("deep_fryer")
+//    data object DeepFryer : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("dessert")
+//    data object Dessert : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("fowl")
+//    data object Fowl : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("frying")
+//    data object Frying : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("macaroni")
+//    data object Macaroni : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("milk_porridge")
+//    data object MilkPorridge : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("multicooker")
+//    data object MultiCooker : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("pasta")
+//    data object Pasta : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("pilaf")
+//    data object Pilaf : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("pizza")
+//    data object Pizza : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("sauce")
+//    data object Sauce : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("slow_cook")
+//    data object SlowCook : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("soup")
+//    data object Soup : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("steam")
+//    data object Steam : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("stewing")
+//    data object Stewing : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("vacuum")
+//    data object Vacuum : ModeCapabilityMode()
+//
+//    @Serializable
+//    @SerialName("yogurt")
+//    data object Yogurt : ModeCapabilityMode()
+//}
+
 @Serializable
-sealed class ModeCapabilityMode : CapabilityStateObjectValue() {
-    @Serializable
-    @SerialName("auto")
-    data object Auto : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("eco")
-    data object Eco : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("smart")
-    data object Smart : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("turbo")
-    data object Turbo : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("cool")
-    data object Cool : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("dry")
-    data object Dry : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("fan_only")
-    data object FanOnly : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("heat")
-    data object Heat : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("preheat")
-    data object Preheat : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("high")
-    data object High : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("low")
-    data object Low : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("medium")
-    data object Medium : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("max")
-    data object Max : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("min")
-    data object Min : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("fast")
-    data object Fast : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("slow")
-    data object Slow : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("express")
-    data object Express : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("normal")
-    data object Normal : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("quiet")
-    data object Quiet : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("horizontal")
-    data object Horizontal : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("stationary")
-    data object Stationary : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("vertical")
-    data object Vertical : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("one")
-    data object One : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("two")
-    data object Two : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("three")
-    data object Three : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("four")
-    data object Four : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("five")
-    data object Five : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("six")
-    data object Six : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("seven")
-    data object Seven : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("eight")
-    data object Eight : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("nine")
-    data object Nine : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("ten")
-    data object Ten : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("americano")
-    data object Americano : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("cappuccino")
-    data object Cappuccino : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("double")
-    data object Double : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("espresso")
-    data object Espresso : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("double_espresso")
-    data object DoubleEspresso : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("latte")
-    data object Latte : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("black_tea")
-    data object BlackTea : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("flower_tea")
-    data object FlowerTea : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("green_tea")
-    data object GreenTea : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("herbal_tea")
-    data object HerbalTea : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("oolong_tea")
-    data object OolongTea : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("puerh_tea")
-    data object PuerhTea : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("red_tea")
-    data object RedTea : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("white_tea")
-    data object WhiteTea : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("glass")
-    data object Glass : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("intensive")
-    data object Intensive : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("pre_rinse")
-    data object PreRinse : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("aspic")
-    data object Aspic : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("baby_food")
-    data object BabyFood : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("baking")
-    data object Baking : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("bread")
-    data object Bread : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("boiling")
-    data object Boiling : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("cereals")
-    data object Cereals : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("cheesecake")
-    data object Cheesecake : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("deep_fryer")
-    data object DeepFryer : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("dessert")
-    data object Dessert : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("fowl")
-    data object Fowl : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("frying")
-    data object Frying : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("macaroni")
-    data object Macaroni : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("milk_porridge")
-    data object MilkPorridge : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("multicooker")
-    data object Multicooker : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("pasta")
-    data object Pasta : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("pilaf")
-    data object Pilaf : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("pizza")
-    data object Pizza : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("sauce")
-    data object Sauce : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("slow_cook")
-    data object SlowCook : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("soup")
-    data object Soup : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("steam")
-    data object Steam : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("stewing")
-    data object Stewing : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("vacuum")
-    data object Vacuum : ModeCapabilityMode()
-
-    @Serializable
-    @SerialName("yogurt")
-    data object Yogurt : ModeCapabilityMode()
+enum class ModeCapabilityMode : CapabilityStateObjectValue {
+    @SerialName("auto") AUTO,
+    @SerialName("eco") ECO,
+    @SerialName("smart") SMART,
+    @SerialName("turbo") TURBO,
+    @SerialName("cool") COOL,
+    @SerialName("dry") DRY,
+    @SerialName("fan_only") FAN_ONLY,
+    @SerialName("heat") HEAT,
+    @SerialName("preheat") PREHEAT,
+    @SerialName("high") HIGH,
+    @SerialName("low") LOW,
+    @SerialName("medium") MEDIUM,
+    @SerialName("max") MAX,
+    @SerialName("min") MIN,
+    @SerialName("fast") FAST,
+    @SerialName("slow") SLOW,
+    @SerialName("express") EXPRESS,
+    @SerialName("normal") NORMAL,
+    @SerialName("quiet") QUIET,
+    @SerialName("horizontal") HORIZONTAL,
+    @SerialName("stationary") STATIONARY,
+    @SerialName("vertical") VERTICAL,
+    @SerialName("one") ONE,
+    @SerialName("two") TWO,
+    @SerialName("three") THREE,
+    @SerialName("four") FOUR,
+    @SerialName("five") FIVE,
+    @SerialName("six") SIX,
+    @SerialName("seven") SEVEN,
+    @SerialName("eight") EIGHT,
+    @SerialName("nine") NINE,
+    @SerialName("ten") TEN,
+    @SerialName("americano") AMERICANO,
+    @SerialName("cappuccino") CAPPUCCINO,
+    @SerialName("double") DOUBLE,
+    @SerialName("espresso") ESPRESSO,
+    @SerialName("double_espresso") DOUBLE_ESPRESSO,
+    @SerialName("latte") LATTE,
+    @SerialName("black_tea") BLACK_TEA,
+    @SerialName("flower_tea") FLOWER_TEA,
+    @SerialName("green_tea") GREEN_TEA,
+    @SerialName("herbal_tea") HERBAL_TEA,
+    @SerialName("oolong_tea") OOLONG_TEA,
+    @SerialName("puerh_tea") PUERH_TEA,
+    @SerialName("red_tea") RED_TEA,
+    @SerialName("white_tea") WHITE_TEA,
+    @SerialName("glass") GLASS,
+    @SerialName("intensive") INTENSIVE,
+    @SerialName("pre_rinse") PRE_RINSE,
+    @SerialName("aspic") ASPIC,
+    @SerialName("baby_food") BABY_FOOD,
+    @SerialName("baking") BAKING,
+    @SerialName("bread") BREAD,
+    @SerialName("boiling") BOILING,
+    @SerialName("cereals") CEREALS,
+    @SerialName("cheesecake") CHEESECAKE,
+    @SerialName("deep_fryer") DEEP_FRYER,
+    @SerialName("dessert") DESSERT,
+    @SerialName("fowl") FOWL,
+    @SerialName("frying") FRYING,
+    @SerialName("macaroni") MACARONI,
+    @SerialName("milk_porridge") MILK_PORRIDGE,
+    @SerialName("multicooker") MULTICOOKER,
+    @SerialName("pasta") PASTA,
+    @SerialName("pilaf") PILAF,
+    @SerialName("pizza") PIZZA,
+    @SerialName("sauce") SAUCE,
+    @SerialName("slow_cook") SLOW_COOK,
+    @SerialName("soup") SOUP,
+    @SerialName("steam") STEAM,
+    @SerialName("stewing") STEWING,
+    @SerialName("vacuum") VACUUM,
+    @SerialName("yogurt") YOGURT
 }
 
+//@Serializable
+//@Polymorphic
+//sealed class ModeCapabilityInstance : CapabilityStateObjectInstance {
+//    @Serializable
+//    @SerialName("cleanup_mode")
+//    data object CleanupMode : ModeCapabilityInstance()
+//
+//    @Serializable
+//    @SerialName("coffee_mode")
+//    data object CoffeeMode : ModeCapabilityInstance()
+//
+//    @Serializable
+//    @SerialName("dishwashing")
+//    data object Dishwashing : ModeCapabilityInstance()
+//
+//    @Serializable
+//    @SerialName("fan_speed")
+//    data object FanSpeed : ModeCapabilityInstance()
+//
+//    @Serializable
+//    @SerialName("heat")
+//    data object Heat : ModeCapabilityInstance()
+//
+//    @Serializable
+//    @SerialName("input_source")
+//    data object InputSource : ModeCapabilityInstance()
+//
+//    @Serializable
+//    @SerialName("program")
+//    data object Program : ModeCapabilityInstance()
+//
+//    @Serializable
+//    @SerialName("swing")
+//    data object Swing : ModeCapabilityInstance()
+//
+//    @Serializable
+//    @SerialName("tea_mode")
+//    data object TeaMode : ModeCapabilityInstance()
+//
+//    @Serializable
+//    @SerialName("thermostat")
+//    data object Thermostat : ModeCapabilityInstance()
+//
+//    @Serializable
+//    @SerialName("work_speed")
+//    data object WorkSpeed : ModeCapabilityInstance()
+//}
+
 @Serializable
-@Polymorphic
-sealed class ModeCapabilityInstance : CapabilityStateObjectInstance {
-    @Serializable
-    @SerialName("cleanup_mode")
-    data object CleanupMode : ModeCapabilityInstance()
-
-    @Serializable
-    @SerialName("coffee_mode")
-    data object CoffeeMode : ModeCapabilityInstance()
-
-    @Serializable
-    @SerialName("dishwashing")
-    data object Dishwashing : ModeCapabilityInstance()
-
-    @Serializable
-    @SerialName("fan_speed")
-    data object FanSpeed : ModeCapabilityInstance()
-
-    @Serializable
-    @SerialName("heat")
-    data object Heat : ModeCapabilityInstance()
-
-    @Serializable
-    @SerialName("input_source")
-    data object InputSource : ModeCapabilityInstance()
-
-    @Serializable
-    @SerialName("program")
-    data object Program : ModeCapabilityInstance()
-
-    @Serializable
-    @SerialName("swing")
-    data object Swing : ModeCapabilityInstance()
-
-    @Serializable
-    @SerialName("tea_mode")
-    data object TeaMode : ModeCapabilityInstance()
-
-    @Serializable
-    @SerialName("thermostat")
-    data object Thermostat : ModeCapabilityInstance()
-
-    @Serializable
-    @SerialName("work_speed")
-    data object WorkSpeed : ModeCapabilityInstance()
+enum class ModeCapabilityInstance : CapabilityStateObjectInstance{
+    @SerialName("cleanup_mode") CLEANUP_MODE,
+    @SerialName("coffee_mode") COFFEE_MODE,
+    @SerialName("dishwashing") DISHWASHING,
+    @SerialName("fan_speed") FAN_SPEED,
+    @SerialName("heat") HEAT,
+    @SerialName("input_source") INPUT_SOURCE,
+    @SerialName("program") PROGRAM,
+    @SerialName("swing") SWING,
+    @SerialName("tea_mode") TEA_MODE,
+    @SerialName("thermostat") THERMOSTAT,
+    @SerialName("work_speed") WORK_SPEED
 }
 
+//@Serializable
+//@Polymorphic
+//sealed class RangeCapabilityParameterObjectFunction : CapabilityStateObjectInstance {
+//    @Serializable
+//    @SerialName("brightness")
+//    data object Brightness : RangeCapabilityParameterObjectFunction()
+//
+//    @Serializable
+//    @SerialName("channel")
+//    data object Channel : RangeCapabilityParameterObjectFunction()
+//
+//    @Serializable
+//    @SerialName("humidity")
+//    data object Humidity : RangeCapabilityParameterObjectFunction()
+//
+//    @Serializable
+//    @SerialName("open")
+//    data object Open : RangeCapabilityParameterObjectFunction()
+//
+//    @Serializable
+//    @SerialName("temperature")
+//    data object Temperature : RangeCapabilityParameterObjectFunction()
+//
+//    @Serializable
+//    @SerialName("volume")
+//    data object Volume : RangeCapabilityParameterObjectFunction()
+//}
+
 @Serializable
-@Polymorphic
-sealed class RangeCapabilityParameterObjectFunction : CapabilityStateObjectInstance {
-    @Serializable
-    @SerialName("brightness")
-    data object Brightness : RangeCapabilityParameterObjectFunction()
-
-    @Serializable
-    @SerialName("channel")
-    data object Channel : RangeCapabilityParameterObjectFunction()
-
-    @Serializable
-    @SerialName("humidity")
-    data object Humidity : RangeCapabilityParameterObjectFunction()
-
-    @Serializable
-    @SerialName("open")
-    data object Open : RangeCapabilityParameterObjectFunction()
-
-    @Serializable
-    @SerialName("temperature")
-    data object Temperature : RangeCapabilityParameterObjectFunction()
-
-    @Serializable
-    @SerialName("volume")
-    data object Volume : RangeCapabilityParameterObjectFunction()
+enum class RangeCapabilityParameterObjectFunction : CapabilityStateObjectInstance {
+    @SerialName("brightness") BRIGHTNESS,
+    @SerialName("channel") CHANNEL,
+    @SerialName("humidity") HUMIDITY,
+    @SerialName("open") OPEN,
+    @SerialName("temperature") TEMPERATURE,
+    @SerialName("volume") VOLUME
 }
 
 @Serializable
@@ -1268,45 +1540,62 @@ data class Range(
     override fun toString() = "[$min, $max]"
 }
 
+//@Serializable
+//sealed class ToggleCapabilityParameterObjectFunction : CapabilityStateObjectInstance {
+//    @Serializable
+//    @SerialName("backlight")
+//    data object Backlight : ToggleCapabilityParameterObjectFunction()
+//
+//    @Serializable
+//    @SerialName("controls_locked")
+//    data object ControlsLocked : ToggleCapabilityParameterObjectFunction()
+//
+//    @Serializable
+//    @SerialName("ionization")
+//    data object Ionization : ToggleCapabilityParameterObjectFunction()
+//
+//    @Serializable
+//    @SerialName("keep_warm")
+//    data object KeepWarm : ToggleCapabilityParameterObjectFunction()
+//
+//    @Serializable
+//    @SerialName("mute")
+//    data object Mute : ToggleCapabilityParameterObjectFunction()
+//
+//    @Serializable
+//    @SerialName("oscillation")
+//    data object Oscillation : ToggleCapabilityParameterObjectFunction()
+//
+//    @Serializable
+//    @SerialName("pause")
+//    data object Pause : ToggleCapabilityParameterObjectFunction()
+//}
+
 @Serializable
-sealed class ToggleCapabilityParameterObjectFunction : CapabilityStateObjectInstance {
-    @Serializable
-    @SerialName("backlight")
-    data object Backlight : ToggleCapabilityParameterObjectFunction()
-
-    @Serializable
-    @SerialName("controls_locked")
-    data object ControlsLocked : ToggleCapabilityParameterObjectFunction()
-
-    @Serializable
-    @SerialName("ionization")
-    data object Ionization : ToggleCapabilityParameterObjectFunction()
-
-    @Serializable
-    @SerialName("keep_warm")
-    data object KeepWarm : ToggleCapabilityParameterObjectFunction()
-
-    @Serializable
-    @SerialName("mute")
-    data object Mute : ToggleCapabilityParameterObjectFunction()
-
-    @Serializable
-    @SerialName("oscillation")
-    data object Oscillation : ToggleCapabilityParameterObjectFunction()
-
-    @Serializable
-    @SerialName("pause")
-    data object Pause : ToggleCapabilityParameterObjectFunction()
+enum class ToggleCapabilityParameterObjectFunction : CapabilityStateObjectInstance {
+    @SerialName("backlight") BACKLIGHT,
+    @SerialName("controls_locked") CONTROLS_LOCKED,
+    @SerialName("ionization") IONIZATION,
+    @SerialName("keep_warm") KEEP_WARM,
+    @SerialName("mute") MUTE,
+    @SerialName("oscillation") OSCILLATION,
+    @SerialName("pause") PAUSE
 }
 
+//@Serializable
+//sealed class VideoStreamCapabilityParameterObjectStreamProtocol {
+//    @Serializable
+//    @SerialName("hls")
+//    data object HLS: VideoStreamCapabilityParameterObjectStreamProtocol()
+//    @Serializable
+//    @SerialName("rtmp")
+//    data object RTMP: VideoStreamCapabilityParameterObjectStreamProtocol()
+//}
+
 @Serializable
-sealed class VideoStreamCapabilityParameterObjectStreamProtocol {
-    @Serializable
-    @SerialName("hls")
-    data object HLS: VideoStreamCapabilityParameterObjectStreamProtocol()
-    @Serializable
-    @SerialName("rtmp")
-    data object RTMP: VideoStreamCapabilityParameterObjectStreamProtocol()
+enum class VideoStreamCapabilityParameterObjectStreamProtocol {
+    @SerialName("hls") HLS,
+    @SerialName("rtmp") RTMP
 }
 
 @Serializable
@@ -1315,68 +1604,14 @@ sealed interface CapabilityState {
     val instance: CapabilityStateObjectInstance
 }
 
-//@Serializable(CapabilityStateObjectDataSerializer::class)
 @Serializable
-sealed class CapabilityStateObjectData: CapabilityState{
+sealed class CapabilityStateObjectData: CapabilityState {
     abstract override val instance: CapabilityStateObjectInstance
     abstract val value: CapabilityStateObjectValue
 }
 
-//object CapabilityStateObjectDataSerializer : KSerializer<CapabilityStateObjectData> {
-//    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("CapabilityStateObjectData") {
-//        element<String>("type")
-//        element<JsonElement>("value")
-//    }
-//
-//    override fun serialize(encoder: Encoder, value: CapabilityStateObjectData) {
-//        // Пока оставляем пустым
-//    }
-//
-//    override fun deserialize(decoder: Decoder): CapabilityStateObjectData {
-//        val input = decoder as? JsonDecoder ?: throw SerializationException("Expected JsonDecoder")
-//        val jsonObject = input.decodeJsonElement().jsonObject
-//
-//        val type = jsonObject["type"]?.jsonPrimitive?.contentOrNull ?: throw SerializationException("Missing type")
-//        val valueJson = jsonObject["value"] ?: throw SerializationException("Missing value")
-//
-//        return when (type) {
-//            "devices.capabilities.on_off" -> {
-//                val instance = input.json.decodeFromJsonElement<OnOffCapabilityStateObjectInstance>(jsonObject["instance"]!!)
-//                val value = input.json.decodeFromJsonElement<OnOffCapabilityStateObjectValue>(valueJson)
-//                OnOffCapabilityStateObjectData(instance, value)
-//            }
-//            "devices.capabilities.color_setting" -> {
-//                val instance = input.json.decodeFromJsonElement<ColorSettingCapabilityStateObjectInstance>(jsonObject["instance"]!!)
-//                val value = input.json.decodeFromJsonElement<ColorSettingCapabilityStateObjectValue>(valueJson)
-//                ColorSettingCapabilityStateObjectData(instance, value)
-//            }
-//            "devices.capabilities.video_stream" -> {
-//                val instance = input.json.decodeFromJsonElement<VideoStreamCapabilityStateObjectInstance>(jsonObject["instance"]!!)
-//                val value = input.json.decodeFromJsonElement<VideoStreamCapabilityStateObjectDataValue>(valueJson)
-//                VideoStreamCapabilityStateObjectData(instance, value)
-//            }
-//            "devices.capabilities.mode" -> {
-//                val instance = input.json.decodeFromJsonElement<ModeCapabilityInstance>(jsonObject["instance"]!!)
-//                val value = input.json.decodeFromJsonElement<ModeCapabilityMode>(valueJson)
-//                ModeCapabilityStateObjectData(instance, value)
-//            }
-//            "devices.capabilities.range" -> {
-//                val instance = input.json.decodeFromJsonElement<RangeCapabilityParameterObjectFunction>(jsonObject["instance"]!!)
-//                val value = input.json.decodeFromJsonElement<RangeCapabilityStateObjectDataValue>(valueJson)
-//                RangeCapabilityStateObjectData(instance, value)
-//            }
-//            "devices.capabilities.toggle" -> {
-//                val instance = input.json.decodeFromJsonElement<ToggleCapabilityParameterObjectFunction>(jsonObject["instance"]!!)
-//                val value = input.json.decodeFromJsonElement<ToggleCapabilityStateObjectDataValue>(valueJson)
-//                ToggleCapabilityStateObjectData(instance, value)
-//            }
-//            else -> throw SerializationException("Unknown CapabilityStateObjectData type")
-//        }
-//    }
-//}
-
 @Serializable
-sealed interface CapabilityStateObjectActionResult : CapabilityState{
+sealed interface CapabilityStateObjectActionResult : CapabilityState {
     abstract override val instance: CapabilityStateObjectInstance
     @SerialName("action_result") val actionResult: ActionResult
 }
@@ -1389,103 +1624,118 @@ data class ActionResult(
 )
 
 @Serializable
-sealed class ErrorCode {
-    @Serializable
-    @SerialName("DOOR_OPEN")
-    data object DoorOpen : ErrorCode()
-
-    @Serializable
-    @SerialName("LID_OPEN")
-    data object LidOpen : ErrorCode()
-
-    @Serializable
-    @SerialName("REMOTE_CONTROL_DISABLED")
-    data object RemoteControlDisabled : ErrorCode()
-
-    @Serializable
-    @SerialName("NOT_ENOUGH_WATER")
-    data object NotEnoughWater : ErrorCode()
-
-    @Serializable
-    @SerialName("LOW_CHARGE_LEVEL")
-    data object LowChargeLevel : ErrorCode()
-
-    @Serializable
-    @SerialName("CONTAINER_FULL")
-    data object ContainerFull : ErrorCode()
-
-    @Serializable
-    @SerialName("CONTAINER_EMPTY")
-    data object ContainerEmpty : ErrorCode()
-
-    @Serializable
-    @SerialName("DRIP_TRAY_FULL")
-    data object DripTrayFull : ErrorCode()
-
-    @Serializable
-    @SerialName("DEVICE_STUCK")
-    data object DeviceStuck : ErrorCode()
-
-    @Serializable
-    @SerialName("DEVICE_OFF")
-    data object DeviceOff : ErrorCode()
-
-    @Serializable
-    @SerialName("FIRMWARE_OUT_OF_DATE")
-    data object FirmwareOutOfDate : ErrorCode()
-
-    @Serializable
-    @SerialName("NOT_ENOUGH_DETERGENT")
-    data object NotEnoughDetergent : ErrorCode()
-
-    @Serializable
-    @SerialName("HUMAN_INVOLVEMENT_NEEDED")
-    data object HumanInvolvementNeeded : ErrorCode()
-
-    @Serializable
-    @SerialName("DEVICE_UNREACHABLE")
-    data object DeviceUnreachable : ErrorCode()
-
-    @Serializable
-    @SerialName("DEVICE_BUSY")
-    data object DeviceBusy : ErrorCode()
-
-    @Serializable
-    @SerialName("INTERNAL_ERROR")
-    data object InternalError : ErrorCode()
-
-    @Serializable
-    @SerialName("INVALID_ACTION")
-    data object InvalidAction : ErrorCode()
-
-    @Serializable
-    @SerialName("INVALID_VALUE")
-    data object InvalidValue : ErrorCode()
-
-    @Serializable
-    @SerialName("NOT_SUPPORTED_IN_CURRENT_MODE")
-    data object NotSupportedInCurrentMode : ErrorCode()
-
-    @Serializable
-    @SerialName("ACCOUNT_LINKING_ERROR")
-    data object AccountLinkingError : ErrorCode()
-
-    @Serializable
-    @SerialName("DEVICE_NOT_FOUND")
-    data object DeviceNotFound : ErrorCode()
+enum class ErrorCode {
+    DOOR_OPEN, LID_OPEN, REMOTE_CONTROL_DISABLED, NOT_ENOUGH_WATER, LOW_CHARGE_LEVEL,
+    CONTAINER_FULL, CONTAINER_EMPTY, DRIP_TRAY_FULL, DEVICE_STUCK, DEVICE_OFF,
+    FIRMWARE_OUT_OF_DATE, NOT_ENOUGH_DETERGENT, HUMAN_INVOLVEMENT_NEEDED, DEVICE_UNREACHABLE,
+    DEVICE_BUSY, INTERNAL_ERROR, INVALID_ACTION, INVALID_VALUE, NOT_SUPPORTED_IN_CURRENT_MODE,
+    ACCOUNT_LINKING_ERROR, DEVICE_NOT_FOUND
 }
+
+//@Serializable
+//sealed class ErrorCode {
+//    @Serializable
+//    @SerialName("DOOR_OPEN")
+//    data object DoorOpen : ErrorCode()
+//
+//    @Serializable
+//    @SerialName("LID_OPEN")
+//    data object LidOpen : ErrorCode()
+//
+//    @Serializable
+//    @SerialName("REMOTE_CONTROL_DISABLED")
+//    data object RemoteControlDisabled : ErrorCode()
+//
+//    @Serializable
+//    @SerialName("NOT_ENOUGH_WATER")
+//    data object NotEnoughWater : ErrorCode()
+//
+//    @Serializable
+//    @SerialName("LOW_CHARGE_LEVEL")
+//    data object LowChargeLevel : ErrorCode()
+//
+//    @Serializable
+//    @SerialName("CONTAINER_FULL")
+//    data object ContainerFull : ErrorCode()
+//
+//    @Serializable
+//    @SerialName("CONTAINER_EMPTY")
+//    data object ContainerEmpty : ErrorCode()
+//
+//    @Serializable
+//    @SerialName("DRIP_TRAY_FULL")
+//    data object DripTrayFull : ErrorCode()
+//
+//    @Serializable
+//    @SerialName("DEVICE_STUCK")
+//    data object DeviceStuck : ErrorCode()
+//
+//    @Serializable
+//    @SerialName("DEVICE_OFF")
+//    data object DeviceOff : ErrorCode()
+//
+//    @Serializable
+//    @SerialName("FIRMWARE_OUT_OF_DATE")
+//    data object FirmwareOutOfDate : ErrorCode()
+//
+//    @Serializable
+//    @SerialName("NOT_ENOUGH_DETERGENT")
+//    data object NotEnoughDetergent : ErrorCode()
+//
+//    @Serializable
+//    @SerialName("HUMAN_INVOLVEMENT_NEEDED")
+//    data object HumanInvolvementNeeded : ErrorCode()
+//
+//    @Serializable
+//    @SerialName("DEVICE_UNREACHABLE")
+//    data object DeviceUnreachable : ErrorCode()
+//
+//    @Serializable
+//    @SerialName("DEVICE_BUSY")
+//    data object DeviceBusy : ErrorCode()
+//
+//    @Serializable
+//    @SerialName("INTERNAL_ERROR")
+//    data object InternalError : ErrorCode()
+//
+//    @Serializable
+//    @SerialName("INVALID_ACTION")
+//    data object InvalidAction : ErrorCode()
+//
+//    @Serializable
+//    @SerialName("INVALID_VALUE")
+//    data object InvalidValue : ErrorCode()
+//
+//    @Serializable
+//    @SerialName("NOT_SUPPORTED_IN_CURRENT_MODE")
+//    data object NotSupportedInCurrentMode : ErrorCode()
+//
+//    @Serializable
+//    @SerialName("ACCOUNT_LINKING_ERROR")
+//    data object AccountLinkingError : ErrorCode()
+//
+//    @Serializable
+//    @SerialName("DEVICE_NOT_FOUND")
+//    data object DeviceNotFound : ErrorCode()
+//}
 
 @Serializable
-sealed class Status {
-    @Serializable
-    @SerialName("DONE")
-    data object Done: Status()
-    @Serializable
-    @SerialName("ERROR")
-    data object Error: Status()
-    @Serializable
-    data class CustomStatus(val value: String): Status()
+enum class Status {
+    @SerialName("DONE") DONE,
+    @SerialName("ERROR") ERROR
 }
+
+//@Serializable
+//sealed class Status {
+//    @Serializable
+//    @SerialName("DONE")
+//    data object Done: Status()
+//    @Serializable
+//    @SerialName("ERROR")
+//    data object Error: Status()
+//    @Serializable
+//    data class CustomStatus(val value: String): Status()
+//}
 
 @Serializable
 @Polymorphic
@@ -1493,7 +1743,7 @@ sealed interface CapabilityStateObjectInstance
 
 @Serializable
 @Polymorphic
-sealed class CapabilityStateObjectValue
+sealed interface CapabilityStateObjectValue
 
 @Serializable
 data class OnOffCapabilityStateObjectData(
@@ -1502,37 +1752,40 @@ data class OnOffCapabilityStateObjectData(
 ): CapabilityStateObjectData()
 
 @Serializable
-sealed class OnOffCapabilityStateObjectInstance : CapabilityStateObjectInstance {
-    @Serializable
-    @SerialName("on")
-    data object On: OnOffCapabilityStateObjectInstance()
+enum class OnOffCapabilityStateObjectInstance : CapabilityStateObjectInstance {
+    @SerialName("on") ON
 }
 
-//@Serializable(with = OnOffCapabilityStateObjectValueSerializer::class)
-@Serializable
-data class OnOffCapabilityStateObjectValue(val value: Boolean) : CapabilityStateObjectValue()
-
-//object OnOffCapabilityStateObjectValueSerializer : KSerializer<OnOffCapabilityStateObjectValue> {
-//    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("OnOffCapabilityStateObjectValue", PrimitiveKind.BOOLEAN)
-//
-//    override fun serialize(encoder: Encoder, value: OnOffCapabilityStateObjectValue) {
-//        encoder.encodeBoolean(value.value)
-//    }
-//
-//    override fun deserialize(decoder: Decoder): OnOffCapabilityStateObjectValue {
-//        return when (decoder) {
-//            is JsonDecoder -> {
-//                val element = decoder.decodeJsonElement()
-//                when (element) {
-//                    is JsonPrimitive -> OnOffCapabilityStateObjectValue(element.boolean)
-//                    is JsonObject -> OnOffCapabilityStateObjectValue(element["value"]?.jsonPrimitive?.booleanOrNull ?: throw SerializationException("Expected 'value' field"))
-//                    else -> throw SerializationException("Expected JsonObject or JsonPrimitive")
-//                }
-//            }
-//            else -> OnOffCapabilityStateObjectValue(decoder.decodeBoolean())
-//        }
-//    }
+//@Serializable
+//sealed class OnOffCapabilityStateObjectInstance : CapabilityStateObjectInstance {
+//    @Serializable
+//    @SerialName("on")
+//    data object On: OnOffCapabilityStateObjectInstance()
 //}
+
+@Serializable(with = OnOffCapabilityStateObjectValueSerializer::class)
+data class OnOffCapabilityStateObjectValue(val value: Boolean) : CapabilityStateObjectValue
+
+object OnOffCapabilityStateObjectValueSerializer : KSerializer<OnOffCapabilityStateObjectValue> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("OnOffCapabilityStateObjectValue", PrimitiveKind.BOOLEAN)
+
+    override fun serialize(encoder: Encoder, value: OnOffCapabilityStateObjectValue) {
+        encoder.encodeBoolean(value.value)
+    }
+
+    override fun deserialize(decoder: Decoder): OnOffCapabilityStateObjectValue {
+        return when (decoder) {
+            is JsonDecoder -> {
+                when (val element = decoder.decodeJsonElement()) {
+                    is JsonPrimitive -> OnOffCapabilityStateObjectValue(element.boolean)
+                    is JsonObject -> OnOffCapabilityStateObjectValue(element["value"]?.jsonPrimitive?.booleanOrNull ?: throw SerializationException("Expected 'value' field"))
+                    else -> throw SerializationException("Expected JsonObject or JsonPrimitive")
+                }
+            }
+            else -> OnOffCapabilityStateObjectValue(decoder.decodeBoolean())
+        }
+    }
+}
 
 @Serializable
 data class ColorSettingCapabilityStateObjectData(
@@ -1541,29 +1794,77 @@ data class ColorSettingCapabilityStateObjectData(
 ): CapabilityStateObjectData()
 
 @Serializable
-sealed class ColorSettingCapabilityStateObjectInstance : CapabilityStateObjectInstance {
-    @Serializable
-    @SerialName("base")
-    data object Base : ColorSettingCapabilityStateObjectInstance()
-    @Serializable
-    @SerialName("rgb")
-    data object RGB : ColorSettingCapabilityStateObjectInstance()
-    @Serializable
-    @SerialName("hsv")
-    data object HSV : ColorSettingCapabilityStateObjectInstance()
-    @Serializable
-    @SerialName("temperature_k")
-    data object TemperatureK : ColorSettingCapabilityStateObjectInstance()
-    @Serializable
-    @SerialName("scene")
-    data object Scene : ColorSettingCapabilityStateObjectInstance()
+enum class ColorSettingCapabilityStateObjectInstance : CapabilityStateObjectInstance {
+    @SerialName("base") BASE,
+    @SerialName("rgb") RGB,
+    @SerialName("hsv") HSV,
+    @SerialName("temperature_k") TEMPERATURE_K,
+    @SerialName("scene") SCENE
 }
 
-//@Serializable(with = ColorSettingCapabilityStateObjectValueSerializer::class)
-@Serializable
-@Polymorphic
-sealed class ColorSettingCapabilityStateObjectValue: CapabilityStateObjectValue(){
-    abstract val value: Any
+//@Serializable
+//sealed class ColorSettingCapabilityStateObjectInstance : CapabilityStateObjectInstance {
+//    @Serializable
+//    @SerialName("base")
+//    data object Base : ColorSettingCapabilityStateObjectInstance()
+//    @Serializable
+//    @SerialName("rgb")
+//    data object RGB : ColorSettingCapabilityStateObjectInstance()
+//    @Serializable
+//    @SerialName("hsv")
+//    data object HSV : ColorSettingCapabilityStateObjectInstance()
+//    @Serializable
+//    @SerialName("temperature_k")
+//    data object TemperatureK : ColorSettingCapabilityStateObjectInstance()
+//    @Serializable
+//    @SerialName("scene")
+//    data object Scene : ColorSettingCapabilityStateObjectInstance()
+//}
+
+@Serializable(with = ColorSettingCapabilityStateObjectValueSerializer::class)
+sealed interface ColorSettingCapabilityStateObjectValue : CapabilityStateObjectValue
+
+class ColorSettingCapabilityStateObjectValueSerializer : KSerializer<ColorSettingCapabilityStateObjectValue> {
+    private val objectSceneSerializer = ColorSettingCapabilityStateObjectValueObjectScene.serializer()
+    private val objectHSVSerializer = ColorSettingCapabilityStateObjectValueObjectHSV.serializer()
+    private val integerSerializer = ColorSettingCapabilityStateObjectValueInteger.serializer()
+
+    @OptIn(ExperimentalSerializationApi::class, InternalSerializationApi::class)
+    override val descriptor: SerialDescriptor = buildSerialDescriptor("ColorSettingCapabilityStateObjectValue", PolymorphicKind.SEALED) {
+        element("ObjectScene", objectSceneSerializer.descriptor)
+        element("ObjectHSV", objectHSVSerializer.descriptor)
+        element("Integer", integerSerializer.descriptor)
+    }
+
+    override fun deserialize(decoder: Decoder): ColorSettingCapabilityStateObjectValue {
+        val jsonDecoder = decoder as? JsonDecoder ?: throw SerializationException("Expected JsonDecoder")
+        return when (val jsonElement = jsonDecoder.decodeJsonElement()) {
+            is JsonObject -> when {
+                "scene" in jsonElement -> jsonDecoder.json.decodeFromJsonElement(objectSceneSerializer, jsonElement)
+                "h" in jsonElement && "s" in jsonElement && "v" in jsonElement -> jsonDecoder.json.decodeFromJsonElement(objectHSVSerializer, jsonElement)
+                else -> throw SerializationException("Unknown ColorSettingCapabilityStateObjectValue type")
+            }
+            is JsonPrimitive -> {
+                if (jsonElement.content.toIntOrNull() != null) {
+                    val intValue = jsonElement.int
+                    ColorSettingCapabilityStateObjectValueInteger(intValue)
+                } else {
+                    throw SerializationException("Expected integer value for ColorSettingCapabilityStateObjectValueInteger")
+                }
+            }
+            else -> throw SerializationException("Unknown ColorSettingCapabilityStateObjectValue type")
+        }
+    }
+
+    override fun serialize(encoder: Encoder, value: ColorSettingCapabilityStateObjectValue) {
+        val jsonEncoder = encoder as? JsonEncoder ?: throw SerializationException("Expected JsonEncoder")
+
+        when (value) {
+            is ColorSettingCapabilityStateObjectValueObjectScene -> jsonEncoder.encodeSerializableValue(objectSceneSerializer, value)
+            is ColorSettingCapabilityStateObjectValueObjectHSV -> jsonEncoder.encodeSerializableValue(objectHSVSerializer, value)
+            is ColorSettingCapabilityStateObjectValueInteger -> jsonEncoder.encodeJsonElement(JsonPrimitive(value.value))
+        }
+    }
 }
 
 //object ColorSettingCapabilityStateObjectValueSerializer : JsonContentPolymorphicSerializer<ColorSettingCapabilityStateObjectValue>(ColorSettingCapabilityStateObjectValue::class) {
@@ -1571,7 +1872,6 @@ sealed class ColorSettingCapabilityStateObjectValue: CapabilityStateObjectValue(
 //        is JsonObject -> when {
 //            "scene" in element -> ColorSettingCapabilityStateObjectValueObjectScene.serializer()
 //            "h" in element && "s" in element && "v" in element -> ColorSettingCapabilityStateObjectValueObjectHSV.serializer()
-//            "value" in element -> ColorSettingCapabilityStateObjectValueInteger.serializer()
 //            else -> throw SerializationException("Unknown ColorSettingCapabilityStateObjectValue type")
 //        }
 //        is JsonPrimitive -> {
@@ -1585,17 +1885,16 @@ sealed class ColorSettingCapabilityStateObjectValue: CapabilityStateObjectValue(
 //    }
 //}
 
-//@Serializable(with = ColorSettingCapabilityStateObjectValueIntegerSerializer::class)
 @Serializable
-data class ColorSettingCapabilityStateObjectValueInteger(@SerialName("value") override val value: Int) : ColorSettingCapabilityStateObjectValue()
+data class ColorSettingCapabilityStateObjectValueInteger(val value: Int) : ColorSettingCapabilityStateObjectValue
 
 @Serializable
-data class ColorSettingCapabilityStateObjectValueObjectScene(override val value: SceneObject)
-    : ColorSettingCapabilityStateObjectValue()
+data class ColorSettingCapabilityStateObjectValueObjectScene(val value: SceneObject)
+    : ColorSettingCapabilityStateObjectValue
 
 @Serializable
-data class ColorSettingCapabilityStateObjectValueObjectHSV(override val value: HSVObject)
-    : ColorSettingCapabilityStateObjectValue()
+data class ColorSettingCapabilityStateObjectValueObjectHSV(val value: HSVObject)
+    : ColorSettingCapabilityStateObjectValue
 
 @Serializable
 data class HSVObject(val h: Int, val s: Int, val v: Int)
@@ -1616,13 +1915,13 @@ sealed class VideoStreamCapabilityStateObjectInstance : CapabilityStateObjectIns
 @Serializable
 data class VideoStreamCapabilityStateObjectDataValue(
     val protocols: List<VideoStreamCapabilityParameterObjectStreamProtocol>
-) : CapabilityStateObjectValue()
+) : CapabilityStateObjectValue
 
 @Serializable
 data class VideoStreamCapabilityStateObjectActionResultValue(
     val protocol: VideoStreamCapabilityParameterObjectStreamProtocol,
     @SerialName("stream_url") val streamUrl: String
-) : CapabilityStateObjectValue()
+) : CapabilityStateObjectValue
 
 @Serializable
 data class VideoStreamCapabilityStateObjectActionResult(
@@ -1653,7 +1952,7 @@ data class RangeCapabilityStateObjectData(
 @Serializable
 data class RangeCapabilityStateObjectDataValue(
     val value: Float,
-) : CapabilityStateObjectValue()
+) : CapabilityStateObjectValue
 
 @Serializable
 data class RangeCapabilityStateObjectActionResult(
@@ -1670,7 +1969,7 @@ data class ToggleCapabilityStateObjectData(
 @Serializable
 data class ToggleCapabilityStateObjectDataValue(
     val value: Boolean
-) : CapabilityStateObjectValue()
+) : CapabilityStateObjectValue
 
 @Serializable
 data class ToggleCapabilityStateObjectActionResult(
@@ -1678,10 +1977,9 @@ data class ToggleCapabilityStateObjectActionResult(
     override val actionResult: ActionResult
 ): CapabilityStateObjectActionResult
 
-//@Serializable(with = PropertyParameterObjectSerializer::class)
-@Serializable
+@Serializable(with = PropertyParameterObjectSerializer::class)
 sealed class PropertyParameterObject {
-    abstract val instance: PropertyFunction
+    abstract val instance: Function
 }
 
 object PropertyParameterObjectSerializer : KSerializer<PropertyParameterObject> {
@@ -1709,63 +2007,50 @@ object PropertyParameterObjectSerializer : KSerializer<PropertyParameterObject> 
 @Serializable
 @SerialName("float")
 data class FloatPropertyParameterObject(
-    override val instance: FloatFunctions,
+    override val instance: Function,
     val unit: MeasurementUnit
 ) : PropertyParameterObject()
 
 @Serializable
-sealed class MeasurementUnit{
-
-    @Serializable
+enum class MeasurementUnit(val serialName: String) {
     @SerialName("unit.temperature.celsius")
-    data object TemperatureCelsius : MeasurementUnit()
+    TEMPERATURE_CELSIUS("unit.temperature.celsius"),
 
-    @Serializable
     @SerialName("unit.ampere")
-    data object Ampere : MeasurementUnit()
+    AMPERE("unit.ampere"),
 
-    @Serializable
     @SerialName("unit.cubic_meter")
-    data object CubicMeter : MeasurementUnit()
+    CUBIC_METER("unit.cubic_meter"),
 
-    @Serializable
     @SerialName("unit.gigacalorie")
-    data object Gigacalorie : MeasurementUnit()
+    GIGACALORIE("unit.gigacalorie"),
 
-    @Serializable
     @SerialName("unit.kilowatt_hour")
-    data object KilowattHour : MeasurementUnit()
+    KILOWATT_HOUR("unit.kilowatt_hour"),
 
-    @Serializable
     @SerialName("unit.illumination.lux")
-    data object Lux : MeasurementUnit()
+    LUX("unit.illumination.lux"),
 
-    @Serializable
     @SerialName("unit.density.mcg_m3")
-    data object McgM3 : MeasurementUnit()
+    MCG_M3("unit.density.mcg_m3"),
 
-    @Serializable
     @SerialName("unit.percent")
-    data object Percent : MeasurementUnit()
+    PERCENT("unit.percent"),
 
-    @Serializable
     @SerialName("unit.ppm")
-    data object Ppm : MeasurementUnit()
+    PPM("unit.ppm"),
 
-    @Serializable
     @SerialName("unit.volt")
-    data object Volt : MeasurementUnit()
+    VOLT("unit.volt"),
 
-    @Serializable
     @SerialName("unit.watt")
-    data object Watt : MeasurementUnit()
-
+    WATT("unit.watt");
 }
 
 @Serializable
 @SerialName("event")
 data class EventPropertyParameterObject(
-    override val instance: EventFunctions,
+    override val instance: Function,
     val events: List<EventObject>
 ) : PropertyParameterObject()
 
@@ -1774,71 +2059,125 @@ data class EventPropertyParameterObject(
 sealed interface PropertyValue
 
 //@Serializable(with = EventObjectValueSerializer::class)
+//@Serializable
+//sealed interface EventObjectValue : PropertyValue {
+//    @Serializable
+//    @SerialName("tilt")
+//    data object Tilt : EventObjectValue
+//
+//    @Serializable
+//    @SerialName("fall")
+//    data object Fall : EventObjectValue
+//
+//    @Serializable
+//    @SerialName("vibration")
+//    data object Vibration : EventObjectValue
+//
+//    @Serializable
+//    @SerialName("opened")
+//    data object Opened : EventObjectValue
+//
+//    @Serializable
+//    @SerialName("closed")
+//    data object Closed : EventObjectValue
+//
+//    @Serializable
+//    @SerialName("click")
+//    data object Click : EventObjectValue
+//
+//    @Serializable
+//    @SerialName("double_click")
+//    data object DoubleClick : EventObjectValue
+//
+//    @Serializable
+//    @SerialName("long_press")
+//    data object LongPress : EventObjectValue
+//
+//    @Serializable
+//    @SerialName("detected")
+//    data object Detected : EventObjectValue
+//
+//    @Serializable
+//    @SerialName("not_detected")
+//    data object NotDetected : EventObjectValue
+//
+//    @Serializable
+//    @SerialName("high")
+//    data object High : EventObjectValue
+//
+//    @Serializable
+//    @SerialName("low")
+//    data object Low : EventObjectValue
+//
+//    @Serializable
+//    @SerialName("normal")
+//    data object Normal : EventObjectValue
+//
+//    @Serializable
+//    @SerialName("empty")
+//    data object Empty : EventObjectValue
+//
+//    @Serializable
+//    @SerialName("dry")
+//    data object Dry : EventObjectValue
+//
+//    @Serializable
+//    @SerialName("leak")
+//    data object Leak : EventObjectValue
+//}
+
 @Serializable
-sealed interface EventObjectValue : PropertyValue {
-    @Serializable
+enum class EventObjectValue(@SerialName("value") val value: String) {
+    @SerialName("speech_finished")
+    SPEECH_FINISHED("speech_finished"),
+
     @SerialName("tilt")
-    data object Tilt : EventObjectValue
+    TILT("tilt"),
 
-    @Serializable
     @SerialName("fall")
-    data object Fall : EventObjectValue
+    FALL("fall"),
 
-    @Serializable
     @SerialName("vibration")
-    data object Vibration : EventObjectValue
+    VIBRATION("vibration"),
 
-    @Serializable
     @SerialName("opened")
-    data object Opened : EventObjectValue
+    OPENED("opened"),
 
-    @Serializable
     @SerialName("closed")
-    data object Closed : EventObjectValue
+    CLOSED("closed"),
 
-    @Serializable
     @SerialName("click")
-    data object Click : EventObjectValue
+    CLICK("click"),
 
-    @Serializable
     @SerialName("double_click")
-    data object DoubleClick : EventObjectValue
+    DOUBLE_CLICK("double_click"),
 
-    @Serializable
     @SerialName("long_press")
-    data object LongPress : EventObjectValue
+    LONG_PRESS("long_press"),
 
-    @Serializable
     @SerialName("detected")
-    data object Detected : EventObjectValue
+    DETECTED("detected"),
 
-    @Serializable
     @SerialName("not_detected")
-    data object NotDetected : EventObjectValue
+    NOT_DETECTED("not_detected"),
 
-    @Serializable
     @SerialName("high")
-    data object High : EventObjectValue
+    HIGH("high"),
 
-    @Serializable
     @SerialName("low")
-    data object Low : EventObjectValue
+    LOW("low"),
 
-    @Serializable
     @SerialName("normal")
-    data object Normal : EventObjectValue
+    NORMAL("normal"),
 
-    @Serializable
     @SerialName("empty")
-    data object Empty : EventObjectValue
+    EMPTY("empty"),
 
-    @Serializable
     @SerialName("dry")
-    data object Dry : EventObjectValue
+    DRY("dry"),
 
-    @Serializable
     @SerialName("leak")
-    data object Leak : EventObjectValue
+    LEAK("leak");
 }
 
 //object EventObjectValueSerializer: KSerializer<EventObjectValue> {
@@ -1896,228 +2235,313 @@ data class EventObject(val value: EventObjectValue)
 @Serializable
 data class FloatObjectValue(val value: Float) : PropertyValue
 
-@Serializable
-@Polymorphic
-sealed interface VibrationEventObjectValue : EventObjectValue
+//@Serializable
+//@Polymorphic
+//sealed interface VibrationEventObjectValue : EventObjectValue
+//
+//@Serializable
+//@Polymorphic
+//sealed interface OpenInstanceObjectValue : EventObjectValue
+//
+//@Serializable
+//@Polymorphic
+//sealed interface ButtonEventObjectValue : EventObjectValue
+//
+//@Serializable
+//@Polymorphic
+//sealed interface MotionEventObjectValue : EventObjectValue
+//
+//@Serializable
+//@Polymorphic
+//sealed interface SmokeEventObjectValue : EventObjectValue
+//
+//@Serializable
+//@Polymorphic
+//sealed interface GasEventObjectValue : EventObjectValue
+//
+//@Serializable
+//@Polymorphic
+//sealed interface BatteryLevelEventObjectValue : EventObjectValue
+//
+//@Serializable
+//@Polymorphic
+//sealed interface FoodLevelEventObjectValue : EventObjectValue
+//
+//@Serializable
+//@Polymorphic
+//sealed interface WaterLevelEventObjectValue : EventObjectValue
+//
+//@Serializable
+//@Polymorphic
+//sealed interface WaterLeakEventObjectValue : EventObjectValue
+
+//@Serializable
+//@Polymorphic
+//sealed class PropertyFunction
+
+//@Serializable
+//sealed class Function {
+//    @Serializable
+//    @SerialName("amperage")
+//    data object Amperage : Function()
+//
+//    @Serializable
+//    @SerialName("battery_level")
+//    data object BatteryLevel : Function()
+//
+//    @Serializable
+//    @SerialName("co2_level")
+//    data object Co2Level : Function()
+//
+//    @Serializable
+//    @SerialName("electricity_meter")
+//    data object ElectricityMeter : Function()
+//
+//    @Serializable
+//    @SerialName("food_level")
+//    data object FoodLevel : Function()
+//
+//    @Serializable
+//    @SerialName("gas_meter")
+//    data object GasMeter : Function()
+//
+//    @Serializable
+//    @SerialName("heat_meter")
+//    data object HeatMeter : Function()
+//
+//    @Serializable
+//    @SerialName("humidity")
+//    data object Humidity : Function()
+//
+//    @Serializable
+//    @SerialName("illumination")
+//    data object Illumination : Function()
+//
+//    @Serializable
+//    @SerialName("meter")
+//    data object Meter : Function()
+//
+//    @Serializable
+//    @SerialName("pm10_density")
+//    data object Pm10Density : Function()
+//
+//    @Serializable
+//    @SerialName("pm1_density")
+//    data object Pm1Density : Function()
+//
+//    @Serializable
+//    @SerialName("pm2.5_density")
+//    data object Pm2_5Density : Function()
+//
+//    @Serializable
+//    @SerialName("power")
+//    data object Power : Function()
+//
+//    @Serializable
+//    @SerialName("pressure")
+//    data object Pressure : Function()
+//
+//    @Serializable
+//    @SerialName("temperature")
+//    data object Temperature : Function()
+//
+//    @Serializable
+//    @SerialName("tvoc")
+//    data object Tvoc : Function()
+//
+//    @Serializable
+//    @SerialName("voltage")
+//    data object Voltage : Function()
+//
+//    @Serializable
+//    @SerialName("water_level")
+//    data object WaterLevel : Function()
+//
+//    @Serializable
+//    @SerialName("water_meter")
+//    data object WaterMeter : Function()
+//
+//    @Serializable
+//    @SerialName("vibration")
+//    data object Vibration : Function()
+//
+//    @Serializable
+//    @SerialName("open")
+//    data object Open : Function()
+//
+//    @Serializable
+//    @SerialName("button")
+//    data object Button : Function()
+//
+//    @Serializable
+//    @SerialName("motion")
+//    data object Motion : Function()
+//
+//    @Serializable
+//    @SerialName("smoke")
+//    data object Smoke : Function()
+//
+//    @Serializable
+//    @SerialName("gas")
+//    data object Gas : Function()
+//
+//    @Serializable
+//    @SerialName("water_leak")
+//    data object WaterLeak : Function()
+//
+//    //TODO
+//    @Serializable
+//    @SerialName("value")
+//    data class Custom(val value: String) : Function()
+//}
 
 @Serializable
-@Polymorphic
-sealed interface OpenInstanceObjectValue : EventObjectValue
+enum class Function(@SerialName("value") val value: String) {
+    @SerialName("voice_activity")
+    VOICE_ACTIVITY("voice_activity"),
 
-@Serializable
-@Polymorphic
-sealed interface ButtonEventObjectValue : EventObjectValue
-
-@Serializable
-@Polymorphic
-sealed interface MotionEventObjectValue : EventObjectValue
-
-@Serializable
-@Polymorphic
-sealed interface SmokeEventObjectValue : EventObjectValue
-
-@Serializable
-@Polymorphic
-sealed interface GasEventObjectValue : EventObjectValue
-
-@Serializable
-@Polymorphic
-sealed interface BatteryLevelEventObjectValue : EventObjectValue
-
-@Serializable
-@Polymorphic
-sealed interface FoodLevelEventObjectValue : EventObjectValue
-
-@Serializable
-@Polymorphic
-sealed interface WaterLevelEventObjectValue : EventObjectValue
-
-@Serializable
-@Polymorphic
-sealed interface WaterLeakEventObjectValue : EventObjectValue
-
-@Serializable
-@Polymorphic
-sealed class PropertyFunction
-
-@Serializable
-sealed class FloatFunctions : PropertyFunction() {
-    @Serializable
     @SerialName("amperage")
-    data object Amperage : FloatFunctions()
+    AMPERAGE("amperage"),
 
-    @Serializable
     @SerialName("battery_level")
-    data object BatteryLevel : FloatFunctions()
+    BATTERY_LEVEL("battery_level"),
 
-    @Serializable
     @SerialName("co2_level")
-    data object Co2Level : FloatFunctions()
+    CO2_LEVEL("co2_level"),
 
-    @Serializable
     @SerialName("electricity_meter")
-    data object ElectricityMeter : FloatFunctions()
+    ELECTRICITY_METER("electricity_meter"),
 
-    @Serializable
     @SerialName("food_level")
-    data object FoodLevel : FloatFunctions()
+    FOOD_LEVEL("food_level"),
 
-    @Serializable
     @SerialName("gas_meter")
-    data object GasMeter : FloatFunctions()
+    GAS_METER("gas_meter"),
 
-    @Serializable
     @SerialName("heat_meter")
-    data object HeatMeter : FloatFunctions()
+    HEAT_METER("heat_meter"),
 
-    @Serializable
     @SerialName("humidity")
-    data object Humidity : FloatFunctions()
+    HUMIDITY("humidity"),
 
-    @Serializable
     @SerialName("illumination")
-    data object Illumination : FloatFunctions()
+    ILLUMINATION("illumination"),
 
-    @Serializable
     @SerialName("meter")
-    data object Meter : FloatFunctions()
+    METER("meter"),
 
-    @Serializable
     @SerialName("pm10_density")
-    data object Pm10Density : FloatFunctions()
+    PM10_DENSITY("pm10_density"),
 
-    @Serializable
     @SerialName("pm1_density")
-    data object Pm1Density : FloatFunctions()
+    PM1_DENSITY("pm1_density"),
 
-    @Serializable
     @SerialName("pm2.5_density")
-    data object Pm2_5Density : FloatFunctions()
+    PM2_5_DENSITY("pm2.5_density"),
 
-    @Serializable
     @SerialName("power")
-    data object Power : FloatFunctions()
+    POWER("power"),
 
-    @Serializable
     @SerialName("pressure")
-    data object Pressure : FloatFunctions()
+    PRESSURE("pressure"),
 
-    @Serializable
     @SerialName("temperature")
-    data object Temperature : FloatFunctions()
+    TEMPERATURE("temperature"),
 
-    @Serializable
     @SerialName("tvoc")
-    data object Tvoc : FloatFunctions()
+    TVOC("tvoc"),
 
-    @Serializable
     @SerialName("voltage")
-    data object Voltage : FloatFunctions()
+    VOLTAGE("voltage"),
 
-    @Serializable
     @SerialName("water_level")
-    data object WaterLevel : FloatFunctions()
+    WATER_LEVEL("water_level"),
 
-    @Serializable
     @SerialName("water_meter")
-    data object WaterMeter : FloatFunctions()
-}
+    WATER_METER("water_meter"),
 
-//@Serializable(with = EventFunctionsSerializer::class)
-@Serializable
-sealed class EventFunctions : PropertyFunction() {
-    @Serializable
     @SerialName("vibration")
-    data object Vibration : EventFunctions()
+    VIBRATION("vibration"),
 
-    @Serializable
     @SerialName("open")
-    data object Open : EventFunctions()
+    OPEN("open"),
 
-    @Serializable
     @SerialName("button")
-    data object Button : EventFunctions()
+    BUTTON("button"),
 
-    @Serializable
     @SerialName("motion")
-    data object Motion : EventFunctions()
+    MOTION("motion"),
 
-    @Serializable
     @SerialName("smoke")
-    data object Smoke : EventFunctions()
+    SMOKE("smoke"),
 
-    @Serializable
     @SerialName("gas")
-    data object Gas : EventFunctions()
+    GAS("gas"),
 
-    @Serializable
-    @SerialName("battery_level")
-    data object BatteryLevel : EventFunctions()
-
-    @Serializable
-    @SerialName("food_level")
-    data object FoodLevel : EventFunctions()
-
-    @Serializable
-    @SerialName("water_level")
-    data object WaterLevel : EventFunctions()
-
-    @Serializable
     @SerialName("water_leak")
-    data object WaterLeak : EventFunctions()
+    WATER_LEAK("water_leak"),
 
-    @Serializable
-    @SerialName("value")
-    data class Custom(val value: String) : EventFunctions()
+    @SerialName("custom")
+    CUSTOM("custom");
+
 }
 
-object EventFunctionsSerializer : KSerializer<EventFunctions> {
-    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("EventFunctions") {
-        element<String>("type")
-    }
+//object EventFunctionsSerializer : KSerializer<EventFunctions> {
+//    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("EventFunctions") {
+//        element<String>("type")
+//    }
+//
+//    override fun deserialize(decoder: Decoder): EventFunctions {
+//        val value = decoder.decodeString()
+//        return when (value) {
+//            "vibration" -> EventFunctions.Vibration
+//            "open" -> EventFunctions.Open
+//            "button" -> EventFunctions.Button
+//            "motion" -> EventFunctions.Motion
+//            "smoke" -> EventFunctions.Smoke
+//            "gas" -> EventFunctions.Gas
+//            "battery_level" -> EventFunctions.BatteryLevel
+//            "food_level" -> EventFunctions.FoodLevel
+//            "water_level" -> EventFunctions.WaterLevel
+//            "water_leak" -> EventFunctions.WaterLeak
+//            else -> EventFunctions.Custom(value)
+//        }
+//    }
+//
+//    override fun serialize(encoder: Encoder, value: EventFunctions) {
+//        when (value) {
+//            is EventFunctions.Vibration -> encoder.encodeString("vibration")
+//            is EventFunctions.Open -> encoder.encodeString("open")
+//            is EventFunctions.Button -> encoder.encodeString("button")
+//            is EventFunctions.Motion -> encoder.encodeString("motion")
+//            is EventFunctions.Smoke -> encoder.encodeString("smoke")
+//            is EventFunctions.Gas -> encoder.encodeString("gas")
+//            is EventFunctions.BatteryLevel -> encoder.encodeString("battery_level")
+//            is EventFunctions.FoodLevel -> encoder.encodeString("food_level")
+//            is EventFunctions.WaterLevel -> encoder.encodeString("water_level")
+//            is EventFunctions.WaterLeak -> encoder.encodeString("water_leak")
+//            is EventFunctions.Custom -> encoder.encodeString(value.value)
+//        }
+//    }
+//}
 
-    override fun deserialize(decoder: Decoder): EventFunctions {
-        val value = decoder.decodeString()
-        return when (value) {
-            "vibration" -> EventFunctions.Vibration
-            "open" -> EventFunctions.Open
-            "button" -> EventFunctions.Button
-            "motion" -> EventFunctions.Motion
-            "smoke" -> EventFunctions.Smoke
-            "gas" -> EventFunctions.Gas
-            "battery_level" -> EventFunctions.BatteryLevel
-            "food_level" -> EventFunctions.FoodLevel
-            "water_level" -> EventFunctions.WaterLevel
-            "water_leak" -> EventFunctions.WaterLeak
-            else -> EventFunctions.Custom(value)
-        }
-    }
-
-    override fun serialize(encoder: Encoder, value: EventFunctions) {
-        when (value) {
-            is EventFunctions.Vibration -> encoder.encodeString("vibration")
-            is EventFunctions.Open -> encoder.encodeString("open")
-            is EventFunctions.Button -> encoder.encodeString("button")
-            is EventFunctions.Motion -> encoder.encodeString("motion")
-            is EventFunctions.Smoke -> encoder.encodeString("smoke")
-            is EventFunctions.Gas -> encoder.encodeString("gas")
-            is EventFunctions.BatteryLevel -> encoder.encodeString("battery_level")
-            is EventFunctions.FoodLevel -> encoder.encodeString("food_level")
-            is EventFunctions.WaterLevel -> encoder.encodeString("water_level")
-            is EventFunctions.WaterLeak -> encoder.encodeString("water_leak")
-            is EventFunctions.Custom -> encoder.encodeString(value.value)
-        }
-    }
-}
+//@Serializable
+//sealed class PropertyType {
+//    @Serializable
+//    @SerialName("devices.properties.float")
+//    data object Float : PropertyType()
+//    @Serializable
+//    @SerialName("devices.properties.event")
+//    data object Event : PropertyType()
+//}
 
 @Serializable
-sealed class PropertyType {
-    @Serializable
+enum class PropertyType(@SerialName("value") val value: String) {
     @SerialName("devices.properties.float")
-    data object Float : PropertyType()
-    @Serializable
+    FLOAT("devices.properties.float"),
+
     @SerialName("devices.properties.event")
-    data object Event : PropertyType()
+    EVENT("devices.properties.event");
 }
 
 @Serializable
@@ -2128,6 +2552,6 @@ sealed interface PropertyStateObject{
 
 @Serializable
 sealed class PropertyState(
-    val propertyFunction: PropertyFunction,
+    val propertyFunction: Function,
     val propertyValue: PropertyValue
 )

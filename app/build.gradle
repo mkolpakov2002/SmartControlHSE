@@ -139,4 +139,7 @@ dependencies {
     implementation 'io.realm.kotlin:library-base:1.14.1'
     implementation 'io.realm.kotlin:library-sync:1.14.1'// If using Device Sync
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0' // If using coroutines with the SDK
+
+    implementation("dev.bright.codified:enums:1.8.22.2")
+    implementation("dev.bright.codified:enums-serializer:1.8.22.2")
 }

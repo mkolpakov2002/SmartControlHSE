@@ -3,7 +3,6 @@ package ru.hse.smart_control.model.entities.universal
 import android.util.Log
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.DEFAULT
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
@@ -17,19 +16,10 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.modules.SerializersModule
-import kotlinx.serialization.modules.polymorphic
 import ru.hse.smart_control.model.entities.universal.scheme.ApiResponse
-import ru.hse.smart_control.model.entities.universal.scheme.CapabilityParameterObject
-import ru.hse.smart_control.model.entities.universal.scheme.ColorSettingCapabilityParameterObject
-import ru.hse.smart_control.model.entities.universal.scheme.DeviceCapabilityObject
 import ru.hse.smart_control.model.entities.universal.scheme.DeviceStateResponse
-import ru.hse.smart_control.model.entities.universal.scheme.ErrorModel
-import ru.hse.smart_control.model.entities.universal.scheme.ModeCapabilityParameterObject
-import ru.hse.smart_control.model.entities.universal.scheme.OnOffCapabilityParameterObject
-import ru.hse.smart_control.model.entities.universal.scheme.RangeCapabilityParameterObject
+import ru.hse.smart_control.model.entities.universal.scheme.ErrorModelResponse
 import ru.hse.smart_control.model.entities.universal.scheme.UserInfoResponse
-import ru.hse.smart_control.model.entities.universal.scheme.VideoStreamCapabilityParameterObject
 
 object YandexSmartHomeAPI {
     private const val BASE_URL = "https://api.iot.yandex.net/v1.0"
@@ -65,7 +55,7 @@ object YandexSmartHomeAPI {
                     ApiResponse.SuccessUserInfo(successResponse)
                 }
                 else -> {
-                    val errorResponse = json.decodeFromString<ErrorModel>(responseBody)
+                    val errorResponse = json.decodeFromString<ErrorModelResponse>(responseBody)
                     ApiResponse.Error(errorResponse)
                 }
             }
@@ -92,7 +82,7 @@ object YandexSmartHomeAPI {
                     ApiResponse.SuccessDeviceState(successResponse)
                 }
                 else -> {
-                    val errorResponse = json.decodeFromString<ErrorModel>(responseBody)
+                    val errorResponse = json.decodeFromString<ErrorModelResponse>(responseBody)
                     ApiResponse.Error(errorResponse)
                 }
             }

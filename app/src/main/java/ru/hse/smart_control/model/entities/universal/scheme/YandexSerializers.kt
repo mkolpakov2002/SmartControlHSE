@@ -41,8 +41,8 @@ object CapabilityObjectSerializer : KSerializer<CapabilityObject> {
     override fun deserialize(decoder: Decoder): CapabilityObject {
         val input = decoder as? JsonDecoder ?: throw SerializationException("Expected JsonDecoder")
         val jsonObject = input.decodeJsonElement().jsonObject
-        val retrievable = jsonObject["retrievable"]?.jsonPrimitive?.boolean ?: throw SerializationException("Missing retrievable")
-        val type = jsonObject["type"]?.jsonPrimitive?.contentOrNull ?: throw SerializationException("Missing type")
+        val retrievable = jsonObject["retrievable"]?.jsonPrimitive?.booleanOrNull
+        val type = jsonObject["type"]?.jsonPrimitive?.contentOrNull
         val stateJson = jsonObject["state"]
         val state: CapabilityStateObjectData?
         when (stateJson) {
@@ -85,7 +85,7 @@ object CapabilityObjectSerializer : KSerializer<CapabilityObject> {
                 }
             }
         }
-        val lastUpdated = jsonObject["last_updated"]?.jsonPrimitive?.float ?: throw SerializationException("Missing lastUpdated")
+        val lastUpdated = jsonObject["last_updated"]?.jsonPrimitive?.float
 
         val paramsJson = jsonObject["parameters"]?.jsonObject ?: throw SerializationException("Missing parameters")
         val params = when (type) {

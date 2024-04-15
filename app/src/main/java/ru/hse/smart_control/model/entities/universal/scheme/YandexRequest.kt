@@ -4,5 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ManageDeviceCapabilitiesStateRequest(
-    val devices: DeviceActionsObject
+    val devices: List<DeviceActionsObject>
 )

@@ -1,6 +1,7 @@
 package ru.hse.smart_control.model.entities.universal.test
 
 import kotlinx.serialization.json.Json
+import ru.hse.smart_control.model.entities.universal.scheme.DeviceActionResponse
 import ru.hse.smart_control.model.entities.universal.scheme.DeviceStateResponse
 import ru.hse.smart_control.model.entities.universal.scheme.ManageDeviceCapabilitiesStateRequest
 
@@ -13,21 +14,21 @@ val postManageDeviceCapabilitiesJson = """
                     {
                         "type": "devices.capabilities.on_off",
                         "state": {
-                            "instance": "ON",
+                            "instance": "on",
                             "value": true
                         }
                     },
                     {
                         "type": "devices.capabilities.range",
                         "state": {
-                            "instance": "BRIGHTNESS",
+                            "instance": "brightness",
                             "value": 50.0
                         }
                     },
                     {
                         "type": "devices.capabilities.color_setting",
                         "state": {
-                            "instance": "TEMPERATURE_K",
+                            "instance": "temperature_k",
                             "value": 4000
                         }
                     }
@@ -46,7 +47,7 @@ val getManageDeviceCapabilitiesJson = """
       "capabilities": [{
          "type": "devices.capabilities.on_off",
          "state": {
-            "instance": "ON",
+            "instance": "on",
             "action_result": {
                "status": "DONE"
             }
@@ -55,7 +56,7 @@ val getManageDeviceCapabilitiesJson = """
       {
          "type": "devices.capabilities.range",
          "state": {
-            "instance": "BRIGHTNESS",
+            "instance": "brightness",
             "action_result": {
                "status": "DONE"
             }
@@ -64,7 +65,7 @@ val getManageDeviceCapabilitiesJson = """
       {
          "type": "devices.capabilities.color_setting",
          "state": {
-            "instance": "TEMPERATURE_K",
+            "instance": "temperature_k",
             "action_result": {
                "status": "DONE"
             }
@@ -81,6 +82,7 @@ fun main() {
     }
     val deviceStateResponse = json.decodeFromString<ManageDeviceCapabilitiesStateRequest>(postManageDeviceCapabilitiesJson)
 
-
+    val getManageDeviceCapabilitiesResponse = json.decodeFromString<DeviceActionResponse>(getManageDeviceCapabilitiesJson)
     println(deviceStateResponse)
+    println(getManageDeviceCapabilitiesResponse)
 }

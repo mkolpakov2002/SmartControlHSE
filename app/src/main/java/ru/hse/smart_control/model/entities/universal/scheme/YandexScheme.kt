@@ -175,7 +175,7 @@ data class HouseholdObject(
 
 @Serializable(with = GroupCapabilityObjectSerializer::class)
 data class GroupCapabilityObject(
-    @SerialName("type") val type: String,
+    @SerialName("type") val type: CapabilityType,
     @SerialName("retrievable") val retrievable: Boolean,
     @SerialName("parameters") val parameters: CapabilityParameterObject,
     @SerialName("state") val state: CapabilityStateObjectData?
@@ -205,8 +205,44 @@ enum class DeviceState {
     OFFLINE
 }
 
+@Serializable(with = CapabilityTypeSerializer::class)
+enum class CapabilityType {
+    @SerialName("devices.capabilities.color_setting")
+    COLOR_SETTING,
+    @SerialName("devices.capabilities.on_off")
+    ON_OFF,
+    @SerialName("devices.capabilities.range")
+    RANGE,
+    @SerialName("devices.capabilities.mode")
+    MODE,
+    @SerialName("devices.capabilities.toggle")
+    TOGGLE,
+    @SerialName("devices.capabilities.video_stream")
+    VIDEO_STREAM;
+
+    companion object {
+        fun fromString(value: String): CapabilityType = when (value) {
+            "devices.capabilities.color_setting" -> COLOR_SETTING
+            "devices.capabilities.on_off" -> ON_OFF
+            "devices.capabilities.range" -> RANGE
+            "devices.capabilities.mode" -> MODE
+            "devices.capabilities.toggle" -> TOGGLE
+            "devices.capabilities.video_stream" -> VIDEO_STREAM
+            else -> throw IllegalArgumentException("Unknown CapabilityType value: $value")
+        }
+        fun toString(value: CapabilityType) = when (value) {
+            COLOR_SETTING -> "devices.capabilities.color_setting"
+            ON_OFF -> "devices.capabilities.on_off"
+            RANGE -> "devices.capabilities.range"
+            MODE -> "devices.capabilities.mode"
+            TOGGLE -> "devices.capabilities.toggle"
+            VIDEO_STREAM -> "devices.capabilities.video_stream"
+        }
+    }
+}
+
 sealed interface Capability{
-    @SerialName("type")  val type: String
+    @SerialName("type")  val type: CapabilityType
     @SerialName("retrievable") val retrievable: Boolean?
     @SerialName("parameters") val parameters: CapabilityParameterObject?
     @SerialName("state") val state: CapabilityStateObjectData?
@@ -215,7 +251,7 @@ sealed interface Capability{
 
 @Serializable(with = DeviceCapabilityObjectSerializer::class)
 data class DeviceCapabilityObject(
-    override val type: String,
+    override val type: CapabilityType,
     val reportable: Boolean,
     override val retrievable: Boolean,
     override val parameters: CapabilityParameterObject,
@@ -225,12 +261,18 @@ data class DeviceCapabilityObject(
 
 @Serializable(with = CapabilityObjectSerializer::class)
 data class CapabilityObject(
-    override val type: String,
+    override val type: CapabilityType,
     override val retrievable: Boolean? = null,
     override val parameters: CapabilityParameterObject? = null,
     override val state: CapabilityStateObjectData?,
     @SerialName("last_updated") override val lastUpdated: Float? = null
 ) : Capability
+
+@Serializable(with = CapabilityActionResultObjectSerializer::class)
+data class CapabilityActionResultObject(
+    @SerialName("type") val type: CapabilityType,
+    @SerialName("state") val state: StateResultObject
+)
 
 @Serializable
 sealed interface Property{
@@ -495,6 +537,12 @@ enum class VideoStreamCapabilityParameterObjectStreamProtocol {
 sealed interface CapabilityState {
     val instance: CapabilityStateObjectInstance
 }
+
+@Serializable
+data class StateResultObject(
+    override val instance: CapabilityStateObjectInstance,
+    @SerialName("action_result") val actionResult: ActionResult
+) : CapabilityState
 
 @Serializable
 @Polymorphic
@@ -895,4 +943,10 @@ sealed class PropertyState(
 data class DeviceActionsObject(
     val id: String,
     val actions: List<CapabilityObject>
+)
+
+@Serializable
+data class DeviceActionsResultObject(
+    val id: String,
+    val capabilities: List<CapabilityActionResultObject>
 )

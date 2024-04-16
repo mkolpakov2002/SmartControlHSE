@@ -58,3 +58,10 @@ data class DeviceStateResponse(
     override val capabilities: List<CapabilityObject>,
     override val properties: List<PropertyObject>
 ) : BaseDeviceObject, Response
+
+@Serializable
+data class DeviceActionResponse(
+    @SerialName("status") override val status: String,
+    @SerialName("request_id") override val requestId: String,
+    @SerialName("devices") val devices: List<DeviceActionsResultObject>
+) : Response

@@ -12,13 +12,13 @@ data class UniversalScheme(val objects: List<UniversalSchemeObject>)
 
 @Serializable
 sealed interface UniversalSchemeObject {
-    val type: TypeConnection
+    val type: TypeDeviceConnection
     val parameter: TypeConnectionParameterObject
 }
 
 @Serializable
 data class SmartHomeTypeConnectionObject(
-    override val type: TypeConnection = TypeConnection.SMART_HOME,
+    override val type: TypeDeviceConnection = TypeDeviceConnection.SMART_HOME,
     override val parameter: SmartHomeTypeConnectionParameterObject,
     var smartHomeApiUrl: String
 ) : UniversalSchemeObject
@@ -30,7 +30,7 @@ data class SmartHomeTypeConnectionParameterObject(
 
 @Serializable
 data class RosTypeConnectionObject(
-    override val type: TypeConnection = TypeConnection.ROS,
+    override val type: TypeDeviceConnection = TypeDeviceConnection.ROS,
     override val parameter: RosTypeConnectionParameterObject
 ) : UniversalSchemeObject
 
@@ -50,7 +50,7 @@ data class RosTypeConnectionParameterObject(
 ): TypeConnectionParameterObject
 
 @Serializable
-enum class TypeConnection(val typeProtocol: TypeProtocol){
+enum class TypeDeviceConnection(val typeProtocol: TypeProtocol){
     ROS(TypeProtocol.INTERNET),
     SMART_HOME(TypeProtocol.INTERNET),
     ARDUINO_BT(TypeProtocol.BLUETOOTH)

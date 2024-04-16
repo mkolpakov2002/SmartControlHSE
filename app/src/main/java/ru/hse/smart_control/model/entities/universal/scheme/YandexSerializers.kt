@@ -42,63 +42,65 @@ object CapabilityObjectSerializer : KSerializer<CapabilityObject> {
         val input = decoder as? JsonDecoder ?: throw SerializationException("Expected JsonDecoder")
         val jsonObject = input.decodeJsonElement().jsonObject
         val retrievable = jsonObject["retrievable"]?.jsonPrimitive?.booleanOrNull
-        val type = jsonObject["type"]?.jsonPrimitive?.contentOrNull
+        val type = jsonObject["type"]?.jsonPrimitive?.content?: throw SerializationException("type not found")
+        val typeObject = CapabilityType.fromString(type)
         val stateJson = jsonObject["state"]
         val state: CapabilityStateObjectData?
         when (stateJson) {
             null -> state = null
             is JsonNull -> state = null
             else -> {
-                state = when (type) {
-                    "devices.capabilities.on_off" -> {
+                state = when (typeObject) {
+                    CapabilityType.ON_OFF -> {
                         val instance = input.json.decodeFromJsonElement<OnOffCapabilityStateObjectInstance>(stateJson.jsonObject["instance"]!!)
                         val value = input.json.decodeFromJsonElement<OnOffCapabilityStateObjectValue>(stateJson.jsonObject["value"]!!)
                         OnOffCapabilityStateObjectData(instance, value)
                     }
-                    "devices.capabilities.color_setting" -> {
+                    CapabilityType.COLOR_SETTING -> {
                         val instance = input.json.decodeFromJsonElement<ColorSettingCapabilityStateObjectInstance>(stateJson.jsonObject["instance"]!!)
                         val value = input.json.decodeFromJsonElement<ColorSettingCapabilityStateObjectValue>(stateJson.jsonObject["value"]!!)
                         ColorSettingCapabilityStateObjectData(instance, value)
                     }
-                    "devices.capabilities.video_stream" -> {
+                    CapabilityType.VIDEO_STREAM -> {
                         val instance = input.json.decodeFromJsonElement<VideoStreamCapabilityStateObjectInstance>(stateJson.jsonObject["instance"]!!)
                         val value = input.json.decodeFromJsonElement<VideoStreamCapabilityStateObjectDataValue>(stateJson.jsonObject["value"]!!)
                         VideoStreamCapabilityStateObjectData(instance, value)
                     }
-                    "devices.capabilities.mode" -> {
+                    CapabilityType.MODE -> {
                         val instance = input.json.decodeFromJsonElement<ModeCapabilityInstance>(stateJson.jsonObject["instance"]!!)
                         val value = input.json.decodeFromJsonElement<ModeCapabilityMode>(stateJson.jsonObject["value"]!!)
                         ModeCapabilityStateObjectData(instance, value)
                     }
-                    "devices.capabilities.range" -> {
+                    CapabilityType.RANGE -> {
                         val instance = input.json.decodeFromJsonElement<RangeCapabilityParameterObjectFunction>(stateJson.jsonObject["instance"]!!)
                         val valueObject = input.json.decodeFromJsonElement<Float>(stateJson.jsonObject["value"]!!)
                         val value = RangeCapabilityStateObjectDataValue(valueObject)
                         RangeCapabilityStateObjectData(instance, value)
                     }
-                    "devices.capabilities.toggle" -> {
+                    CapabilityType.TOGGLE -> {
                         val instance = input.json.decodeFromJsonElement<ToggleCapabilityParameterObjectFunction>(stateJson.jsonObject["instance"]!!)
                         val value = input.json.decodeFromJsonElement<ToggleCapabilityStateObjectDataValue>(stateJson.jsonObject["value"]!!)
                         ToggleCapabilityStateObjectData(instance, value)
                     }
-                    else -> throw SerializationException("Unknown CapabilityStateObjectData type: $type")
                 }
             }
         }
         val lastUpdated = jsonObject["last_updated"]?.jsonPrimitive?.float
 
-        val paramsJson = jsonObject["parameters"]?.jsonObject ?: throw SerializationException("Missing parameters")
-        val params = when (type) {
-            "devices.capabilities.color_setting" -> input.json.decodeFromJsonElement<ColorSettingCapabilityParameterObject>(paramsJson)
-            "devices.capabilities.on_off" -> input.json.decodeFromJsonElement<OnOffCapabilityParameterObject>(paramsJson)
-            "devices.capabilities.range" -> input.json.decodeFromJsonElement<RangeCapabilityParameterObject>(paramsJson)
-            "devices.capabilities.mode" -> input.json.decodeFromJsonElement<ModeCapabilityParameterObject>(paramsJson)
-            "devices.capabilities.toggle" -> input.json.decodeFromJsonElement<ToggleCapabilityParameterObject>(paramsJson)
-            "devices.capabilities.video_stream" -> input.json.decodeFromJsonElement<VideoStreamCapabilityParameterObject>(paramsJson)
-            else -> throw SerializationException("Unknown Capability type")
+        val params: CapabilityParameterObject? = when(val paramsJson = jsonObject["parameters"]) {
+            null -> null
+            is JsonNull -> null
+            else -> when (typeObject) {
+                CapabilityType.COLOR_SETTING -> input.json.decodeFromJsonElement<ColorSettingCapabilityParameterObject>(paramsJson)
+                CapabilityType.ON_OFF -> input.json.decodeFromJsonElement<OnOffCapabilityParameterObject>(paramsJson)
+                CapabilityType.RANGE -> input.json.decodeFromJsonElement<RangeCapabilityParameterObject>(paramsJson)
+                CapabilityType.MODE -> input.json.decodeFromJsonElement<ModeCapabilityParameterObject>(paramsJson)
+                CapabilityType.TOGGLE -> input.json.decodeFromJsonElement<ToggleCapabilityParameterObject>(paramsJson)
+                CapabilityType.VIDEO_STREAM -> input.json.decodeFromJsonElement<VideoStreamCapabilityParameterObject>(paramsJson)
+            }
         }
 
-        return CapabilityObject(retrievable = retrievable, type = type, parameters = params, state = state, lastUpdated = lastUpdated)
+        return CapabilityObject(retrievable = retrievable, type = typeObject, parameters = params, state = state, lastUpdated = lastUpdated)
     }
 }
 
@@ -113,7 +115,7 @@ object GroupCapabilityObjectSerializer : KSerializer<GroupCapabilityObject> {
     @OptIn(ExperimentalSerializationApi::class)
     override fun serialize(encoder: Encoder, value: GroupCapabilityObject) {
         val compositeOutput = encoder.beginStructure(descriptor)
-        compositeOutput.encodeStringElement(descriptor, 0, value.type)
+        compositeOutput.encodeStringElement(descriptor, 0, value.type.toString())
         compositeOutput.encodeBooleanElement(descriptor, 1, value.retrievable)
         compositeOutput.encodeSerializableElement(descriptor, 2, CapabilityParameterObject.serializer(), value.parameters)
         compositeOutput.encodeNullableSerializableElement(descriptor, 3, CapabilityStateObjectData.serializer(), value.state)
@@ -125,31 +127,30 @@ object GroupCapabilityObjectSerializer : KSerializer<GroupCapabilityObject> {
         val jsonObject = input.decodeJsonElement().jsonObject
 
         val type = jsonObject["type"]?.jsonPrimitive?.content ?: throw SerializationException("Missing type")
+        val typeObject = CapabilityType.fromString(type)
         val retrievable = jsonObject["retrievable"]?.jsonPrimitive?.boolean ?: throw SerializationException("Missing retrievable")
 
         val paramsJson = jsonObject["parameters"]?.jsonObject ?: throw SerializationException("Missing parameters")
-        val params = when (type) {
-            "devices.capabilities.color_setting" -> input.json.decodeFromJsonElement<ColorSettingCapabilityParameterObject>(paramsJson)
-            "devices.capabilities.on_off" -> input.json.decodeFromJsonElement<OnOffCapabilityParameterObject>(paramsJson)
-            "devices.capabilities.range" -> input.json.decodeFromJsonElement<RangeCapabilityParameterObject>(paramsJson)
-            "devices.capabilities.mode" -> input.json.decodeFromJsonElement<ModeCapabilityParameterObject>(paramsJson)
-            "devices.capabilities.toggle" -> input.json.decodeFromJsonElement<ToggleCapabilityParameterObject>(paramsJson)
-            "devices.capabilities.video_stream" -> input.json.decodeFromJsonElement<VideoStreamCapabilityParameterObject>(paramsJson)
-            else -> throw SerializationException("Unknown Capability type")
+        val params = when (typeObject) {
+            CapabilityType.COLOR_SETTING -> input.json.decodeFromJsonElement<ColorSettingCapabilityParameterObject>(paramsJson)
+            CapabilityType.ON_OFF -> input.json.decodeFromJsonElement<OnOffCapabilityParameterObject>(paramsJson)
+            CapabilityType.RANGE -> input.json.decodeFromJsonElement<RangeCapabilityParameterObject>(paramsJson)
+            CapabilityType.MODE -> input.json.decodeFromJsonElement<ModeCapabilityParameterObject>(paramsJson)
+            CapabilityType.TOGGLE -> input.json.decodeFromJsonElement<ToggleCapabilityParameterObject>(paramsJson)
+            CapabilityType.VIDEO_STREAM -> input.json.decodeFromJsonElement<VideoStreamCapabilityParameterObject>(paramsJson)
         }
 
         val stateJson = jsonObject["state"]?.jsonObject ?: throw SerializationException("Missing state")
-        val state = when (type) {
-            "devices.capabilities.color_setting" -> input.json.decodeFromJsonElement<ColorSettingCapabilityStateObjectData>(stateJson)
-            "devices.capabilities.on_off" -> input.json.decodeFromJsonElement<OnOffCapabilityStateObjectData>(stateJson)
-            "devices.capabilities.range" -> input.json.decodeFromJsonElement<RangeCapabilityStateObjectData>(stateJson)
-            "devices.capabilities.mode" -> input.json.decodeFromJsonElement<ModeCapabilityStateObjectData>(stateJson)
-            "devices.capabilities.toggle" -> input.json.decodeFromJsonElement<ToggleCapabilityStateObjectData>(stateJson)
-            "devices.capabilities.video_stream" -> input.json.decodeFromJsonElement<VideoStreamCapabilityStateObjectData>(stateJson)
-            else -> throw SerializationException("Unknown Capability type")
+        val state = when (typeObject) {
+            CapabilityType.COLOR_SETTING -> input.json.decodeFromJsonElement<ColorSettingCapabilityStateObjectData>(stateJson)
+            CapabilityType.ON_OFF -> input.json.decodeFromJsonElement<OnOffCapabilityStateObjectData>(stateJson)
+            CapabilityType.RANGE -> input.json.decodeFromJsonElement<RangeCapabilityStateObjectData>(stateJson)
+            CapabilityType.MODE -> input.json.decodeFromJsonElement<ModeCapabilityStateObjectData>(stateJson)
+            CapabilityType.TOGGLE -> input.json.decodeFromJsonElement<ToggleCapabilityStateObjectData>(stateJson)
+            CapabilityType.VIDEO_STREAM -> input.json.decodeFromJsonElement<VideoStreamCapabilityStateObjectData>(stateJson)
         }
 
-        return GroupCapabilityObject(type = type, retrievable = retrievable, parameters = params, state = state)
+        return GroupCapabilityObject(type = typeObject, retrievable = retrievable, parameters = params, state = state)
     }
 }
 //
@@ -167,61 +168,60 @@ object DeviceCapabilityObjectSerializer : KSerializer<DeviceCapabilityObject> {
         val reportable = jsonObject["reportable"]?.jsonPrimitive?.boolean ?: throw SerializationException("Missing reportable")
         val retrievable = jsonObject["retrievable"]?.jsonPrimitive?.boolean ?: throw SerializationException("Missing retrievable")
         val type = jsonObject["type"]?.jsonPrimitive?.contentOrNull ?: throw SerializationException("Missing type")
+        val typeObject = CapabilityType.fromString(type)
         val stateJson = jsonObject["state"]
         val state: CapabilityStateObjectData?
         when (stateJson) {
             null -> state = null
             is JsonNull -> state = null
             else -> {
-                state = when (type) {
-                    "devices.capabilities.on_off" -> {
+                state = when (typeObject) {
+                    CapabilityType.ON_OFF -> {
                         val instance = input.json.decodeFromJsonElement<OnOffCapabilityStateObjectInstance>(stateJson.jsonObject["instance"]!!)
                         val value = input.json.decodeFromJsonElement<OnOffCapabilityStateObjectValue>(stateJson.jsonObject["value"]!!)
                         OnOffCapabilityStateObjectData(instance, value)
                     }
-                    "devices.capabilities.color_setting" -> {
+                    CapabilityType.COLOR_SETTING -> {
                         val instance = input.json.decodeFromJsonElement<ColorSettingCapabilityStateObjectInstance>(stateJson.jsonObject["instance"]!!)
                         val value = input.json.decodeFromJsonElement<ColorSettingCapabilityStateObjectValue>(stateJson.jsonObject["value"]!!)
                         ColorSettingCapabilityStateObjectData(instance, value)
                     }
-                    "devices.capabilities.video_stream" -> {
+                    CapabilityType.VIDEO_STREAM -> {
                         val instance = input.json.decodeFromJsonElement<VideoStreamCapabilityStateObjectInstance>(stateJson.jsonObject["instance"]!!)
                         val value = input.json.decodeFromJsonElement<VideoStreamCapabilityStateObjectDataValue>(stateJson.jsonObject["value"]!!)
                         VideoStreamCapabilityStateObjectData(instance, value)
                     }
-                    "devices.capabilities.mode" -> {
+                    CapabilityType.MODE -> {
                         val instance = input.json.decodeFromJsonElement<ModeCapabilityInstance>(stateJson.jsonObject["instance"]!!)
                         val value = input.json.decodeFromJsonElement<ModeCapabilityMode>(stateJson.jsonObject["value"]!!)
                         ModeCapabilityStateObjectData(instance, value)
                     }
-                    "devices.capabilities.range" -> {
+                    CapabilityType.RANGE -> {
                         val instance = input.json.decodeFromJsonElement<RangeCapabilityParameterObjectFunction>(stateJson.jsonObject["instance"]!!)
                         val value = input.json.decodeFromJsonElement<RangeCapabilityStateObjectDataValue>(stateJson.jsonObject["value"]!!)
                         RangeCapabilityStateObjectData(instance, value)
                     }
-                    "devices.capabilities.toggle" -> {
+                    CapabilityType.TOGGLE -> {
                         val instance = input.json.decodeFromJsonElement<ToggleCapabilityParameterObjectFunction>(stateJson.jsonObject["instance"]!!)
                         val value = input.json.decodeFromJsonElement<ToggleCapabilityStateObjectDataValue>(stateJson.jsonObject["value"]!!)
                         ToggleCapabilityStateObjectData(instance, value)
                     }
-                    else -> throw SerializationException("Unknown CapabilityStateObjectData type: $type")
                 }
             }
         }
         val lastUpdated = jsonObject["last_updated"]?.jsonPrimitive?.float ?: throw SerializationException("Missing lastUpdated")
 
         val paramsJson = jsonObject["parameters"]?.jsonObject ?: throw SerializationException("Missing parameters")
-        val params = when (type) {
-            "devices.capabilities.color_setting" -> input.json.decodeFromJsonElement<ColorSettingCapabilityParameterObject>(paramsJson)
-            "devices.capabilities.on_off" -> input.json.decodeFromJsonElement<OnOffCapabilityParameterObject>(paramsJson)
-            "devices.capabilities.range" -> input.json.decodeFromJsonElement<RangeCapabilityParameterObject>(paramsJson)
-            "devices.capabilities.mode" -> input.json.decodeFromJsonElement<ModeCapabilityParameterObject>(paramsJson)
-            "devices.capabilities.toggle" -> input.json.decodeFromJsonElement<ToggleCapabilityParameterObject>(paramsJson)
-            "devices.capabilities.video_stream" -> input.json.decodeFromJsonElement<VideoStreamCapabilityParameterObject>(paramsJson)
-            else -> throw SerializationException("Unknown Capability type")
+        val params = when (typeObject) {
+            CapabilityType.COLOR_SETTING -> input.json.decodeFromJsonElement<ColorSettingCapabilityParameterObject>(paramsJson)
+            CapabilityType.ON_OFF -> input.json.decodeFromJsonElement<OnOffCapabilityParameterObject>(paramsJson)
+            CapabilityType.RANGE -> input.json.decodeFromJsonElement<RangeCapabilityParameterObject>(paramsJson)
+            CapabilityType.MODE -> input.json.decodeFromJsonElement<ModeCapabilityParameterObject>(paramsJson)
+            CapabilityType.TOGGLE -> input.json.decodeFromJsonElement<ToggleCapabilityParameterObject>(paramsJson)
+            CapabilityType.VIDEO_STREAM -> input.json.decodeFromJsonElement<VideoStreamCapabilityParameterObject>(paramsJson)
         }
 
-        return DeviceCapabilityObject(reportable = reportable, retrievable = retrievable, type = type, parameters = params, state = state, lastUpdated = lastUpdated)
+        return DeviceCapabilityObject(reportable = reportable, retrievable = retrievable, type = typeObject, parameters = params, state = state, lastUpdated = lastUpdated)
     }
 }
 
@@ -326,3 +326,50 @@ object PropertyParameterObjectSerializer : KSerializer<PropertyParameterObject> 
     }
 }
 
+object CapabilityTypeSerializer : KSerializer<CapabilityType> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("CapabilityType", PrimitiveKind.STRING)
+
+    override fun deserialize(decoder: Decoder): CapabilityType {
+        val value = decoder.decodeString()
+        return CapabilityType.fromString(value)
+    }
+
+    override fun serialize(encoder: Encoder, value: CapabilityType) {
+        encoder.encodeString(value.name)
+    }
+}
+
+object CapabilityActionResultObjectSerializer : KSerializer<CapabilityActionResultObject> {
+    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("CapabilityActionResultObject") {
+        element("type", String.serializer().descriptor)
+        element("state", StateResultObject.serializer().descriptor)
+    }
+
+    override fun serialize(encoder: Encoder, value: CapabilityActionResultObject) {
+        // Serialization logic, if needed
+    }
+
+    override fun deserialize(decoder: Decoder): CapabilityActionResultObject {
+        val input = decoder as? JsonDecoder ?: throw SerializationException("Expected JsonDecoder")
+        val jsonObject = input.decodeJsonElement().jsonObject
+
+        val type = jsonObject["type"]?.jsonPrimitive?.contentOrNull ?: throw SerializationException("Missing type")
+        val typeObject: CapabilityType = CapabilityType.fromString(type)
+
+        val stateJson = jsonObject["state"] ?: throw SerializationException("Missing state")
+        val instanceJson = stateJson.jsonObject["instance"] ?: throw SerializationException("Missing instance")
+
+        val instanceObject = when (typeObject) {
+            CapabilityType.COLOR_SETTING -> input.json.decodeFromJsonElement<ColorSettingCapabilityStateObjectInstance>(instanceJson)
+            CapabilityType.ON_OFF -> input.json.decodeFromJsonElement<OnOffCapabilityStateObjectInstance>(instanceJson)
+            CapabilityType.RANGE -> input.json.decodeFromJsonElement<RangeCapabilityParameterObjectFunction>(instanceJson)
+            CapabilityType.MODE -> input.json.decodeFromJsonElement<ModeCapabilityInstance>(instanceJson)
+            CapabilityType.TOGGLE -> input.json.decodeFromJsonElement<ToggleCapabilityParameterObjectFunction>(instanceJson)
+            CapabilityType.VIDEO_STREAM -> input.json.decodeFromJsonElement<VideoStreamCapabilityStateObjectInstance>(instanceJson)
+        }
+        val actionResult = input.json.decodeFromJsonElement<ActionResult>(stateJson.jsonObject["action_result"]!!)
+        val state = StateResultObject(instanceObject, actionResult)
+
+        return CapabilityActionResultObject(typeObject, state)
+    }
+}

@@ -1,4 +1,4 @@
-package ru.hse.smart_control.model.entities.universal.scheme
+package ru.hse.miem.yandexsmarthomeapi.entity
 
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -225,7 +225,8 @@ object DeviceCapabilityObjectSerializer : KSerializer<DeviceCapabilityObject> {
     }
 }
 
-object CapabilityParameterObjectSerializer : JsonContentPolymorphicSerializer<CapabilityParameterObject>(CapabilityParameterObject::class) {
+object CapabilityParameterObjectSerializer : JsonContentPolymorphicSerializer<CapabilityParameterObject>(
+    CapabilityParameterObject::class) {
     override fun selectDeserializer(element: JsonElement): DeserializationStrategy<CapabilityParameterObject> = when {
         "color_model" in element.jsonObject || "temperature_k" in element.jsonObject || "color_scene" in element.jsonObject -> ColorSettingCapabilityParameterObject.serializer()
         "split" in element.jsonObject -> OnOffCapabilityParameterObject.serializer()
@@ -320,8 +321,10 @@ object PropertyParameterObjectSerializer : KSerializer<PropertyParameterObject> 
     override fun serialize(encoder: Encoder, value: PropertyParameterObject) {
         val jsonEncoder = encoder as? JsonEncoder ?: throw SerializationException("Expected JsonEncoder")
         when (value) {
-            is FloatPropertyParameterObject -> jsonEncoder.encodeSerializableValue(FloatPropertyParameterObject.serializer(), value)
-            is EventPropertyParameterObject -> jsonEncoder.encodeSerializableValue(EventPropertyParameterObject.serializer(), value)
+            is FloatPropertyParameterObject -> jsonEncoder.encodeSerializableValue(
+                FloatPropertyParameterObject.serializer(), value)
+            is EventPropertyParameterObject -> jsonEncoder.encodeSerializableValue(
+                EventPropertyParameterObject.serializer(), value)
         }
     }
 }

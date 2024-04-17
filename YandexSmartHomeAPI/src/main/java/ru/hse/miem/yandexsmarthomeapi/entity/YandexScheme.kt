@@ -1,6 +1,5 @@
-package ru.hse.smart_control.model.entities.universal.scheme
+package ru.hse.miem.yandexsmarthomeapi.entity
 
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Polymorphic
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -202,7 +201,11 @@ enum class DeviceState {
     @SerialName("online")
     ONLINE,
     @SerialName("offline")
-    OFFLINE
+    OFFLINE,
+    @SerialName("not_found")
+    NOT_FOUND,
+    @SerialName("split")
+    SPLIT
 }
 
 @Serializable(with = CapabilityTypeSerializer::class)
@@ -482,7 +485,7 @@ enum class ModeCapabilityMode : CapabilityStateObjectValue {
 }
 
 @Serializable
-enum class ModeCapabilityInstance : CapabilityStateObjectInstance{
+enum class ModeCapabilityInstance : CapabilityStateObjectInstance {
     @SerialName("cleanup_mode") CLEANUP_MODE,
     @SerialName("coffee_mode") COFFEE_MODE,
     @SerialName("dishwashing") DISHWASHING,
@@ -617,7 +620,8 @@ enum class ColorSettingCapabilityStateObjectInstance : CapabilityStateObjectInst
 sealed interface ColorSettingCapabilityStateObjectValue : CapabilityStateObjectValue
 
 @Serializable
-data class ColorSettingCapabilityStateObjectValueInteger(val value: Int) : ColorSettingCapabilityStateObjectValue
+data class ColorSettingCapabilityStateObjectValueInteger(val value: Int) :
+    ColorSettingCapabilityStateObjectValue
 
 @Serializable
 data class ColorSettingCapabilityStateObjectValueObjectScene(val value: SceneObject)
@@ -673,11 +677,11 @@ data class ModeCapabilityStateObjectActionResult(
     override val actionResult: ActionResult
 ): CapabilityStateObjectActionResult
 
-//relative не реализуем (для RangeCapabilityStateObjectData в request)
 @Serializable
 data class RangeCapabilityStateObjectData(
     override val instance: RangeCapabilityParameterObjectFunction,
-    override val value: RangeCapabilityStateObjectDataValue
+    override val value: RangeCapabilityStateObjectDataValue,
+    @SerialName("relative") val relative: Boolean? = null
 ): CapabilityStateObjectData()
 
 @Serializable
@@ -949,4 +953,11 @@ data class DeviceActionsObject(
 data class DeviceActionsResultObject(
     val id: String,
     val capabilities: List<CapabilityActionResultObject>
+)
+
+@Serializable
+data class GroupDeviceInfoObject(
+    val id: String,
+    val name: String,
+    val type: DeviceType
 )

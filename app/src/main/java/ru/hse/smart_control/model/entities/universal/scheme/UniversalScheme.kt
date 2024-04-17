@@ -6,6 +6,7 @@ import com.schneewittchen.rosandroid.model.entities.SSHEntity
 import com.schneewittchen.rosandroid.model.entities.widgets.BaseEntity
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import ru.hse.miem.yandexsmarthomeapi.entity.UserInfoResponse
 
 @Serializable
 data class UniversalScheme(val objects: List<UniversalSchemeObject>)

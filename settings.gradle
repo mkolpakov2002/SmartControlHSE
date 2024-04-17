@@ -29,3 +29,4 @@ rootProject.name = "SmartControlHSE"
 include ':app'
 include ':jcraft'
 include ':RosAndroid'
+include ':YandexSmartHomeAPI'

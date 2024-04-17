@@ -8,7 +8,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
-import ru.hse.smart_control.model.entities.universal.YandexSmartHomeAPITest
 import ru.hse.smart_control.databinding.FragmentConnectionTypeBinding
 
 class ConnectionTypeFragment : Fragment() {
@@ -32,8 +31,7 @@ class ConnectionTypeFragment : Fragment() {
 
         binding.fabConnect.setOnClickListener {
             viewLifecycleOwner.lifecycleScope.launch {
-                val apiTest = YandexSmartHomeAPITest()
-                apiTest.testAll()
+                //TODO
             }
         }
     }

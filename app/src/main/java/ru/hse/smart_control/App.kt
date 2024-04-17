@@ -7,8 +7,6 @@ import androidx.preference.PreferenceManager
 
 class App : Application() {
 
-    val token = "y0_AgAEA7qkJBRwAAtNHQAAAAD7NOpOAABZXzInfHtFAoIVc4SUjPlw0bda8g"
-
     override fun onCreate() {
         super.onCreate()
         instance = this

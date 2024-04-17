@@ -1,6 +1,5 @@
 buildscript {
     ext {
-        compose_version = '1.4.0-alpha02'
         kotlinVersion = '1.9.23'
         activityVersion = '1.8.2'
         appCompatVersion = '1.6.1'
@@ -13,7 +12,7 @@ buildscript {
         navVersion = '2.7.7'
         exoPlayerVersion = '2.19.1'
         ktorVersion = '2.3.9'
-        mavlinkVersion = '0.20.0'
+        mavlinkVersion = '1.2.3'
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"

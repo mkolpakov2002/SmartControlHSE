@@ -1,9 +1,193 @@
-package ru.hse.smart_control.model.entities.universal.test
+package ru.hse.miem.yandexsmarthomeapi
 
-import kotlinx.serialization.json.Json
-import ru.hse.smart_control.model.entities.universal.scheme.UserInfoResponse
+object TestConstants {
+    val responseDeviceStateJson = """
+    {
+      "status": "ok",
+      "request_id": "24581927-7c7c-4660-97be-801237b42403",
+      "id": "51e797a4-93cf-4bc4-832e-698b6703467c",
+      "name": "Лампа",
+      "aliases": [],
+      "type": "devices.types.light",
+      "external_id": "bf9159632e4fb1987bi7am",
+      "skill_id": "35e2897a-c583-495a-9e33-f5d6f0f4cb49",
+      "state": "not_found",
+      "groups": [],
+      "room": "ca82a680-0317-4bec-b92e-5c3dd27c61eb",
+      "capabilities": [
+        {
+          "retrievable": true,
+          "type": "devices.capabilities.color_setting",
+          "parameters": {
+            "color_model": "hsv",
+            "temperature_k": {
+              "min": 2700,
+              "max": 6500
+            }
+          },
+          "state": null,
+          "last_updated": 0
+        },
+        {
+          "retrievable": true,
+          "type": "devices.capabilities.on_off",
+          "parameters": {
+            "split": false
+          },
+          "state": null,
+          "last_updated": 0
+        },
+        {
+          "retrievable": true,
+          "type": "devices.capabilities.range",
+          "parameters": {
+            "instance": "brightness",
+            "unit": "unit.percent",
+            "random_access": true,
+            "looped": false,
+            "range": {
+              "min": 1,
+              "max": 100,
+              "precision": 11
+            }
+          },
+          "state": null,
+          "last_updated": 0
+        }
+      ],
+      "properties": []
+    }
+""".trimIndent()
 
-val universalSchemeJson = """
+    val requestManageGroupCapabilitiesJson = """
+       {
+        "actions": [
+            {
+                "type": "devices.capabilities.on_off",
+                "state": {
+                    "instance": "on",
+                    "value": true
+                    }
+            }
+        ]
+    }
+    """.trimIndent()
+
+    val responseManageGroupCapabilitiesJson = """
+    {
+        "status": "ok",
+        "request_id": "35e9d24a-40f3-409d-b654-2cf4d87fe593",
+        "devices": [{
+            "id": "lamp-id-1",
+                "capabilities": [{
+                "type": "devices.capabilities.on_off",
+                "state": {
+                  "instance": "on",
+                  "action_result": {
+                    "status": "DONE"
+                  }
+                }
+            }]
+        },
+        {
+          "id": "lamp-id-2",
+          "capabilities": [{
+            "type": "devices.capabilities.on_off",
+            "state": {
+              "instance": "on",
+              "action_result": {
+                "status": "DONE"
+              }
+            }
+          }]
+        },
+        {
+          "id": "lamp-id-3",
+          "capabilities": [{
+            "type": "devices.capabilities.on_off",
+            "state": {
+              "instance": "on",
+              "action_result": {
+                "status": "DONE"
+              }
+            }
+          }]
+        }
+      ]
+    }
+    """.trimIndent()
+
+    val requestManageDeviceCapabilitiesJson = """
+    {
+        "devices": [
+            {
+                "id": "lamp-id-1",
+                "actions": [
+                    {
+                        "type": "devices.capabilities.on_off",
+                        "state": {
+                            "instance": "on",
+                            "value": true
+                        }
+                    },
+                    {
+                        "type": "devices.capabilities.range",
+                        "state": {
+                            "instance": "brightness",
+                            "value": 50.0
+                        }
+                    },
+                    {
+                        "type": "devices.capabilities.color_setting",
+                        "state": {
+                            "instance": "temperature_k",
+                            "value": 4000
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+""".trimIndent()
+
+    val responseManageDeviceCapabilitiesJson = """
+    {
+   "status": "ok",
+   "request_id": "fd9299b8-f927-44f1-8728-8a0b35f1c72a",
+   "devices": [{
+      "id": "lamp-id-1",
+      "capabilities": [{
+         "type": "devices.capabilities.on_off",
+         "state": {
+            "instance": "on",
+            "action_result": {
+               "status": "DONE"
+            }
+         }
+      },
+      {
+         "type": "devices.capabilities.range",
+         "state": {
+            "instance": "brightness",
+            "action_result": {
+               "status": "DONE"
+            }
+         }
+      },
+      {
+         "type": "devices.capabilities.color_setting",
+         "state": {
+            "instance": "temperature_k",
+            "action_result": {
+               "status": "DONE"
+            }
+         }
+      }]
+   }]
+}
+""".trimIndent()
+
+    val responseUserInfoJson = """
         {
           "status": "ok",
           "request_id": "9f055dc8-5407-499a-87d7-b31af8ec289f",
@@ -229,12 +413,4 @@ val universalSchemeJson = """
           ]
         }
     """.trimIndent()
-
-fun main() {
-
-    val json = Json {
-        prettyPrint = true
-    }
-    val universalSchemeJsonResponse = json.decodeFromString<UserInfoResponse>(universalSchemeJson)
-    println(universalSchemeJsonResponse)
 }

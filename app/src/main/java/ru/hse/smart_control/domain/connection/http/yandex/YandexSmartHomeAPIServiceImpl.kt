@@ -7,7 +7,7 @@ import io.ktor.http.HttpStatusCode
 import ru.hse.miem.yandexsmarthomeapi.entity.YandexApiResponse
 import ru.hse.miem.yandexsmarthomeapi.entity.YandexDeviceStateResponse
 import ru.hse.miem.yandexsmarthomeapi.entity.YandexErrorModelResponse
-import ru.hse.miem.yandexsmarthomeapi.entity.UserInfoResponse
+import ru.hse.miem.yandexsmarthomeapi.entity.YandexUserInfoResponse
 
 class YandexSmartHomeAPIServiceImpl(accessToken: String, baseUrl: String):
     YandexSmartHomeAPIService {
@@ -22,7 +22,7 @@ class YandexSmartHomeAPIServiceImpl(accessToken: String, baseUrl: String):
             val response = client.get("$baseUrl/user/info")
             when (response.status) {
                 HttpStatusCode.OK -> {
-                    val successResponse = response.body<UserInfoResponse>()
+                    val successResponse = response.body<YandexUserInfoResponse>()
                     logger.debug { "Success response: $successResponse" }
                     YandexApiResponse.SuccessUserInfo(successResponse)
                 }

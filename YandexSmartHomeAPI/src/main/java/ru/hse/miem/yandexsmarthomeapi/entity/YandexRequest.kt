@@ -5,12 +5,12 @@ import kotlinx.serialization.json.JsonObject
 
 //JsonObject = DeviceActionsObject
 @Serializable
-data class ManageDeviceCapabilitiesStateRequest(
+data class YandexManageDeviceCapabilitiesStateRequest(
     val devices: List<JsonObject>
 )
 
 //JsonObject = CapabilityObject
 @Serializable
-data class ManageGroupCapabilitiesStateRequest(
+data class YandexManageGroupCapabilitiesStateRequest(
     val actions: List<JsonObject>
 )

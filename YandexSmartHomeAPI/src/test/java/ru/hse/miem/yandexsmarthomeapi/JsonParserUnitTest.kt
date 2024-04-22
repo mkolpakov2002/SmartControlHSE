@@ -9,8 +9,8 @@ import ru.hse.miem.yandexsmarthomeapi.TestConstants.responseManageGroupCapabilit
 import ru.hse.miem.yandexsmarthomeapi.TestConstants.responseUserInfoJson
 
 import ru.hse.miem.yandexsmarthomeapi.entity.YandexDeviceStateResponse
-import ru.hse.miem.yandexsmarthomeapi.entity.ManageDeviceCapabilitiesStateRequest
-import ru.hse.miem.yandexsmarthomeapi.entity.ManageGroupCapabilitiesStateRequest
+import ru.hse.miem.yandexsmarthomeapi.entity.YandexManageDeviceCapabilitiesStateRequest
+import ru.hse.miem.yandexsmarthomeapi.entity.YandexManageGroupCapabilitiesStateRequest
 import ru.hse.miem.yandexsmarthomeapi.entity.YandexManageGroupCapabilitiesStateResponse
 import ru.hse.miem.yandexsmarthomeapi.entity.YandexUserInfoResponse
 
@@ -23,7 +23,7 @@ class JsonParserUnitTest {
     @Test
     fun addition_requestDeviceGroupStateJson_isCorrect() {
         val deviceGroupStateRequest =
-            json.decodeFromString<ManageGroupCapabilitiesStateRequest>(requestManageGroupCapabilitiesJson)
+            json.decodeFromString<YandexManageGroupCapabilitiesStateRequest>(requestManageGroupCapabilitiesJson)
     }
 
     @Test
@@ -35,7 +35,7 @@ class JsonParserUnitTest {
     @Test
     fun addition_requestManageDeviceCapabilitiesJson_isCorrect() {
         val manageDeviceCapabilitiesRequest =
-            json.decodeFromString<ManageDeviceCapabilitiesStateRequest>(requestManageDeviceCapabilitiesJson)
+            json.decodeFromString<YandexManageDeviceCapabilitiesStateRequest>(requestManageDeviceCapabilitiesJson)
     }
 
     @Test
@@ -47,7 +47,7 @@ class JsonParserUnitTest {
     @Test
     fun addition_requestManageGroupCapabilitiesJson_isCorrect() {
         val manageGroupCapabilitiesRequest =
-            json.decodeFromString<ManageGroupCapabilitiesStateRequest>(requestManageGroupCapabilitiesJson)
+            json.decodeFromString<YandexManageGroupCapabilitiesStateRequest>(requestManageGroupCapabilitiesJson)
     }
 
     @Test

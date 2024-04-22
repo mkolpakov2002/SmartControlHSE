@@ -700,13 +700,13 @@ data class ToggleCapabilityStateObjectActionResult(
 
 @Serializable
 sealed class PropertyParameterObject {
-    abstract val instance: Function
+    abstract val instance: PropertyFunction
 }
 
 @Serializable
 @SerialName("float")
 data class FloatPropertyParameterObject(
-    override val instance: Function,
+    override val instance: PropertyFunction,
     val unit: MeasurementUnit
 ) : PropertyParameterObject()
 
@@ -728,7 +728,7 @@ enum class MeasurementUnit(override val code: String) : Codified<String> {
 @Serializable
 @SerialName("event")
 data class EventPropertyParameterObject(
-    override val instance: Function,
+    override val instance: PropertyFunction,
     val events: List<EventObject>
 ) : PropertyParameterObject()
 
@@ -758,12 +758,12 @@ enum class EventObjectValue(override val code: String) : Codified<String> {
 }
 
 @Serializable
-data class EventObject(val value: EventObjectValue)
+data class EventObject(val value: EventObjectValue): PropertyValue
 
 @Serializable
 data class FloatObjectValue(val value: Float) : PropertyValue
 
-enum class Function(override val code: String) : Codified<String> {
+enum class PropertyFunction(override val code: String) : Codified<String> {
     VOICE_ACTIVITY("voice_activity"),
     AMPERAGE("amperage"),
     BATTERY_LEVEL("battery_level"),
@@ -793,7 +793,7 @@ enum class Function(override val code: String) : Codified<String> {
     GAS("gas"),
     WATER_LEAK("water_leak"),
     CUSTOM("custom");
-    object CodifiedSerializer : KSerializer<CodifiedEnum<Function, String>> by codifiedEnumSerializer()
+    object CodifiedSerializer : KSerializer<CodifiedEnum<PropertyFunction, String>> by codifiedEnumSerializer()
 }
 
 enum class PropertyType(override val code: String) : Codified<String> {
@@ -809,10 +809,34 @@ sealed interface PropertyStateObjectData{
 }
 
 @Serializable
-sealed class PropertyState(
-    val propertyFunction: Function,
+sealed interface PropertyState{
+    val propertyFunction: PropertyFunction
     val propertyValue: PropertyValue
-)
+}
+
+@Serializable
+data class FloatPropertyStateObjectData(
+    override val type: PropertyType = PropertyType.FLOAT,
+    override val state: FloatPropertyState
+) : PropertyStateObjectData
+
+@Serializable
+data class EventPropertyStateObjectData(
+    override val type: PropertyType = PropertyType.EVENT,
+    override val state: EventPropertyState
+) : PropertyStateObjectData
+
+@Serializable
+data class FloatPropertyState(
+    override val propertyFunction: PropertyFunction,
+    override val propertyValue: FloatObjectValue
+) : PropertyState
+
+@Serializable
+data class EventPropertyState(
+    override val propertyFunction: PropertyFunction,
+    override val propertyValue: EventObject
+) : PropertyState
 
 @Serializable
 data class DeviceActionsObject(

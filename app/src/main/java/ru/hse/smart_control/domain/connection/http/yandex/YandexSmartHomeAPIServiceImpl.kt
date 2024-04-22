@@ -4,9 +4,9 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.http.HttpStatusCode
-import ru.hse.miem.yandexsmarthomeapi.entity.ApiResponse
-import ru.hse.miem.yandexsmarthomeapi.entity.DeviceStateResponse
-import ru.hse.miem.yandexsmarthomeapi.entity.ErrorModelResponse
+import ru.hse.miem.yandexsmarthomeapi.entity.YandexApiResponse
+import ru.hse.miem.yandexsmarthomeapi.entity.YandexDeviceStateResponse
+import ru.hse.miem.yandexsmarthomeapi.entity.YandexErrorModelResponse
 import ru.hse.miem.yandexsmarthomeapi.entity.UserInfoResponse
 
 class YandexSmartHomeAPIServiceImpl(accessToken: String, baseUrl: String):
@@ -17,19 +17,19 @@ class YandexSmartHomeAPIServiceImpl(accessToken: String, baseUrl: String):
     private val baseUrl = yandexSmartHomeAPIClient.baseUrl
     private val logger = KotlinLogging.logger{}
 
-    override suspend fun getUserInfo(): ApiResponse? {
+    override suspend fun getUserInfo(): YandexApiResponse? {
         return try {
             val response = client.get("$baseUrl/user/info")
             when (response.status) {
                 HttpStatusCode.OK -> {
                     val successResponse = response.body<UserInfoResponse>()
                     logger.debug { "Success response: $successResponse" }
-                    ApiResponse.SuccessUserInfo(successResponse)
+                    YandexApiResponse.SuccessUserInfo(successResponse)
                 }
                 else -> {
-                    val errorResponse = response.body<ErrorModelResponse>()
+                    val errorResponse = response.body<YandexErrorModelResponse>()
                     logger.debug { "Error response: $errorResponse" }
-                    ApiResponse.Error(errorResponse)
+                    YandexApiResponse.Error(errorResponse)
                 }
             }
         } catch (e: Exception) {
@@ -38,20 +38,20 @@ class YandexSmartHomeAPIServiceImpl(accessToken: String, baseUrl: String):
         }
     }
 
-    override suspend fun getDeviceState(deviceId: String): ApiResponse? {
+    override suspend fun getDeviceState(deviceId: String): YandexApiResponse? {
         return try {
             val response = client.get("$baseUrl/devices/$deviceId")
             when (response.status) {
                 HttpStatusCode.OK -> {
-                    val successResponse = response.body<DeviceStateResponse>()
+                    val successResponse = response.body<YandexDeviceStateResponse>()
                     logger.debug { "Success response: $successResponse" }
-                    val result = ApiResponse.SuccessDeviceState(successResponse)
+                    val result = YandexApiResponse.SuccessDeviceState(successResponse)
                     result
                 }
                 else -> {
-                    val errorResponse = response.body<ErrorModelResponse>()
+                    val errorResponse = response.body<YandexErrorModelResponse>()
                     logger.debug { "Error response: $errorResponse" }
-                    ApiResponse.Error(errorResponse)
+                    YandexApiResponse.Error(errorResponse)
                 }
             }
         } catch (e: Exception) {

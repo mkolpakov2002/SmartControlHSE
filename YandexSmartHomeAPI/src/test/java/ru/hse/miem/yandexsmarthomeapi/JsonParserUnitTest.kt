@@ -8,11 +8,11 @@ import ru.hse.miem.yandexsmarthomeapi.TestConstants.responseDeviceStateJson
 import ru.hse.miem.yandexsmarthomeapi.TestConstants.responseManageGroupCapabilitiesJson
 import ru.hse.miem.yandexsmarthomeapi.TestConstants.responseUserInfoJson
 
-import ru.hse.miem.yandexsmarthomeapi.entity.DeviceStateResponse
+import ru.hse.miem.yandexsmarthomeapi.entity.YandexDeviceStateResponse
 import ru.hse.miem.yandexsmarthomeapi.entity.ManageDeviceCapabilitiesStateRequest
 import ru.hse.miem.yandexsmarthomeapi.entity.ManageGroupCapabilitiesStateRequest
-import ru.hse.miem.yandexsmarthomeapi.entity.ManageGroupCapabilitiesStateResponse
-import ru.hse.miem.yandexsmarthomeapi.entity.UserInfoResponse
+import ru.hse.miem.yandexsmarthomeapi.entity.YandexManageGroupCapabilitiesStateResponse
+import ru.hse.miem.yandexsmarthomeapi.entity.YandexUserInfoResponse
 
 class JsonParserUnitTest {
 
@@ -28,8 +28,8 @@ class JsonParserUnitTest {
 
     @Test
     fun addition_responseDeviceStateJson_isCorrect() {
-        val deviceStateResponse =
-            json.decodeFromString<DeviceStateResponse>(responseDeviceStateJson)
+        val yandexDeviceStateResponse =
+            json.decodeFromString<YandexDeviceStateResponse>(responseDeviceStateJson)
     }
 
     @Test
@@ -41,7 +41,7 @@ class JsonParserUnitTest {
     @Test
     fun addition_responseManageDeviceCapabilitiesJson_isCorrect() {
         val manageGroupCapabilitiesResponse =
-            json.decodeFromString<ManageGroupCapabilitiesStateResponse>(responseManageGroupCapabilitiesJson)
+            json.decodeFromString<YandexManageGroupCapabilitiesStateResponse>(responseManageGroupCapabilitiesJson)
     }
 
     @Test
@@ -53,12 +53,12 @@ class JsonParserUnitTest {
     @Test
     fun addition_responseManageGroupCapabilitiesJson_isCorrect() {
         val manageGroupCapabilitiesResponse =
-            json.decodeFromString<ManageGroupCapabilitiesStateResponse>(responseManageGroupCapabilitiesJson)
+            json.decodeFromString<YandexManageGroupCapabilitiesStateResponse>(responseManageGroupCapabilitiesJson)
     }
 
     @Test
     fun addition_requestUserInfoJson_isCorrect() {
         val userInfoResponse =
-            json.decodeFromString<UserInfoResponse>(responseUserInfoJson)
+            json.decodeFromString<YandexUserInfoResponse>(responseUserInfoJson)
     }
 }

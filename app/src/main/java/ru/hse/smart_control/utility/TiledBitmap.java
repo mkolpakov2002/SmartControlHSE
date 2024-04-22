@@ -1,4 +1,4 @@
-package com.schneewittchen.rosandroid.utility;
+package ru.hse.smart_control.utility;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;

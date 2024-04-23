@@ -28,7 +28,7 @@ class YandexApiResponseMapper {
             id = deviceStateResponse.id,
             name = deviceStateResponse.name,
             aliases = deviceStateResponse.aliases,
-            type = DeviceTypeWrapper(DeviceType.valueOf(deviceStateResponse.type.content).codifiedEnum()),
+            type = DeviceTypeWrapper(deviceStateResponse.type.content.codifiedEnum()),
             externalId = deviceStateResponse.externalId,
             skillId = deviceStateResponse.skillId,
             householdId = "", // Отсутствует в ответе
@@ -57,7 +57,7 @@ class YandexApiResponseMapper {
                 id = groupJson["id"]!!.jsonPrimitive.content,
                 name = groupJson["name"]!!.jsonPrimitive.content,
                 aliases = groupJson["aliases"]!!.jsonArray.map { it.jsonPrimitive.content },
-                type = groupJson["type"]!!.jsonPrimitive.content,
+                type = DeviceTypeWrapper(groupJson["type"]!!.jsonPrimitive.content.codifiedEnum()),
                 capabilities = mapGroupCapabilities(groupJson["capabilities"]!!.jsonArray.map { it.jsonObject }),
                 devices = groupJson["devices"]!!.jsonArray.map { it.jsonPrimitive.content },
                 householdId = groupJson["household_id"]!!.jsonPrimitive.content
@@ -71,7 +71,7 @@ class YandexApiResponseMapper {
                 id = deviceJson["id"]!!.jsonPrimitive.content,
                 name = deviceJson["name"]!!.jsonPrimitive.content,
                 aliases = deviceJson["aliases"]?.jsonArray?.map { it.jsonPrimitive.content } ?: emptyList(),
-                type = DeviceTypeWrapper(DeviceType.valueOf(deviceJson["type"]!!.jsonPrimitive.content).codifiedEnum()),
+                type = DeviceTypeWrapper(deviceJson["type"]!!.jsonPrimitive.content.codifiedEnum()),
                 externalId = deviceJson["external_id"]!!.jsonPrimitive.content,
                 skillId = deviceJson["skill_id"]!!.jsonPrimitive.content,
                 householdId = deviceJson["household_id"]!!.jsonPrimitive.content,
@@ -87,7 +87,7 @@ class YandexApiResponseMapper {
     private fun mapCapabilities(capabilities: List<JsonObject>): List<DeviceCapabilityObject> {
         return capabilities.map { capabilityJson ->
             DeviceCapabilityObject(
-                type = CapabilityType.valueOf(capabilityJson["type"]!!.jsonPrimitive.content).codifiedEnum(),
+                type = CapabilityTypeWrapper(capabilityJson["type"]!!.jsonPrimitive.content.codifiedEnum()),
                 reportable = capabilityJson["reportable"]!!.jsonPrimitive.boolean,
                 retrievable = capabilityJson["retrievable"]!!.jsonPrimitive.boolean,
                 parameters = mapCapabilityParameters(capabilityJson["parameters"]!!.jsonObject),
@@ -98,9 +98,9 @@ class YandexApiResponseMapper {
     }
 
     private fun mapCapabilityParameters(parametersJson: JsonObject): CapabilityParameterObject {
-        return when (val capabilityType = CapabilityType.valueOf(parametersJson["type"]!!.jsonPrimitive.content)) {
-            CapabilityType.COLOR_SETTING -> ColorSettingCapabilityParameterObject(
-                colorModel = parametersJson["color_model"]?.let { ColorModelWrapper(ColorModel.valueOf(it.jsonPrimitive.content).codifiedEnum()) },
+        return when (val capabilityTypeWrapper = CapabilityTypeWrapper(parametersJson["type"]!!.jsonPrimitive.content.codifiedEnum())) {
+            CapabilityTypeWrapper(CapabilityType.COLOR_SETTING.codifiedEnum()) -> ColorSettingCapabilityParameterObject(
+                colorModel = parametersJson["color_model"]?.let { ColorModelWrapper(it.jsonPrimitive.content.codifiedEnum()) },
                 temperatureK = parametersJson["temperature_k"]?.let {
                     TemperatureK(
                         min = it.jsonObject["min"]!!.jsonPrimitive.int,
@@ -109,21 +109,21 @@ class YandexApiResponseMapper {
                 },
                 colorScene = parametersJson["color_scene"]?.let {
                     ColorScene(scenes = it.jsonObject["scenes"]!!.jsonArray.map { sceneJson ->
-                        Scene(id = SceneObjectWrapper(SceneObject.valueOf(sceneJson.jsonObject["id"]!!.jsonPrimitive.content).codifiedEnum()))
+                        Scene(id = SceneObjectWrapper(sceneJson.jsonObject["id"]!!.jsonPrimitive.content.codifiedEnum()))
                     })
                 }
             )
-            CapabilityType.ON_OFF -> OnOffCapabilityParameterObject(
+            CapabilityTypeWrapper(CapabilityType.ON_OFF.codifiedEnum()) -> OnOffCapabilityParameterObject(
                 split = parametersJson["split"]!!.jsonPrimitive.boolean
             )
-            CapabilityType.MODE -> ModeCapabilityParameterObject(
-                instance = ModeCapabilityInstanceWrapper(ModeCapability.valueOf(parametersJson["instance"]!!.jsonPrimitive.content).codifiedEnum()),
+            CapabilityTypeWrapper(CapabilityType.MODE.codifiedEnum()) -> ModeCapabilityParameterObject(
+                instance = ModeCapabilityInstanceWrapper(parametersJson["instance"]!!.jsonPrimitive.content.codifiedEnum()),
                 modes = parametersJson["modes"]!!.jsonArray.map {
-                    ModeObject(value = ModeCapabilityModeWrapper(ModeCapabilityMode.valueOf(it.jsonObject["value"]!!.jsonPrimitive.content).codifiedEnum()))
+                    ModeObject(value = ModeCapabilityModeWrapper(it.jsonObject["value"]!!.jsonPrimitive.content.codifiedEnum()))
                 }
             )
-            CapabilityType.RANGE -> RangeCapabilityParameterObject(
-                instance = RangeCapabilityWrapper(RangeCapability.valueOf(parametersJson["instance"]!!.jsonPrimitive.content).codifiedEnum()),
+            CapabilityTypeWrapper(CapabilityType.RANGE.codifiedEnum()) -> RangeCapabilityParameterObject(
+                instance = RangeCapabilityWrapper(parametersJson["instance"]!!.jsonPrimitive.content.codifiedEnum()),
                 randomAccess = parametersJson["random_access"]!!.jsonPrimitive.boolean,
                 range = parametersJson["range"]?.let {
                     Range(
@@ -134,33 +134,34 @@ class YandexApiResponseMapper {
                 },
                 looped = parametersJson["looped"]?.jsonPrimitive?.boolean
             )
-            CapabilityType.TOGGLE -> ToggleCapabilityParameterObject(
-                instance = ToggleCapabilityWrapper(ToggleCapability.valueOf(parametersJson["instance"]!!.jsonPrimitive.content).codifiedEnum())
+            CapabilityTypeWrapper(CapabilityType.TOGGLE.codifiedEnum()) -> ToggleCapabilityParameterObject(
+                instance = ToggleCapabilityWrapper(parametersJson["instance"]!!.jsonPrimitive.content.codifiedEnum())
             )
-            CapabilityType.VIDEO_STREAM -> VideoStreamCapabilityParameterObject(
+            CapabilityTypeWrapper(CapabilityType.VIDEO_STREAM.codifiedEnum()) -> VideoStreamCapabilityParameterObject(
                 protocols = parametersJson["protocols"]!!.jsonArray.map {
-                    VideoStreamCapabilityParameterObjectStreamProtocolWrapper(VideoStreamCapabilityParameterObjectStreamProtocol.valueOf(it.jsonPrimitive.content).codifiedEnum())
+                    VideoStreamCapabilityParameterObjectStreamProtocolWrapper(it.jsonPrimitive.content.codifiedEnum())
                 }
             )
+            else -> error("Unsupported capability type")
         }
     }
 
     private fun mapCapabilityState(stateJson: JsonObject?): CapabilityStateObjectData? {
-        return when (stateJson?.get("type")?.jsonPrimitive?.contentOrNull?.let { CapabilityType.valueOf(it) }) {
-            CapabilityType.ON_OFF -> stateJson?.let {
+        return when (stateJson?.get("type")?.jsonPrimitive?.contentOrNull?.let { CapabilityTypeWrapper(it.codifiedEnum()) }) {
+            CapabilityTypeWrapper(CapabilityType.ON_OFF.codifiedEnum()) -> stateJson?.let {
                 OnOffCapabilityStateObjectData(
-                    instance = OnOffCapabilityStateObjectInstanceWrapper(OnOffCapabilityStateObjectInstance.valueOf(it["instance"]!!.jsonPrimitive.content).codifiedEnum()),
+                    instance = OnOffCapabilityStateObjectInstanceWrapper(it["instance"]!!.jsonPrimitive.content.codifiedEnum()),
                     value = OnOffCapabilityStateObjectValue(value = it["value"]!!.jsonObject["value"]!!.jsonPrimitive.boolean)
                 )
             }
 
-            CapabilityType.COLOR_SETTING -> stateJson?.let {
+            CapabilityTypeWrapper(CapabilityType.COLOR_SETTING.codifiedEnum()) -> stateJson?.let {
                 ColorSettingCapabilityStateObjectData(
-                    instance = ColorSettingCapabilityStateObjectInstanceWrapper(ColorSettingCapabilityStateObjectInstance.valueOf(it["instance"]!!.jsonPrimitive.content).codifiedEnum()),
+                    instance = ColorSettingCapabilityStateObjectInstanceWrapper(it["instance"]!!.jsonPrimitive.content.codifiedEnum()),
                     value = when (val valueJson = it["value"]!!.jsonObject["value"]!!) {
                         is JsonPrimitive -> ColorSettingCapabilityStateObjectValueInteger(value = valueJson.int)
                         is JsonObject -> when (valueJson["type"]?.jsonPrimitive?.content) {
-                            "scene" -> ColorSettingCapabilityStateObjectValueObjectScene(value = SceneObjectWrapper(SceneObject.valueOf(valueJson["id"]!!.jsonPrimitive.content).codifiedEnum()))
+                            "scene" -> ColorSettingCapabilityStateObjectValueObjectScene(value = SceneObjectWrapper(valueJson["id"]!!.jsonPrimitive.content.codifiedEnum()))
                             else -> ColorSettingCapabilityStateObjectValueObjectHSV(value = HSVObject(
                                 h = valueJson["h"]!!.jsonPrimitive.int,
                                 s = valueJson["s"]!!.jsonPrimitive.int,
@@ -171,22 +172,22 @@ class YandexApiResponseMapper {
                     }
                 )
             }
-            CapabilityType.RANGE -> stateJson?.let {
+            CapabilityTypeWrapper(CapabilityType.RANGE.codifiedEnum()) -> stateJson?.let {
                 RangeCapabilityStateObjectData(
-                    instance = RangeCapabilityWrapper(RangeCapability.valueOf(it["instance"]!!.jsonPrimitive.content).codifiedEnum()),
+                    instance = RangeCapabilityWrapper(it["instance"]!!.jsonPrimitive.content.codifiedEnum()),
                     value = RangeCapabilityStateObjectDataValue(value = it["value"]!!.jsonObject["value"]!!.jsonPrimitive.float),
                     relative = it["relative"]?.jsonPrimitive?.boolean
                 )
             }
-            CapabilityType.MODE -> stateJson?.let {
+            CapabilityTypeWrapper(CapabilityType.MODE.codifiedEnum()) -> stateJson?.let {
                 ModeCapabilityStateObjectData(
-                    instance = ModeCapabilityInstanceWrapper(ModeCapability.valueOf(it["instance"]!!.jsonPrimitive.content).codifiedEnum()),
-                    value = ModeCapabilityModeWrapper(ModeCapabilityMode.valueOf(it["value"]!!.jsonPrimitive.content).codifiedEnum())
+                    instance = ModeCapabilityInstanceWrapper(it["instance"]!!.jsonPrimitive.content.codifiedEnum()),
+                    value = ModeCapabilityModeWrapper(it["value"]!!.jsonPrimitive.content.codifiedEnum())
                 )
             }
-            CapabilityType.TOGGLE -> stateJson?.let {
+            CapabilityTypeWrapper(CapabilityType.TOGGLE.codifiedEnum()) -> stateJson?.let {
                 ToggleCapabilityStateObjectData(
-                    instance = ToggleCapabilityWrapper(ToggleCapability.valueOf(it["instance"]!!.jsonPrimitive.content).codifiedEnum()),
+                    instance = ToggleCapabilityWrapper(it["instance"]!!.jsonPrimitive.content.codifiedEnum()),
                     value = ToggleCapabilityStateObjectDataValue(value = it["value"]!!.jsonObject["value"]!!.jsonPrimitive.boolean)
                 )
             }
@@ -198,7 +199,7 @@ class YandexApiResponseMapper {
     private fun mapProperties(properties: List<JsonObject>): List<DevicePropertyObject> {
         return properties.map { propertyJson ->
             DevicePropertyObject(
-                type = propertyJson["type"]!!.jsonPrimitive.content,
+                type = PropertyTypeWrapper(propertyJson["type"]!!.jsonPrimitive.content.codifiedEnum()),
                 reportable = propertyJson["reportable"]!!.jsonPrimitive.boolean,
                 retrievable = propertyJson["retrievable"]!!.jsonPrimitive.boolean,
                 parameters = mapPropertyParameters(propertyJson["parameters"]!!.jsonObject),
@@ -209,34 +210,35 @@ class YandexApiResponseMapper {
     }
 
     private fun mapPropertyParameters(parametersJson: JsonObject): PropertyParameterObject {
-        return when (val propertyType = PropertyType.valueOf(parametersJson["type"]!!.jsonPrimitive.content)) {
-            PropertyType.FLOAT -> FloatPropertyParameterObject(
-                instance = PropertyFunctionWrapper(PropertyFunction.valueOf(parametersJson["instance"]!!.jsonPrimitive.content).codifiedEnum()),
-                unit = MeasurementUnitWrapper(MeasurementUnit.valueOf(parametersJson["unit"]!!.jsonPrimitive.content).codifiedEnum())
+        return when (val propertyTypeWrapper = PropertyTypeWrapper(parametersJson["type"]!!.jsonPrimitive.content.codifiedEnum())) {
+            PropertyTypeWrapper(PropertyType.FLOAT.codifiedEnum()) -> FloatPropertyParameterObject(
+                instance = PropertyFunctionWrapper(parametersJson["instance"]!!.jsonPrimitive.content.codifiedEnum()),
+                unit = MeasurementUnitWrapper(parametersJson["unit"]!!.jsonPrimitive.content.codifiedEnum())
             )
-            PropertyType.EVENT -> EventPropertyParameterObject(
-                instance = PropertyFunctionWrapper(PropertyFunction.valueOf(parametersJson["instance"]!!.jsonPrimitive.content).codifiedEnum()),
-                events = parametersJson["events"]!!.jsonArray.map { EventObject(value = EventObjectValueWrapper(EventObjectValue.valueOf(it.jsonObject["value"]!!.jsonPrimitive.content).codifiedEnum())) }
+            PropertyTypeWrapper(PropertyType.EVENT.codifiedEnum()) -> EventPropertyParameterObject(
+                instance = PropertyFunctionWrapper(parametersJson["instance"]!!.jsonPrimitive.content.codifiedEnum()),
+                events = parametersJson["events"]!!.jsonArray.map { EventObject(value = EventObjectValueWrapper(it.jsonObject["value"]!!.jsonPrimitive.content.codifiedEnum())) }
             )
+            else -> error("Unsupported property type")
         }
     }
 
     private fun mapPropertyState(stateJson: JsonObject?): PropertyStateObjectData? {
         return stateJson?.let {
-            when (PropertyTypeWrapper(PropertyType.valueOf(it["type"]!!.jsonPrimitive.content).codifiedEnum())) {
+            when (PropertyTypeWrapper(it["type"]!!.jsonPrimitive.content.codifiedEnum())) {
                 PropertyTypeWrapper(PropertyType.FLOAT.codifiedEnum()) -> FloatPropertyStateObjectData(
                     state = FloatPropertyState(
-                        propertyFunction = PropertyFunctionWrapper(PropertyFunction.valueOf(it["state"]!!.jsonObject["function"]!!.jsonPrimitive.content).codifiedEnum()),
+                        propertyFunction = PropertyFunctionWrapper(it["state"]!!.jsonObject["function"]!!.jsonPrimitive.content.codifiedEnum()),
                         propertyValue = FloatObjectValue(value = it["state"]!!.jsonObject["value"]!!.jsonPrimitive.float)
                     )
                 )
                 PropertyTypeWrapper(PropertyType.EVENT.codifiedEnum()) -> EventPropertyStateObjectData(
                     state = EventPropertyState(
-                        propertyFunction = PropertyFunctionWrapper(PropertyFunction.valueOf(it["state"]!!.jsonObject["function"]!!.jsonPrimitive.content).codifiedEnum()),
-                        propertyValue = EventObject(value = EventObjectValueWrapper(EventObjectValue.valueOf(it["state"]!!.jsonObject["value"]!!.jsonPrimitive.content).codifiedEnum()))
+                        propertyFunction = PropertyFunctionWrapper(it["state"]!!.jsonObject["function"]!!.jsonPrimitive.content.codifiedEnum()),
+                        propertyValue = EventObject(value = EventObjectValueWrapper(it["state"]!!.jsonObject["value"]!!.jsonPrimitive.content.codifiedEnum()))
                     )
                 )
-                else -> null
+                else -> error("Unsupported property state type")
             }
         }
     }
@@ -252,24 +254,24 @@ class YandexApiResponseMapper {
         }
     }
 
-    private fun mapHouseholds(households: List<JsonObject>): List<HouseholdObject> {
-        return households.map { householdJson ->
-            HouseholdObject(
-                id = householdJson["id"]!!.jsonPrimitive.content,
-                name = householdJson["name"]!!.jsonPrimitive.content,
-                type = householdJson["type"]!!.jsonPrimitive.content
-            )
-        }
-    }
-
     private fun mapGroupCapabilities(capabilities: List<JsonObject>): List<GroupCapabilityObject> {
         return capabilities.map { capabilityJson ->
             GroupCapabilityObject(
-                type = CapabilityType.valueOf(capabilityJson["type"]!!.jsonPrimitive.content).codifiedEnum(),
+                type = CapabilityTypeWrapper((capabilityJson["type"]!!.jsonPrimitive.content).codifiedEnum()),
                 retrievable = capabilityJson["retrievable"]!!.jsonPrimitive.boolean,
                 parameters = mapCapabilityParameters(capabilityJson["parameters"]!!.jsonObject),
                 state = mapCapabilityState(capabilityJson["state"]?.jsonObject)
             )
         }
     }
+
+    private fun mapHouseholds(households: List<JsonObject>): List<HouseholdObject> {
+        return households.map { householdJson ->
+            HouseholdObject(
+                id = householdJson["id"]!!.jsonPrimitive.content,
+                name = householdJson["name"]!!.jsonPrimitive.content
+            )
+        }
+    }
+
 }

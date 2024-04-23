@@ -86,7 +86,7 @@ data class GroupObject(
     @SerialName("id") val id: String,
     @SerialName("name") val name: String,
     @SerialName("aliases") val aliases: List<String>,
-    @SerialName("type") val type: String,
+    @SerialName("type") val type: DeviceTypeWrapper,
     @SerialName("capabilities") val capabilities: List<GroupCapabilityObject>,
     @SerialName("devices") val devices: List<String>,
     @SerialName("household_id") val householdId: String
@@ -175,15 +175,13 @@ data class ScenarioObject(
 @Serializable
 data class HouseholdObject(
     @SerialName("id") val id: String,
-    @SerialName("name") val name: String,
-    @SerialName("type") val type: String
+    @SerialName("name") val name: String
 )
 
 @Serializable
 data class GroupCapabilityObject(
     @SerialName("type")
-    @Serializable(with = CapabilityType.CodifiedSerializer::class)
-    val type: CodifiedEnum<CapabilityType, String>,
+    val type: CapabilityTypeWrapper,
     @SerialName("retrievable") val retrievable: Boolean,
     @SerialName("parameters") val parameters: CapabilityParameterObject,
     @SerialName("state") val state: CapabilityStateObjectData?
@@ -191,7 +189,7 @@ data class GroupCapabilityObject(
 
 @Serializable
 data class DevicePropertyObject(
-    override val type: String,
+    override val type: PropertyTypeWrapper,
     @SerialName("reportable") val reportable: Boolean,
     override val retrievable: Boolean,
     override val parameters: PropertyParameterObject,
@@ -213,9 +211,6 @@ enum class DeviceState(override val code: String) : Codified<String> {
     object CodifiedSerializer : KSerializer<CodifiedEnum<DeviceState, String>> by codifiedEnumSerializer()
 }
 
-@Serializable
-
-
 enum class CapabilityType(override val code: String) : Codified<String> {
     COLOR_SETTING("devices.capabilities.color_setting"),
     ON_OFF("devices.capabilities.on_off"),
@@ -226,8 +221,14 @@ enum class CapabilityType(override val code: String) : Codified<String> {
     object CodifiedSerializer : KSerializer<CodifiedEnum<CapabilityType, String>> by codifiedEnumSerializer()
 }
 
+@Serializable
+data class CapabilityTypeWrapper(
+    @Serializable(with = CapabilityType.CodifiedSerializer::class)
+    val type: CodifiedEnum<CapabilityType, String>
+)
+
 sealed interface Capability{
-    @SerialName("type")  val type: CodifiedEnum<CapabilityType, String>
+    @SerialName("type")  val type: CapabilityTypeWrapper
     @SerialName("retrievable") val retrievable: Boolean?
     @SerialName("parameters") val parameters: CapabilityParameterObject?
     @SerialName("state") val state: CapabilityStateObjectData?
@@ -236,8 +237,7 @@ sealed interface Capability{
 
 @Serializable
 data class DeviceCapabilityObject(
-    @Serializable(with = CapabilityType.CodifiedSerializer::class)
-    override val type: CodifiedEnum<CapabilityType, String>,
+    override val type: CapabilityTypeWrapper,
     val reportable: Boolean,
     override val retrievable: Boolean,
     override val parameters: CapabilityParameterObject,
@@ -247,8 +247,7 @@ data class DeviceCapabilityObject(
 
 @Serializable
 data class CapabilityObject(
-    @Serializable(with = CapabilityType.CodifiedSerializer::class)
-    override val type: CodifiedEnum<CapabilityType, String>,
+    override val type: CapabilityTypeWrapper,
     override val retrievable: Boolean? = null,
     override val parameters: CapabilityParameterObject? = null,
     override val state: CapabilityStateObjectData?,
@@ -257,13 +256,13 @@ data class CapabilityObject(
 
 @Serializable
 data class CapabilityActionResultObject(
-    @SerialName("type") val type: CapabilityType,
+    @SerialName("type") val type: CapabilityTypeWrapper,
     @SerialName("state") val state: StateResultObject
 )
 
 @Serializable
 sealed interface Property{
-    @SerialName("type") val type: String
+    @SerialName("type") val type: PropertyTypeWrapper
     @SerialName("retrievable") val retrievable: Boolean
     @SerialName("parameters") val parameters: PropertyParameterObject
     @SerialName("state") val state: PropertyStateObjectData?
@@ -272,7 +271,7 @@ sealed interface Property{
 
 @Serializable
 data class PropertyObject(
-    override val type: String,
+    override val type: PropertyTypeWrapper,
     override val retrievable: Boolean,
     override val parameters: PropertyParameterObject,
     override val state: PropertyStateObjectData?,

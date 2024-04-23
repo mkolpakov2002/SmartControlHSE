@@ -1,5 +1,7 @@
 package ru.hse.smart_control.model.entities.universal.scheme
 
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.boolean
@@ -34,8 +36,8 @@ class YandexApiResponseMapper {
             householdId = "", // Отсутствует в ответе
             room = deviceStateResponse.room,
             groups = deviceStateResponse.groups,
-            capabilities = mapCapabilities(deviceStateResponse.capabilities),
-            properties = mapProperties(deviceStateResponse.properties),
+            capabilities = deviceStateResponse.capabilities?.let { mapCapabilities(it) } ?: emptyList(),
+            properties = deviceStateResponse.properties?.let { mapProperties(it) } ?: emptyList(),
             quasarInfo = null // Отсутствует в ответе
         )
     }
@@ -84,46 +86,57 @@ class YandexApiResponseMapper {
         }
     }
 
-    private fun mapCapabilities(capabilities: List<JsonObject>): List<DeviceCapabilityObject> {
-        return capabilities.map { capabilityJson ->
-            DeviceCapabilityObject(
-                type = CapabilityTypeWrapper(capabilityJson["type"]!!.jsonPrimitive.content.codifiedEnum()),
-                reportable = capabilityJson["reportable"]!!.jsonPrimitive.boolean,
-                retrievable = capabilityJson["retrievable"]!!.jsonPrimitive.boolean,
-                parameters = mapCapabilityParameters(capabilityJson["parameters"]!!.jsonObject),
-                state = mapCapabilityState(capabilityJson["state"]?.jsonObject),
-                lastUpdated = capabilityJson["last_updated"]!!.jsonPrimitive.float
-            )
+    private fun mapCapabilities(capabilities: List<JsonElement>): List<DeviceCapabilityObject> {
+        return capabilities.mapNotNull { capabilityJson ->
+            val type = (capabilityJson as? JsonObject)?.get("type")?.jsonPrimitive?.contentOrNull?.let { CapabilityTypeWrapper(it.codifiedEnum()) }
+            val parameters = (capabilityJson as? JsonObject)?.get("parameters")?.jsonObject?.let { mapCapabilityParameters(type, it) }
+            val state = when (val stateElement = (capabilityJson as? JsonObject)?.get("state")) {
+                is JsonObject -> mapCapabilityState(stateElement)
+                is JsonNull -> null
+                else -> null
+            }
+            if (type != null && parameters != null) {
+                DeviceCapabilityObject(
+                    type = type,
+                    reportable = capabilityJson["reportable"]?.jsonPrimitive?.boolean ?: false,
+                    retrievable = capabilityJson["retrievable"]?.jsonPrimitive?.boolean ?: false,
+                    parameters = parameters,
+                    state = state,
+                    lastUpdated = (capabilityJson as? JsonObject)?.get("last_updated")?.jsonPrimitive?.float ?: 0.0f
+                )
+            } else {
+                null
+            }
         }
     }
 
-    private fun mapCapabilityParameters(parametersJson: JsonObject): CapabilityParameterObject {
-        return when (val capabilityTypeWrapper = CapabilityTypeWrapper(parametersJson["type"]!!.jsonPrimitive.content.codifiedEnum())) {
+    private fun mapCapabilityParameters(type: CapabilityTypeWrapper?, parametersJson: JsonObject): CapabilityParameterObject {
+        return when (type) {
             CapabilityTypeWrapper(CapabilityType.COLOR_SETTING.codifiedEnum()) -> ColorSettingCapabilityParameterObject(
                 colorModel = parametersJson["color_model"]?.let { ColorModelWrapper(it.jsonPrimitive.content.codifiedEnum()) },
                 temperatureK = parametersJson["temperature_k"]?.let {
                     TemperatureK(
-                        min = it.jsonObject["min"]!!.jsonPrimitive.int,
-                        max = it.jsonObject["max"]!!.jsonPrimitive.int
+                        min = it.jsonObject["min"]?.jsonPrimitive?.int ?: 0,
+                        max = it.jsonObject["max"]?.jsonPrimitive?.int ?: 0
                     )
                 },
                 colorScene = parametersJson["color_scene"]?.let {
-                    ColorScene(scenes = it.jsonObject["scenes"]!!.jsonArray.map { sceneJson ->
-                        Scene(id = SceneObjectWrapper(sceneJson.jsonObject["id"]!!.jsonPrimitive.content.codifiedEnum()))
-                    })
+                    ColorScene(scenes = it.jsonObject["scenes"]?.jsonArray?.map { sceneJson ->
+                        Scene(id = SceneObjectWrapper(sceneJson.jsonObject["id"]?.jsonPrimitive?.content?.codifiedEnum() ?: SceneObject.ALARM.codifiedEnum()))
+                    } ?: emptyList())
                 }
             )
             CapabilityTypeWrapper(CapabilityType.ON_OFF.codifiedEnum()) -> OnOffCapabilityParameterObject(
                 split = parametersJson["split"]!!.jsonPrimitive.boolean
             )
             CapabilityTypeWrapper(CapabilityType.MODE.codifiedEnum()) -> ModeCapabilityParameterObject(
-                instance = ModeCapabilityInstanceWrapper(parametersJson["instance"]!!.jsonPrimitive.content.codifiedEnum()),
+                instance = ModeCapabilityInstanceWrapper((parametersJson["instance"]!!.jsonPrimitive.content).codifiedEnum()),
                 modes = parametersJson["modes"]!!.jsonArray.map {
-                    ModeObject(value = ModeCapabilityModeWrapper(it.jsonObject["value"]!!.jsonPrimitive.content.codifiedEnum()))
+                    ModeObject(value = ModeCapabilityModeWrapper((it.jsonObject["value"]!!.jsonPrimitive.content).codifiedEnum()))
                 }
             )
             CapabilityTypeWrapper(CapabilityType.RANGE.codifiedEnum()) -> RangeCapabilityParameterObject(
-                instance = RangeCapabilityWrapper(parametersJson["instance"]!!.jsonPrimitive.content.codifiedEnum()),
+                instance = RangeCapabilityWrapper((parametersJson["instance"]!!.jsonPrimitive.content).codifiedEnum()),
                 randomAccess = parametersJson["random_access"]!!.jsonPrimitive.boolean,
                 range = parametersJson["range"]?.let {
                     Range(
@@ -135,11 +148,11 @@ class YandexApiResponseMapper {
                 looped = parametersJson["looped"]?.jsonPrimitive?.boolean
             )
             CapabilityTypeWrapper(CapabilityType.TOGGLE.codifiedEnum()) -> ToggleCapabilityParameterObject(
-                instance = ToggleCapabilityWrapper(parametersJson["instance"]!!.jsonPrimitive.content.codifiedEnum())
+                instance = ToggleCapabilityWrapper((parametersJson["instance"]!!.jsonPrimitive.content).codifiedEnum())
             )
             CapabilityTypeWrapper(CapabilityType.VIDEO_STREAM.codifiedEnum()) -> VideoStreamCapabilityParameterObject(
                 protocols = parametersJson["protocols"]!!.jsonArray.map {
-                    VideoStreamCapabilityParameterObjectStreamProtocolWrapper(it.jsonPrimitive.content.codifiedEnum())
+                    VideoStreamCapabilityParameterObjectStreamProtocolWrapper((it.jsonPrimitive.content).codifiedEnum())
                 }
             )
             else -> error("Unsupported capability type")
@@ -198,19 +211,25 @@ class YandexApiResponseMapper {
 
     private fun mapProperties(properties: List<JsonObject>): List<DevicePropertyObject> {
         return properties.map { propertyJson ->
+            val type = PropertyTypeWrapper(propertyJson["type"]!!.jsonPrimitive.content.codifiedEnum())
+            val state = when (val stateElement = (propertyJson as? JsonObject)?.get("state")) {
+                is JsonObject -> mapPropertyState(stateElement)
+                is JsonNull -> null
+                else -> null
+            }
             DevicePropertyObject(
-                type = PropertyTypeWrapper(propertyJson["type"]!!.jsonPrimitive.content.codifiedEnum()),
+                type = type,
                 reportable = propertyJson["reportable"]!!.jsonPrimitive.boolean,
                 retrievable = propertyJson["retrievable"]!!.jsonPrimitive.boolean,
-                parameters = mapPropertyParameters(propertyJson["parameters"]!!.jsonObject),
-                state = mapPropertyState(propertyJson["state"]?.jsonObject),
+                parameters = mapPropertyParameters(type, propertyJson["parameters"]!!.jsonObject),
+                state = state,
                 lastUpdated = propertyJson["last_updated"]!!.jsonPrimitive.float
             )
         }
     }
 
-    private fun mapPropertyParameters(parametersJson: JsonObject): PropertyParameterObject {
-        return when (val propertyTypeWrapper = PropertyTypeWrapper(parametersJson["type"]!!.jsonPrimitive.content.codifiedEnum())) {
+    private fun mapPropertyParameters(type: PropertyTypeWrapper, parametersJson: JsonObject): PropertyParameterObject {
+        return when (type) {
             PropertyTypeWrapper(PropertyType.FLOAT.codifiedEnum()) -> FloatPropertyParameterObject(
                 instance = PropertyFunctionWrapper(parametersJson["instance"]!!.jsonPrimitive.content.codifiedEnum()),
                 unit = MeasurementUnitWrapper(parametersJson["unit"]!!.jsonPrimitive.content.codifiedEnum())
@@ -255,13 +274,19 @@ class YandexApiResponseMapper {
     }
 
     private fun mapGroupCapabilities(capabilities: List<JsonObject>): List<GroupCapabilityObject> {
-        return capabilities.map { capabilityJson ->
-            GroupCapabilityObject(
-                type = CapabilityTypeWrapper((capabilityJson["type"]!!.jsonPrimitive.content).codifiedEnum()),
-                retrievable = capabilityJson["retrievable"]!!.jsonPrimitive.boolean,
-                parameters = mapCapabilityParameters(capabilityJson["parameters"]!!.jsonObject),
-                state = mapCapabilityState(capabilityJson["state"]?.jsonObject)
-            )
+        return capabilities.mapNotNull { capabilityJson ->
+            val type = capabilityJson["type"]?.jsonPrimitive?.contentOrNull?.let { CapabilityTypeWrapper(it.codifiedEnum()) }
+            val parameters = capabilityJson["parameters"]?.jsonObject?.let { mapCapabilityParameters(type, it) }
+            if (type != null && parameters != null) {
+                GroupCapabilityObject(
+                    type = type,
+                    retrievable = capabilityJson["retrievable"]?.jsonPrimitive?.boolean ?: false,
+                    parameters = parameters,
+                    state = capabilityJson["state"]?.jsonObject?.let { mapCapabilityState(it) }
+                )
+            } else {
+                null
+            }
         }
     }
 

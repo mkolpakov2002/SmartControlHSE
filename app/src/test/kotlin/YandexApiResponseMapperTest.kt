@@ -14,14 +14,9 @@ import ru.hse.miem.yandexsmarthomeapi.entity.YandexUserInfoResponse
 import ru.hse.smart_control.model.entities.universal.scheme.CapabilityType
 import ru.hse.smart_control.model.entities.universal.scheme.ColorModel
 import ru.hse.smart_control.model.entities.universal.scheme.ColorSettingCapabilityParameterObject
-import ru.hse.smart_control.model.entities.universal.scheme.ColorSettingCapabilityStateObjectData
 import ru.hse.smart_control.model.entities.universal.scheme.ColorSettingCapabilityStateObjectInstance
 import ru.hse.smart_control.model.entities.universal.scheme.ColorSettingCapabilityStateObjectValueInteger
 import ru.hse.smart_control.model.entities.universal.scheme.DeviceType
-import ru.hse.smart_control.model.entities.universal.scheme.OnOffCapabilityStateObjectData
-import ru.hse.smart_control.model.entities.universal.scheme.OnOffCapabilityStateObjectInstance
-import ru.hse.smart_control.model.entities.universal.scheme.RangeCapabilityParameterObjectFunction
-import ru.hse.smart_control.model.entities.universal.scheme.RangeCapabilityStateObjectData
 import ru.hse.smart_control.model.entities.universal.scheme.TestConstants
 import ru.hse.smart_control.model.entities.universal.scheme.YandexApiResponseMapper
 import kotlin.test.Test

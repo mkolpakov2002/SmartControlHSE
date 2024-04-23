@@ -9,6 +9,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import pl.brightinventions.codified.Codified
 import pl.brightinventions.codified.enums.CodifiedEnum
+import pl.brightinventions.codified.enums.codifiedEnum
 import pl.brightinventions.codified.enums.serializer.codifiedEnumSerializer
 
 @Serializable
@@ -96,7 +97,7 @@ sealed interface BaseDeviceObject {
     @SerialName("id") val id: String
     @SerialName("name") val name: String
     @SerialName("aliases") val aliases: List<String>?
-    @SerialName("type") val type: DeviceType
+    @SerialName("type") val type: DeviceTypeWrapper
     @SerialName("groups") val groups: List<String>?
     @SerialName("room") val room: String?
     @SerialName("external_id") val externalId: String?
@@ -143,11 +144,17 @@ enum class DeviceType(override val code: String) : Codified<String> {
 }
 
 @Serializable
+data class DeviceTypeWrapper(
+    @Serializable(with = DeviceType.CodifiedSerializer::class)
+    val type: CodifiedEnum<DeviceType, String>
+)
+
+@Serializable
 data class DeviceObject(
     override val id: String,
     override val name: String,
     override val aliases: List<String>,
-    override val type: DeviceType,
+    override val type: DeviceTypeWrapper,
     @SerialName("external_id") override val externalId: String,
     @SerialName("skill_id") override val skillId: String,
     @SerialName("household_id") val householdId: String,
@@ -174,7 +181,9 @@ data class HouseholdObject(
 
 @Serializable
 data class GroupCapabilityObject(
-    @SerialName("type") val type: CapabilityType,
+    @SerialName("type")
+    @Serializable(with = CapabilityType.CodifiedSerializer::class)
+    val type: CodifiedEnum<CapabilityType, String>,
     @SerialName("retrievable") val retrievable: Boolean,
     @SerialName("parameters") val parameters: CapabilityParameterObject,
     @SerialName("state") val state: CapabilityStateObjectData?
@@ -204,6 +213,9 @@ enum class DeviceState(override val code: String) : Codified<String> {
     object CodifiedSerializer : KSerializer<CodifiedEnum<DeviceState, String>> by codifiedEnumSerializer()
 }
 
+@Serializable
+
+
 enum class CapabilityType(override val code: String) : Codified<String> {
     COLOR_SETTING("devices.capabilities.color_setting"),
     ON_OFF("devices.capabilities.on_off"),
@@ -215,7 +227,7 @@ enum class CapabilityType(override val code: String) : Codified<String> {
 }
 
 sealed interface Capability{
-    @SerialName("type")  val type: CapabilityType
+    @SerialName("type")  val type: CodifiedEnum<CapabilityType, String>
     @SerialName("retrievable") val retrievable: Boolean?
     @SerialName("parameters") val parameters: CapabilityParameterObject?
     @SerialName("state") val state: CapabilityStateObjectData?
@@ -224,7 +236,8 @@ sealed interface Capability{
 
 @Serializable
 data class DeviceCapabilityObject(
-    override val type: CapabilityType,
+    @Serializable(with = CapabilityType.CodifiedSerializer::class)
+    override val type: CodifiedEnum<CapabilityType, String>,
     val reportable: Boolean,
     override val retrievable: Boolean,
     override val parameters: CapabilityParameterObject,
@@ -234,7 +247,8 @@ data class DeviceCapabilityObject(
 
 @Serializable
 data class CapabilityObject(
-    override val type: CapabilityType,
+    @Serializable(with = CapabilityType.CodifiedSerializer::class)
+    override val type: CodifiedEnum<CapabilityType, String>,
     override val retrievable: Boolean? = null,
     override val parameters: CapabilityParameterObject? = null,
     override val state: CapabilityStateObjectData?,
@@ -270,7 +284,8 @@ sealed class CapabilityParameterObject
 
 @Serializable
 data class ColorSettingCapabilityParameterObject(
-    @SerialName("color_model") val colorModel: ColorModel? = null,
+    @SerialName("color_model")
+    val colorModel: ColorModelWrapper? = null,
     @SerialName("temperature_k") val temperatureK: TemperatureK? = null,
     @SerialName("color_scene") val colorScene: ColorScene? = null
 ): CapabilityParameterObject() {
@@ -288,26 +303,26 @@ data class OnOffCapabilityParameterObject(
 
 @Serializable
 data class ModeCapabilityParameterObject(
-    val instance: ModeCapabilityInstance,
+    val instance: ModeCapabilityInstanceWrapper,
     val modes: List<ModeObject>
 ): CapabilityParameterObject()
 
 @Serializable
 data class RangeCapabilityParameterObject(
-    val instance: RangeCapabilityParameterObjectFunction,
-    var unit: MeasurementUnit? = null,
+    val instance: RangeCapabilityWrapper,
+    var unit: MeasurementUnitWrapper? = null,
     @SerialName("random_access") val randomAccess: Boolean,
     val range: Range? = null,
     val looped: Boolean? = null
 ): CapabilityParameterObject() {
     init {
-        unit = when (instance) {
-            RangeCapabilityParameterObjectFunction.BRIGHTNESS,
-            RangeCapabilityParameterObjectFunction.HUMIDITY,
-            RangeCapabilityParameterObjectFunction.OPEN -> MeasurementUnit.PERCENT
+        unit = when (instance.range.knownOrNull()) {
+            RangeCapability.BRIGHTNESS,
+            RangeCapability.HUMIDITY,
+            RangeCapability.OPEN -> MeasurementUnitWrapper(MeasurementUnit.PERCENT.codifiedEnum())
             else -> {
                 //RangeCapabilityInstanceOld.TEMPERATURE
-                MeasurementUnit.TEMPERATURE_CELSIUS
+                MeasurementUnitWrapper(MeasurementUnit.TEMPERATURE_CELSIUS.codifiedEnum())
             }
         }
     }
@@ -316,24 +331,26 @@ data class RangeCapabilityParameterObject(
 
 @Serializable
 data class ToggleCapabilityParameterObject(
-    val instance: ToggleCapabilityParameterObjectFunction
+    val instance: ToggleCapabilityWrapper
 ): CapabilityParameterObject()
 
 
 @Serializable
 data class VideoStreamCapabilityParameterObject(
-    val protocols: List<VideoStreamCapabilityParameterObjectStreamProtocol>
+    val protocols: List<VideoStreamCapabilityParameterObjectStreamProtocolWrapper>
 ): CapabilityParameterObject()
-
-/**
- * make KSerializable
- */
 
 enum class ColorModel(override val code: String) : Codified<String> {
     RGB("rgb"),
     HSV("hsv");
     object CodifiedSerializer : KSerializer<CodifiedEnum<ColorModel, String>> by codifiedEnumSerializer()
 }
+
+@Serializable
+data class ColorModelWrapper(
+    @Serializable(with = ColorModel.CodifiedSerializer::class)
+    val colorModel: CodifiedEnum<ColorModel, String>
+)
 
 @Serializable
 data class TemperatureK(
@@ -348,7 +365,8 @@ data class ColorScene(
 
 @Serializable
 data class Scene(
-    @SerialName("id") val id: SceneObject
+    @SerialName("id")
+    val id: SceneObjectWrapper
 )
 
 enum class SceneObject(override val code: String) : Codified<String> {
@@ -374,9 +392,15 @@ enum class SceneObject(override val code: String) : Codified<String> {
 }
 
 @Serializable
-data class ModeObject(val value: ModeCapabilityMode)
+data class SceneObjectWrapper(
+    @Serializable(with = SceneObject.CodifiedSerializer::class)
+    val scene: CodifiedEnum<SceneObject, String>
+)
 
-enum class ModeCapabilityMode(override val code: String) : Codified<String>, CapabilityStateObjectValue {
+@Serializable
+data class ModeObject(val value: ModeCapabilityModeWrapper)
+
+enum class ModeCapabilityMode(override val code: String) : Codified<String> {
     AUTO("auto"),
     ECO("eco"),
     SMART("smart"),
@@ -453,7 +477,13 @@ enum class ModeCapabilityMode(override val code: String) : Codified<String>, Cap
     object CodifiedSerializer : KSerializer<CodifiedEnum<ModeCapabilityMode, String>> by codifiedEnumSerializer()
 }
 
-enum class ModeCapabilityInstance(override val code: String) : Codified<String>, CapabilityStateObjectInstance {
+@Serializable
+data class ModeCapabilityModeWrapper(
+    @Serializable(with = ModeCapabilityMode.CodifiedSerializer::class)
+    val mode: CodifiedEnum<ModeCapabilityMode, String>
+) : CapabilityStateObjectValue
+
+enum class ModeCapability(override val code: String) : Codified<String> {
     CLEANUP_MODE("cleanup_mode"),
     COFFEE_MODE("coffee_mode"),
     DISHWASHING("dishwashing"),
@@ -465,18 +495,30 @@ enum class ModeCapabilityInstance(override val code: String) : Codified<String>,
     TEA_MODE("tea_mode"),
     THERMOSTAT("thermostat"),
     WORK_SPEED("work_speed");
-    object CodifiedSerializer : KSerializer<CodifiedEnum<ModeCapabilityInstance, String>> by codifiedEnumSerializer()
+    object CodifiedSerializer : KSerializer<CodifiedEnum<ModeCapability, String>> by codifiedEnumSerializer()
 }
 
-enum class RangeCapabilityParameterObjectFunction(override val code: String) : Codified<String>, CapabilityStateObjectInstance {
+@Serializable
+data class ModeCapabilityInstanceWrapper(
+    @Serializable(with = ModeCapability.CodifiedSerializer::class)
+    val mode: CodifiedEnum<ModeCapability, String>
+) : CapabilityStateObjectInstance
+
+enum class RangeCapability(override val code: String) : Codified<String> {
     BRIGHTNESS("brightness"),
     CHANNEL("channel"),
     HUMIDITY("humidity"),
     OPEN("open"),
     TEMPERATURE("temperature"),
     VOLUME("volume");
-    object CodifiedSerializer : KSerializer<CodifiedEnum<RangeCapabilityParameterObjectFunction, String>> by codifiedEnumSerializer()
+    object CodifiedSerializer : KSerializer<CodifiedEnum<RangeCapability, String>> by codifiedEnumSerializer()
 }
+
+@Serializable
+data class RangeCapabilityWrapper(
+    @Serializable(with = RangeCapability.CodifiedSerializer::class)
+    val range: CodifiedEnum<RangeCapability, String>
+) : CapabilityStateObjectInstance
 
 @Serializable
 data class Range(
@@ -487,7 +529,7 @@ data class Range(
     override fun toString() = "[$min, $max]"
 }
 
-enum class ToggleCapabilityParameterObjectFunction(override val code: String) : Codified<String>, CapabilityStateObjectInstance {
+enum class ToggleCapability(override val code: String) : Codified<String> {
     BACKLIGHT("backlight"),
     CONTROLS_LOCKED("controls_locked"),
     IONIZATION("ionization"),
@@ -495,14 +537,26 @@ enum class ToggleCapabilityParameterObjectFunction(override val code: String) : 
     MUTE("mute"),
     OSCILLATION("oscillation"),
     PAUSE("pause");
-    object CodifiedSerializer : KSerializer<CodifiedEnum<ToggleCapabilityParameterObjectFunction, String>> by codifiedEnumSerializer()
+    object CodifiedSerializer : KSerializer<CodifiedEnum<ToggleCapability, String>> by codifiedEnumSerializer()
 }
+
+@Serializable
+data class ToggleCapabilityWrapper(
+    @Serializable(with = ToggleCapability.CodifiedSerializer::class)
+    val toggle: CodifiedEnum<ToggleCapability, String>
+) : CapabilityStateObjectInstance
 
 enum class VideoStreamCapabilityParameterObjectStreamProtocol(override val code: String) : Codified<String> {
     HLS("hls"),
     RTMP("rtmp");
     object CodifiedSerializer : KSerializer<CodifiedEnum<VideoStreamCapabilityParameterObjectStreamProtocol, String>> by codifiedEnumSerializer()
 }
+
+@Serializable
+data class VideoStreamCapabilityParameterObjectStreamProtocolWrapper(
+    @Serializable(with = VideoStreamCapabilityParameterObjectStreamProtocol.CodifiedSerializer::class)
+    val streamProtocol: CodifiedEnum<VideoStreamCapabilityParameterObjectStreamProtocol, String>
+)
 
 @Serializable
 sealed interface CapabilityState {
@@ -529,8 +583,9 @@ sealed interface CapabilityStateObjectActionResult : CapabilityState {
 
 @Serializable
 data class ActionResult(
-    val status: Status,
-    @SerialName("error_code") val errorCode: ErrorCode? = null,
+    val status: StatusWrapper,
+    @SerialName("error_code")
+    val errorCode: ErrorCodeWrapper? = null,
     @SerialName("error_message") val errorMessage: String? = null
 )
 
@@ -559,11 +614,23 @@ enum class ErrorCode(override val code: String) : Codified<String> {
     object CodifiedSerializer : KSerializer<CodifiedEnum<ErrorCode, String>> by codifiedEnumSerializer()
 }
 
+@Serializable
+data class ErrorCodeWrapper(
+    @Serializable(with = ErrorCode.CodifiedSerializer::class)
+    val errorCode: CodifiedEnum<ErrorCode, String>
+)
+
 enum class Status(override val code: String) : Codified<String> {
     DONE("DONE"),
     ERROR("ERROR");
     object CodifiedSerializer : KSerializer<CodifiedEnum<Status, String>> by codifiedEnumSerializer()
 }
+
+@Serializable
+data class StatusWrapper(
+    @Serializable(with = Status.CodifiedSerializer::class)
+    val status: CodifiedEnum<Status, String>
+)
 
 @Serializable
 sealed interface CapabilityStateObjectInstance
@@ -573,7 +640,7 @@ sealed interface CapabilityStateObjectValue
 
 @Serializable
 data class OnOffCapabilityStateObjectData(
-    override val instance: OnOffCapabilityStateObjectInstance,
+    override val instance: OnOffCapabilityStateObjectInstanceWrapper,
     override val value: OnOffCapabilityStateObjectValue
 ): CapabilityStateObjectData()
 
@@ -581,19 +648,25 @@ data class OnOffCapabilityStateObjectData(
 data class OnOffCapabilityStateObjectValue(val value: Boolean) : CapabilityStateObjectValue
 
 @Serializable
-enum class OnOffCapabilityStateObjectInstance(override val code: String) : Codified<String>, CapabilityStateObjectInstance {
+enum class OnOffCapabilityStateObjectInstance(override val code: String) : Codified<String> {
     ON("on");
     object CodifiedSerializer : KSerializer<CodifiedEnum<OnOffCapabilityStateObjectInstance, String>> by codifiedEnumSerializer()
 }
 
 @Serializable
+data class OnOffCapabilityStateObjectInstanceWrapper(
+    @Serializable(with = OnOffCapabilityStateObjectInstance.CodifiedSerializer::class)
+    val onOff: CodifiedEnum<OnOffCapabilityStateObjectInstance, String>
+) : CapabilityStateObjectInstance
+
+@Serializable
 data class ColorSettingCapabilityStateObjectData(
-    override val instance: ColorSettingCapabilityStateObjectInstance,
+    override val instance: ColorSettingCapabilityStateObjectInstanceWrapper,
     override val value: ColorSettingCapabilityStateObjectValue
 ): CapabilityStateObjectData()
 
 @Serializable
-enum class ColorSettingCapabilityStateObjectInstance(override val code: String) : Codified<String>, CapabilityStateObjectInstance {
+enum class ColorSettingCapabilityStateObjectInstance(override val code: String) : Codified<String> {
     BASE("base"),
     RGB("rgb"),
     HSV("hsv"),
@@ -603,6 +676,12 @@ enum class ColorSettingCapabilityStateObjectInstance(override val code: String) 
 }
 
 @Serializable
+data class ColorSettingCapabilityStateObjectInstanceWrapper(
+    @Serializable(with = ColorSettingCapabilityStateObjectInstance.CodifiedSerializer::class)
+    val colorSetting: CodifiedEnum<ColorSettingCapabilityStateObjectInstance, String>
+) : CapabilityStateObjectInstance
+
+@Serializable
 sealed interface ColorSettingCapabilityStateObjectValue : CapabilityStateObjectValue
 
 @Serializable
@@ -610,8 +689,9 @@ data class ColorSettingCapabilityStateObjectValueInteger(val value: Int) :
     ColorSettingCapabilityStateObjectValue
 
 @Serializable
-data class ColorSettingCapabilityStateObjectValueObjectScene(val value: SceneObject)
-    : ColorSettingCapabilityStateObjectValue
+data class ColorSettingCapabilityStateObjectValueObjectScene(
+    val value: SceneObjectWrapper
+) : ColorSettingCapabilityStateObjectValue
 
 @Serializable
 data class ColorSettingCapabilityStateObjectValueObjectHSV(val value: HSVObject)
@@ -635,12 +715,12 @@ sealed class VideoStreamCapabilityStateObjectInstance : CapabilityStateObjectIns
 
 @Serializable
 data class VideoStreamCapabilityStateObjectDataValue(
-    val protocols: List<VideoStreamCapabilityParameterObjectStreamProtocol>
+    val protocols: List<VideoStreamCapabilityParameterObjectStreamProtocolWrapper>
 ) : CapabilityStateObjectValue
 
 @Serializable
 data class VideoStreamCapabilityStateObjectActionResultValue(
-    val protocol: VideoStreamCapabilityParameterObjectStreamProtocol,
+    val protocol: VideoStreamCapabilityParameterObjectStreamProtocolWrapper,
     @SerialName("stream_url") val streamUrl: String
 ) : CapabilityStateObjectValue
 
@@ -653,19 +733,19 @@ data class VideoStreamCapabilityStateObjectActionResult(
 
 @Serializable
 data class ModeCapabilityStateObjectData(
-    override val instance: ModeCapabilityInstance,
-    override val value: ModeCapabilityMode
+    override val instance: ModeCapabilityInstanceWrapper,
+    override val value: ModeCapabilityModeWrapper
 ): CapabilityStateObjectData()
 
 @Serializable
 data class ModeCapabilityStateObjectActionResult(
-    override val instance: ModeCapabilityInstance,
+    override val instance: ModeCapabilityInstanceWrapper,
     override val actionResult: ActionResult
 ): CapabilityStateObjectActionResult
 
 @Serializable
 data class RangeCapabilityStateObjectData(
-    override val instance: RangeCapabilityParameterObjectFunction,
+    override val instance: RangeCapabilityWrapper,
     override val value: RangeCapabilityStateObjectDataValue,
     @SerialName("relative") val relative: Boolean? = null
 ): CapabilityStateObjectData()
@@ -677,13 +757,13 @@ data class RangeCapabilityStateObjectDataValue(
 
 @Serializable
 data class RangeCapabilityStateObjectActionResult(
-    override val instance: RangeCapabilityParameterObjectFunction,
+    override val instance: RangeCapabilityWrapper,
     override val actionResult: ActionResult
 ): CapabilityStateObjectActionResult
 
 @Serializable
 data class ToggleCapabilityStateObjectData(
-    override val instance: ToggleCapabilityParameterObjectFunction,
+    override val instance: ToggleCapabilityWrapper,
     override val value: ToggleCapabilityStateObjectDataValue
 ): CapabilityStateObjectData()
 
@@ -694,20 +774,20 @@ data class ToggleCapabilityStateObjectDataValue(
 
 @Serializable
 data class ToggleCapabilityStateObjectActionResult(
-    override val instance: ToggleCapabilityParameterObjectFunction,
+    override val instance: ToggleCapabilityWrapper,
     override val actionResult: ActionResult
 ): CapabilityStateObjectActionResult
 
 @Serializable
 sealed class PropertyParameterObject {
-    abstract val instance: PropertyFunction
+    abstract val instance: PropertyFunctionWrapper
 }
 
 @Serializable
 @SerialName("float")
 data class FloatPropertyParameterObject(
-    override val instance: PropertyFunction,
-    val unit: MeasurementUnit
+    override val instance: PropertyFunctionWrapper,
+    val unit: MeasurementUnitWrapper
 ) : PropertyParameterObject()
 
 enum class MeasurementUnit(override val code: String) : Codified<String> {
@@ -726,9 +806,15 @@ enum class MeasurementUnit(override val code: String) : Codified<String> {
 }
 
 @Serializable
+data class MeasurementUnitWrapper(
+    @Serializable(with = MeasurementUnit.CodifiedSerializer::class)
+    val unit: CodifiedEnum<MeasurementUnit, String>
+)
+
+@Serializable
 @SerialName("event")
 data class EventPropertyParameterObject(
-    override val instance: PropertyFunction,
+    override val instance: PropertyFunctionWrapper,
     val events: List<EventObject>
 ) : PropertyParameterObject()
 
@@ -758,7 +844,13 @@ enum class EventObjectValue(override val code: String) : Codified<String> {
 }
 
 @Serializable
-data class EventObject(val value: EventObjectValue): PropertyValue
+data class EventObjectValueWrapper(
+    @Serializable(with = EventObjectValue.CodifiedSerializer::class)
+    val value: CodifiedEnum<EventObjectValue, String>
+)
+
+@Serializable
+data class EventObject(val value: EventObjectValueWrapper): PropertyValue
 
 @Serializable
 data class FloatObjectValue(val value: Float) : PropertyValue
@@ -796,6 +888,12 @@ enum class PropertyFunction(override val code: String) : Codified<String> {
     object CodifiedSerializer : KSerializer<CodifiedEnum<PropertyFunction, String>> by codifiedEnumSerializer()
 }
 
+@Serializable
+data class PropertyFunctionWrapper(
+    @Serializable(with = PropertyFunction.CodifiedSerializer::class)
+    val function: CodifiedEnum<PropertyFunction, String>
+)
+
 enum class PropertyType(override val code: String) : Codified<String> {
     FLOAT("devices.properties.float"),
     EVENT("devices.properties.event");
@@ -803,38 +901,44 @@ enum class PropertyType(override val code: String) : Codified<String> {
 }
 
 @Serializable
+data class PropertyTypeWrapper(
+    @Serializable(with = PropertyType.CodifiedSerializer::class)
+    val type: CodifiedEnum<PropertyType, String>
+)
+
+@Serializable
 sealed interface PropertyStateObjectData{
-    val type: PropertyType
+    val type: PropertyTypeWrapper
     val state: PropertyState
 }
 
 @Serializable
 sealed interface PropertyState{
-    val propertyFunction: PropertyFunction
+    val propertyFunction: PropertyFunctionWrapper
     val propertyValue: PropertyValue
 }
 
 @Serializable
 data class FloatPropertyStateObjectData(
-    override val type: PropertyType = PropertyType.FLOAT,
+    override val type: PropertyTypeWrapper = PropertyTypeWrapper(PropertyType.FLOAT.codifiedEnum()),
     override val state: FloatPropertyState
 ) : PropertyStateObjectData
 
 @Serializable
 data class EventPropertyStateObjectData(
-    override val type: PropertyType = PropertyType.EVENT,
+    override val type: PropertyTypeWrapper = PropertyTypeWrapper(PropertyType.EVENT.codifiedEnum()),
     override val state: EventPropertyState
 ) : PropertyStateObjectData
 
 @Serializable
 data class FloatPropertyState(
-    override val propertyFunction: PropertyFunction,
+    override val propertyFunction: PropertyFunctionWrapper,
     override val propertyValue: FloatObjectValue
 ) : PropertyState
 
 @Serializable
 data class EventPropertyState(
-    override val propertyFunction: PropertyFunction,
+    override val propertyFunction: PropertyFunctionWrapper,
     override val propertyValue: EventObject
 ) : PropertyState
 
@@ -854,5 +958,6 @@ data class DeviceActionsResultObject(
 data class GroupDeviceInfoObject(
     val id: String,
     val name: String,
-    val type: DeviceType
+    @Serializable(with = DeviceType.CodifiedSerializer::class)
+    val type: DeviceTypeWrapper
 )

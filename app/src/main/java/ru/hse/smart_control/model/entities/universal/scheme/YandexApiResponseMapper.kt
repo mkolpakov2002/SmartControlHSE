@@ -116,13 +116,13 @@ class YandexApiResponseMapper {
                 split = parametersJson["split"]!!.jsonPrimitive.boolean
             )
             CapabilityType.MODE -> ModeCapabilityParameterObject(
-                instance = ModeCapabilityInstance.valueOf(parametersJson["instance"]!!.jsonPrimitive.content),
+                instance = ModeCapability.valueOf(parametersJson["instance"]!!.jsonPrimitive.content),
                 modes = parametersJson["modes"]!!.jsonArray.map {
                     ModeObject(value = ModeCapabilityMode.valueOf(it.jsonObject["value"]!!.jsonPrimitive.content))
                 }
             )
             CapabilityType.RANGE -> RangeCapabilityParameterObject(
-                instance = RangeCapabilityParameterObjectFunction.valueOf(parametersJson["instance"]!!.jsonPrimitive.content),
+                instance = RangeCapability.valueOf(parametersJson["instance"]!!.jsonPrimitive.content),
                 randomAccess = parametersJson["random_access"]!!.jsonPrimitive.boolean,
                 range = parametersJson["range"]?.let {
                     Range(
@@ -134,7 +134,7 @@ class YandexApiResponseMapper {
                 looped = parametersJson["looped"]?.jsonPrimitive?.boolean
             )
             CapabilityType.TOGGLE -> ToggleCapabilityParameterObject(
-                instance = ToggleCapabilityParameterObjectFunction.valueOf(parametersJson["instance"]!!.jsonPrimitive.content)
+                instance = ToggleCapability.valueOf(parametersJson["instance"]!!.jsonPrimitive.content)
             )
             CapabilityType.VIDEO_STREAM -> VideoStreamCapabilityParameterObject(
                 protocols = parametersJson["protocols"]!!.jsonArray.map {
@@ -172,20 +172,20 @@ class YandexApiResponseMapper {
             }
             CapabilityType.RANGE -> stateJson?.let {
                 RangeCapabilityStateObjectData(
-                    instance = RangeCapabilityParameterObjectFunction.valueOf(it["instance"]!!.jsonPrimitive.content),
+                    instance = RangeCapability.valueOf(it["instance"]!!.jsonPrimitive.content),
                     value = RangeCapabilityStateObjectDataValue(value = it["value"]!!.jsonObject["value"]!!.jsonPrimitive.float),
                     relative = it["relative"]?.jsonPrimitive?.boolean
                 )
             }
             CapabilityType.MODE -> stateJson?.let {
                 ModeCapabilityStateObjectData(
-                    instance = ModeCapabilityInstance.valueOf(it["instance"]!!.jsonPrimitive.content),
+                    instance = ModeCapability.valueOf(it["instance"]!!.jsonPrimitive.content),
                     value = ModeCapabilityMode.valueOf(it["value"]!!.jsonPrimitive.content)
                 )
             }
             CapabilityType.TOGGLE -> stateJson?.let {
                 ToggleCapabilityStateObjectData(
-                    instance = ToggleCapabilityParameterObjectFunction.valueOf(it["instance"]!!.jsonPrimitive.content),
+                    instance = ToggleCapability.valueOf(it["instance"]!!.jsonPrimitive.content),
                     value = ToggleCapabilityStateObjectDataValue(value = it["value"]!!.jsonObject["value"]!!.jsonPrimitive.boolean)
                 )
             }

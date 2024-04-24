@@ -36,8 +36,8 @@ class YandexApiResponseMapper {
             householdId = "",
             room = deviceStateResponse.room,
             groups = deviceStateResponse.groups,
-            capabilities = deviceStateResponse.capabilities?.let { mapCapabilities(it) } ?: emptyList(),
-            properties = deviceStateResponse.properties?.let { mapProperties(it) } ?: emptyList(),
+            capabilities = mapCapabilities(deviceStateResponse.capabilities),
+            properties = mapProperties(deviceStateResponse.properties),
             quasarInfo = null
         )
     }

@@ -22,6 +22,7 @@ import ru.hse.smart_control.model.entities.universal.scheme.DeviceType
 import ru.hse.smart_control.model.entities.universal.scheme.DeviceTypeWrapper
 import ru.hse.smart_control.model.entities.universal.scheme.OnOffCapabilityStateObjectInstance
 import ru.hse.smart_control.model.entities.universal.scheme.TestConstants
+import ru.hse.smart_control.model.entities.universal.scheme.UniversalScheme
 import ru.hse.smart_control.model.entities.universal.scheme.YandexApiResponseMapper
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -50,8 +51,8 @@ class YandexApiResponseMapperTest {
         assertEquals("f80b6641-8880-49d5-be31-1b35745c321a", result.groups[0].householdId)
         assertEquals(2, result.groups[0].capabilities.size)
         assertEquals(CapabilityType.COLOR_SETTING.codifiedEnum(), result.groups[0].capabilities[0].type.type)
-        //assertEquals(ColorSettingCapabilityStateObjectInstanceWrapper(ColorSettingCapabilityStateObjectInstance.TEMPERATURE_K.codifiedEnum()), result.groups[0].capabilities[0].state?.instance)
-        //assertEquals(6500, (result.groups[0].capabilities[0].state?.value as ColorSettingCapabilityStateObjectValueInteger).value)
+        assertEquals(ColorSettingCapabilityStateObjectInstanceWrapper(ColorSettingCapabilityStateObjectInstance.TEMPERATURE_K.codifiedEnum()), result.groups[0].capabilities[0].state?.instance)
+        assertEquals(6500, (result.groups[0].capabilities[0].state?.value as ColorSettingCapabilityStateObjectValueInteger).value)
 
         assertEquals(3, result.devices.size)
         assertEquals("4a7a2b29-3788-4e09-b5ef-387447185c96", result.devices[0].id)
@@ -60,7 +61,7 @@ class YandexApiResponseMapperTest {
         assertEquals("L00BN1200M42ZY.yandexmicro", result.devices[0].externalId)
         assertEquals("Q", result.devices[0].skillId)
         assertEquals("f80b6641-8880-49d5-be31-1b35745c321a", result.devices[0].householdId)
-        //assertEquals(null, result.devices[0].room)
+        assertEquals(null, result.devices[0].room)
         assertEquals(emptyList(), result.devices[0].groups)
         assertEquals(emptyList(), result.devices[0].capabilities)
         assertEquals(1, result.devices[0].properties.size)

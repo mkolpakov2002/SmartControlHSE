@@ -60,18 +60,18 @@ object TestConstants {
 """.trimIndent()
 
     val requestManageGroupCapabilitiesJson = """
-       {
-        "actions": [
-            {
-                "type": "devices.capabilities.on_off",
-                "state": {
-                    "instance": "on",
-                    "value": true
-                    }
+{
+    "actions": [
+        {
+            "type": "devices.capabilities.on_off",
+            "state": {
+                "instance": "on",
+                "value": true
             }
-        ]
-    }
-    """.trimIndent()
+        }
+    ]
+}
+""".trimIndent()
 
     val responseManageGroupCapabilitiesJson = """
     {

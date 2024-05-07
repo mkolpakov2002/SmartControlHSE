@@ -1,5 +1,6 @@
 buildscript {
     ext {
+        objectboxVersion = "3.8.0"
         kotlinVersion = '1.9.23'
         activityVersion = '1.8.2'
         appCompatVersion = '1.6.1'
@@ -17,7 +18,7 @@ buildscript {
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
-        //classpath "io.realm:realm-gradle-plugin:10.4.0"
+        classpath("io.objectbox:objectbox-gradle-plugin:$objectboxVersion")
     } // NOTE: Do not place your application dependencies here; they belong
 // in the individual module build.gradle files
     }
@@ -28,7 +29,7 @@ plugins {
     id 'androidx.navigation.safeargs' version "$navVersion" apply false
     id 'org.jetbrains.kotlin.android' version "$kotlinVersion" apply false
     id 'com.google.devtools.ksp' version '1.9.23-1.0.19'
-    id 'io.realm.kotlin' version '1.14.1' apply false
+
 }
 
 tasks.register('clean') {

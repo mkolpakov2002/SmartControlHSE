@@ -5,7 +5,7 @@ plugins {
     id("com.google.devtools.ksp")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.serialization")
-    id("io.realm.kotlin")
+    id("io.objectbox")
 }
 
 android {
@@ -141,13 +141,13 @@ dependencies {
     // Logging
     implementation 'io.github.oshai:kotlin-logging-jvm:5.1.0'
 
-    // Realm
-//    implementation("io.realm.kotlin:library-base:1.13.0")
-    implementation 'io.realm.kotlin:library-base:1.14.1'
-    implementation 'io.realm.kotlin:library-sync:1.14.1'// If using Device Sync
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0' // If using coroutines with the SDK
 
     // Serialization enum
     implementation("dev.bright.codified:enums:1.8.22.2")
     implementation("dev.bright.codified:enums-serializer:1.8.22.2")
+
+    // Database
+    implementation("io.objectbox:objectbox-kotlin:3.8.0")
+    testImplementation("io.objectbox:objectbox-windows:3.8.0")
 }

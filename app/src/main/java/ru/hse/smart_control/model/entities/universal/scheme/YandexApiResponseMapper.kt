@@ -1,16 +1,23 @@
 package ru.hse.smart_control.model.entities.universal.scheme
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.addJsonObject
 import kotlinx.serialization.json.boolean
+import kotlinx.serialization.json.buildJsonArray
+import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.float
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.put
+import kotlinx.serialization.json.putJsonArray
+import kotlinx.serialization.json.putJsonObject
 import pl.brightinventions.codified.enums.codifiedEnum
 import ru.hse.miem.yandexsmarthomeapi.entity.YandexDeviceStateResponse
 import ru.hse.miem.yandexsmarthomeapi.entity.YandexUserInfoResponse
@@ -23,6 +30,18 @@ class YandexApiResponseMapper {
         val scenarioObjects = mapScenarios(userInfoResponse.scenarios)
         val householdObjects = mapHouseholds(userInfoResponse.households)
         return UserInfo(roomObjects, groupObjects, deviceObjects, scenarioObjects, householdObjects)
+    }
+
+    fun mapUserInfoToResponseJson(userInfo: UserInfo): YandexUserInfoResponse {
+        return YandexUserInfoResponse(
+            rooms = mapRoomsToJson(userInfo.rooms),
+            groups = mapGroupsToJson(userInfo.groups),
+            devices = mapDevicesToJson(userInfo.devices),
+            scenarios = mapScenariosToJson(userInfo.scenarios),
+            households = mapHouseholdsToJson(userInfo.households),
+            requestId = "",
+            status = ""
+        )
     }
 
     fun mapDeviceStateResponse(deviceStateResponse: YandexDeviceStateResponse): DeviceObject {
@@ -42,6 +61,43 @@ class YandexApiResponseMapper {
         )
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
+    fun mapDeviceToObjectJson(device: DeviceObject): JsonObject {
+        return buildJsonObject {
+            put("id", device.id)
+            put("name", device.name)
+            putJsonArray("aliases") {
+                device.aliases.forEach { alias ->
+                    add(JsonPrimitive(alias))
+                }
+            }
+            put("type", device.type.type.code())
+            put("external_id", device.externalId)
+            put("skill_id", device.skillId)
+            put("household_id", device.householdId)
+            device.room?.let { put("room", it) }
+            putJsonArray("groups") {
+                device.groups.forEach { group ->
+                    add(JsonPrimitive(group))
+                }
+            }
+            put("capabilities", buildJsonArray {
+                addAll(mapCapabilitiesToJson(device.capabilities))
+            })
+            put("properties", buildJsonArray {
+                addAll(mapPropertiesToJson(device.properties))
+            })
+            device.quasarInfo?.let { put("quasar_info", mapQuasarInfoToJson(it)) }
+        }
+    }
+
+    private fun mapQuasarInfoToJson(quasarInfo: QuasarInfo): JsonObject {
+        return buildJsonObject {
+            put("device_id", quasarInfo.deviceId)
+            put("platform", quasarInfo.platform)
+        }
+    }
+
     private fun mapRooms(rooms: List<JsonObject>): List<RoomObject> {
         return rooms.map { roomJson ->
             RoomObject(
@@ -50,6 +106,21 @@ class YandexApiResponseMapper {
                 devices = roomJson["devices"]?.jsonArray?.map { it.jsonPrimitive.content } ?: emptyList(),
                 householdId = roomJson["household_id"]?.jsonPrimitive?.content ?: ""
             )
+        }
+    }
+
+    private fun mapRoomsToJson(rooms: List<RoomObject>): List<JsonObject> {
+        return rooms.map { room ->
+            buildJsonObject {
+                put("id", room.id)
+                put("name", room.name)
+                putJsonArray("devices") {
+                    room.devices.forEach { deviceId ->
+                        add(JsonPrimitive(deviceId))
+                    }
+                }
+                put("household_id", room.householdId)
+            }
         }
     }
 
@@ -65,6 +136,32 @@ class YandexApiResponseMapper {
                 devices = groupJson["devices"]?.jsonArray?.map { it.jsonPrimitive.content } ?: emptyList(),
                 householdId = groupJson["household_id"]?.jsonPrimitive?.content ?: ""
             )
+        }
+    }
+
+    private fun mapGroupsToJson(groups: List<GroupObject>): List<JsonObject> {
+        return groups.map { group ->
+            buildJsonObject {
+                put("id", group.id)
+                put("name", group.name)
+                putJsonArray("aliases") {
+                    group.aliases.forEach { alias ->
+                        add(JsonPrimitive(alias))
+                    }
+                }
+                put("type", group.type.type.code())
+                putJsonArray("capabilities") {
+                    group.capabilities.forEach { capability ->
+                        add(mapGroupCapabilityToJson(capability))
+                    }
+                }
+                putJsonArray("devices") {
+                    group.devices.forEach { deviceId ->
+                        add(JsonPrimitive(deviceId))
+                    }
+                }
+                put("household_id", group.householdId)
+            }
         }
     }
 
@@ -88,8 +185,20 @@ class YandexApiResponseMapper {
         }
     }
 
+    private fun mapDevicesToJson(devices: List<DeviceObject>): List<JsonObject> {
+        return devices.map { device ->
+            mapDeviceToObjectJson(device)
+        }
+    }
+
     private fun mapCapabilities(capabilities: List<JsonObject>): List<DeviceCapabilityObject> {
         return capabilities.mapNotNull { mapCapability(it) }
+    }
+
+    private fun mapCapabilitiesToJson(capabilities: List<DeviceCapabilityObject>): List<JsonObject> {
+        return capabilities.map { deviceCapability ->
+            mapCapabilityToJson(deviceCapability)
+        }
     }
 
     private fun mapCapability(capabilityJson: JsonObject): DeviceCapabilityObject? {
@@ -110,6 +219,23 @@ class YandexApiResponseMapper {
             )
         } else {
             null
+        }
+    }
+
+    private fun mapCapabilityToJson(deviceCapability: DeviceCapabilityObject): JsonObject {
+        val type = deviceCapability.type
+        val parametersJson = mapCapabilityParametersToJson(type, deviceCapability.parameters)
+        val stateJson = deviceCapability.state?.let {
+            mapCapabilityStateToJson(type, it)
+        }
+
+        return buildJsonObject {
+            put("type", type.type.code())
+            put("reportable", deviceCapability.reportable)
+            put("retrievable", deviceCapability.retrievable)
+            put("parameters", parametersJson)
+            stateJson?.let { put("state", it) } ?: put("state", JsonNull)
+            put("last_updated", deviceCapability.lastUpdated)
         }
     }
 
@@ -166,6 +292,85 @@ class YandexApiResponseMapper {
         }
     }
 
+    private fun mapCapabilityParametersToJson(typeWrapper: CapabilityTypeWrapper, capabilityParameters: CapabilityParameterObject): JsonObject {
+        return when (typeWrapper) {
+            CapabilityTypeWrapper(CapabilityType.COLOR_SETTING.codifiedEnum()) -> {
+                capabilityParameters as? ColorSettingCapabilityParameterObject ?: error("Invalid capability parameters type")
+                buildJsonObject {
+                    capabilityParameters.colorModel?.let { put("color_model", it.colorModel.code()) }
+                    capabilityParameters.temperatureK?.let {
+                        putJsonObject("temperature_k") {
+                            put("min", it.min)
+                            put("max", it.max)
+                        }
+                    }
+                    capabilityParameters.colorScene?.let {
+                        putJsonObject("color_scene") {
+                            putJsonArray("scenes") {
+                                it.scenes.forEach { scene ->
+                                    addJsonObject {
+                                        put("id", scene.id.scene.code())
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            CapabilityTypeWrapper(CapabilityType.ON_OFF.codifiedEnum()) -> {
+                capabilityParameters as? OnOffCapabilityParameterObject ?: error("Invalid capability parameters type")
+                buildJsonObject {
+                    put("split", capabilityParameters.split)
+                }
+            }
+            CapabilityTypeWrapper(CapabilityType.MODE.codifiedEnum()) -> {
+                capabilityParameters as? ModeCapabilityParameterObject ?: error("Invalid capability parameters type")
+                buildJsonObject {
+                    put("instance", capabilityParameters.instance.mode.code())
+                    putJsonArray("modes") {
+                        capabilityParameters.modes.forEach { mode ->
+                            addJsonObject {
+                                put("value", mode.value.mode.code())
+                            }
+                        }
+                    }
+                }
+            }
+            CapabilityTypeWrapper(CapabilityType.RANGE.codifiedEnum()) -> {
+                capabilityParameters as? RangeCapabilityParameterObject ?: error("Invalid capability parameters type")
+                buildJsonObject {
+                    put("instance", capabilityParameters.instance.range.code())
+                    put("random_access", capabilityParameters.randomAccess)
+                    capabilityParameters.range?.let {
+                        putJsonObject("range") {
+                            put("min", it.min)
+                            put("max", it.max)
+                            put("precision", it.precision)
+                        }
+                    }
+                    capabilityParameters.looped?.let { put("looped", it) }
+                }
+            }
+            CapabilityTypeWrapper(CapabilityType.TOGGLE.codifiedEnum()) -> {
+                capabilityParameters as? ToggleCapabilityParameterObject ?: error("Invalid capability parameters type")
+                buildJsonObject {
+                    put("instance", capabilityParameters.instance.toggle.code())
+                }
+            }
+            CapabilityTypeWrapper(CapabilityType.VIDEO_STREAM.codifiedEnum()) -> {
+                capabilityParameters as? VideoStreamCapabilityParameterObject ?: error("Invalid capability parameters type")
+                buildJsonObject {
+                    putJsonArray("protocols") {
+                        capabilityParameters.protocols.forEach { protocol ->
+                            add(JsonPrimitive(protocol.streamProtocol.code()))
+                        }
+                    }
+                }
+            }
+            else -> error("Unsupported capability type")
+        }
+    }
+
     private fun mapCapabilityState(typeWrapper: CapabilityTypeWrapper, stateJson: JsonObject): CapabilityStateObjectData? {
         return when (typeWrapper) {
             CapabilityTypeWrapper(CapabilityType.ON_OFF.codifiedEnum()) ->
@@ -216,8 +421,74 @@ class YandexApiResponseMapper {
         }
     }
 
+    private fun mapCapabilityStateToJson(typeWrapper: CapabilityTypeWrapper, capabilityState: CapabilityStateObjectData): JsonObject? {
+        return when (typeWrapper) {
+            CapabilityTypeWrapper(CapabilityType.ON_OFF.codifiedEnum()) -> {
+                if (capabilityState !is OnOffCapabilityStateObjectData) return null
+                buildJsonObject {
+                    put("instance", capabilityState.instance.onOff.code())
+                    put("value", capabilityState.value.value)
+                }
+            }
+
+            CapabilityTypeWrapper(CapabilityType.COLOR_SETTING.codifiedEnum()) -> {
+                if (capabilityState !is ColorSettingCapabilityStateObjectData) return null
+                buildJsonObject {
+                    put("instance", capabilityState.instance.colorSetting.code())
+                    put("value", when (val value = capabilityState.value) {
+                        is ColorSettingCapabilityStateObjectValueInteger -> JsonPrimitive(value.value)
+                        is ColorSettingCapabilityStateObjectValueObjectScene -> buildJsonObject {
+                            put("type", "scene")
+                            put("id", value.value.scene.code())
+                        }
+                        is ColorSettingCapabilityStateObjectValueObjectHSV -> buildJsonObject {
+                            put("type", "hsv")
+                            put("h", value.value.h)
+                            put("s", value.value.s)
+                            put("v", value.value.v)
+                        }
+                        else -> JsonNull
+                    })
+                }
+            }
+
+            CapabilityTypeWrapper(CapabilityType.RANGE.codifiedEnum()) -> {
+                if (capabilityState !is RangeCapabilityStateObjectData) return null
+                buildJsonObject {
+                    put("instance", capabilityState.instance.range.code())
+                    put("value", capabilityState.value.value)
+                    capabilityState.relative?.let { put("relative", it) }
+                }
+            }
+
+            CapabilityTypeWrapper(CapabilityType.MODE.codifiedEnum()) -> {
+                if (capabilityState !is ModeCapabilityStateObjectData) return null
+                buildJsonObject {
+                    put("instance", capabilityState.instance.mode.code())
+                    put("value", capabilityState.value.mode.code())
+                }
+            }
+
+            CapabilityTypeWrapper(CapabilityType.TOGGLE.codifiedEnum()) -> {
+                if (capabilityState !is ToggleCapabilityStateObjectData) return null
+                buildJsonObject {
+                    put("instance", capabilityState.instance.toggle.code())
+                    put("value", capabilityState.value.value)
+                }
+            }
+
+            else -> null
+        }
+    }
+
     private fun mapProperties(properties: List<JsonObject>): List<DevicePropertyObject> {
         return properties.mapNotNull { mapProperty(it) }
+    }
+
+    private fun mapPropertiesToJson(properties: List<DevicePropertyObject>): List<JsonObject> {
+        return properties.map { deviceProperty ->
+            mapPropertyToJson(deviceProperty)
+        }
     }
 
     private fun mapProperty(propertyJson: JsonObject): DevicePropertyObject? {
@@ -238,6 +509,21 @@ class YandexApiResponseMapper {
         }
     }
 
+    private fun mapPropertyToJson(deviceProperty: DevicePropertyObject): JsonObject {
+        val type = deviceProperty.type
+        val parametersJson = mapPropertyParametersToJson(type, deviceProperty.parameters)
+        val stateJson = deviceProperty.state?.let { mapPropertyStateToJson(type, it) }
+
+        return buildJsonObject {
+            put("type", type.type.code())
+            put("reportable", deviceProperty.reportable)
+            put("retrievable", deviceProperty.retrievable)
+            put("parameters", parametersJson)
+            stateJson?.let { put("state", it) } ?: put("state", JsonNull)
+            put("last_updated", deviceProperty.lastUpdated)
+        }
+    }
+
     private fun mapPropertyParameters(type: PropertyTypeWrapper, parametersJson: JsonObject): PropertyParameterObject {
         return when (type) {
             PropertyTypeWrapper(PropertyType.FLOAT.codifiedEnum()) -> FloatPropertyParameterObject(
@@ -254,6 +540,32 @@ class YandexApiResponseMapper {
                         ?: EventObjectValue.CLICK.codifiedEnum()))
                 } ?: emptyList()
             )
+            else -> error("Unsupported property type")
+        }
+    }
+
+    private fun mapPropertyParametersToJson(type: PropertyTypeWrapper, propertyParameters: PropertyParameterObject): JsonObject {
+        return when (type) {
+            PropertyTypeWrapper(PropertyType.FLOAT.codifiedEnum()) -> {
+                propertyParameters as? FloatPropertyParameterObject ?: error("Invalid property parameters type")
+                buildJsonObject {
+                    put("instance", propertyParameters.instance.function.code())
+                    put("unit", propertyParameters.unit.unit.code())
+                }
+            }
+            PropertyTypeWrapper(PropertyType.EVENT.codifiedEnum()) -> {
+                propertyParameters as? EventPropertyParameterObject ?: error("Invalid property parameters type")
+                buildJsonObject {
+                    put("instance", propertyParameters.instance.function.code())
+                    putJsonArray("events") {
+                        propertyParameters.events.forEach { event ->
+                            addJsonObject {
+                                put("value", event.value.value.code())
+                            }
+                        }
+                    }
+                }
+            }
             else -> error("Unsupported property type")
         }
     }
@@ -283,6 +595,32 @@ class YandexApiResponseMapper {
         }
     }
 
+    private fun mapPropertyStateToJson(type: PropertyTypeWrapper, propertyState: PropertyStateObjectData): JsonObject? {
+        return when (type) {
+            PropertyTypeWrapper(PropertyType.FLOAT.codifiedEnum()) -> {
+                if (propertyState !is FloatPropertyStateObjectData) return null
+                buildJsonObject {
+                    putJsonObject("state") {
+                        put("function", propertyState.state.propertyFunction.function.code())
+                        put("value", propertyState.state.propertyValue.value)
+                    }
+                }
+            }
+
+            PropertyTypeWrapper(PropertyType.EVENT.codifiedEnum()) -> {
+                if (propertyState !is EventPropertyStateObjectData) return null
+                buildJsonObject {
+                    putJsonObject("state") {
+                        put("function", propertyState.state.propertyFunction.function.code())
+                        put("value", propertyState.state.propertyValue.value.value.code())
+                    }
+                }
+            }
+
+            else -> null
+        }
+    }
+
     private fun mapScenarios(scenarios: List<JsonObject>): List<ScenarioObject> {
         return scenarios.map { scenarioJson ->
             ScenarioObject(
@@ -290,6 +628,16 @@ class YandexApiResponseMapper {
                 name = scenarioJson["name"]?.jsonPrimitive?.content ?: "",
                 isActive = scenarioJson["is_active"]?.jsonPrimitive?.boolean ?: false
             )
+        }
+    }
+
+    private fun mapScenariosToJson(scenarios: List<ScenarioObject>): List<JsonObject> {
+        return scenarios.map { scenario ->
+            buildJsonObject {
+                put("id", scenario.id)
+                put("name", scenario.name)
+                put("is_active", scenario.isActive)
+            }
         }
     }
 
@@ -304,12 +652,35 @@ class YandexApiResponseMapper {
         )
     }
 
+    private fun mapGroupCapabilityToJson(groupCapability: GroupCapabilityObject): JsonObject {
+        val parametersJson = mapCapabilityParametersToJson(groupCapability.type, groupCapability.parameters)
+        val stateJson = groupCapability.state?.let {
+            mapCapabilityStateToJson(groupCapability.type, it)
+        }
+
+        return buildJsonObject {
+            put("type", groupCapability.type.type.code())
+            put("retrievable", groupCapability.retrievable)
+            put("parameters", parametersJson)
+            stateJson?.let { put("state", it) }
+        }
+    }
+
     private fun mapHouseholds(households: List<JsonObject>): List<HouseholdObject> {
         return households.map { householdJson ->
             HouseholdObject(
                 id = householdJson["id"]?.jsonPrimitive?.content ?: "",
                 name = householdJson["name"]?.jsonPrimitive?.content ?: ""
             )
+        }
+    }
+
+    private fun mapHouseholdsToJson(households: List<HouseholdObject>): List<JsonObject> {
+        return households.map { household ->
+            buildJsonObject {
+                put("id", household.id)
+                put("name", household.name)
+            }
         }
     }
 }

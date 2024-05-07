@@ -13,7 +13,10 @@ import pl.brightinventions.codified.enums.codifiedEnum
 import pl.brightinventions.codified.enums.serializer.codifiedEnumSerializer
 
 @Serializable
-data class UniversalScheme(val objects: List<UniversalSchemeObject>)
+data class UniversalScheme(
+    var id: Long,
+    var objects: List<UniversalSchemeObject> = emptyList()
+)
 
 @Serializable
 sealed interface UniversalSchemeObject {

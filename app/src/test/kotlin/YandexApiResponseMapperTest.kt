@@ -72,6 +72,11 @@ class YandexApiResponseMapperTest {
         assertEquals("c9a8269c-9939-429b-bb56-05f5abae2937", result.households[0].id)
         assertEquals("Мой дом", result.households[0].name)
 //        assertEquals("households.types.personal", result.households[0].type)
+
+        val jsonDBResult = mapper.mapUserInfoToResponseJson(result)
+        val dbResult = mapper.mapUserInfoResponse(jsonDBResult)
+        assertEquals(result, dbResult)
+
     }
 
     @Test

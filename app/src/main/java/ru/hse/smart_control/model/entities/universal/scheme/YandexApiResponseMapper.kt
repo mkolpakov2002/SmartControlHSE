@@ -1,6 +1,8 @@
 package ru.hse.smart_control.model.entities.universal.scheme
 
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonConfiguration
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
@@ -23,6 +25,48 @@ import ru.hse.miem.yandexsmarthomeapi.entity.YandexDeviceStateResponse
 import ru.hse.miem.yandexsmarthomeapi.entity.YandexUserInfoResponse
 
 class YandexApiResponseMapper {
+
+    @OptIn(ExperimentalSerializationApi::class)
+    val json = Json{
+        prettyPrint = true
+        prettyPrintIndent = "  "
+        encodeDefaults = true
+    }
+
+    @OptIn(ExperimentalSerializationApi::class)
+    fun mapYandexUserInfoResponseToJson(response: YandexUserInfoResponse): String {
+        val responseJson = buildJsonObject {
+            put("status", response.status)
+            put("request_id", response.requestId)
+            putJsonArray("rooms") {
+                response.rooms.forEach { room ->
+                    add(room)
+                }
+            }
+            putJsonArray("groups") {
+                response.groups.forEach { group ->
+                    add(group)
+                }
+            }
+            putJsonArray("devices") {
+                response.devices.forEach { device ->
+                    add(device)
+                }
+            }
+            putJsonArray("scenarios") {
+                response.scenarios.forEach { scenario ->
+                    add(scenario)
+                }
+            }
+            putJsonArray("households") {
+                response.households.forEach { household ->
+                    add(household)
+                }
+            }
+        }
+        return json.encodeToString(JsonElement.serializer(), responseJson)
+    }
+
     fun mapUserInfoResponse(userInfoResponse: YandexUserInfoResponse): UserInfo {
         val roomObjects = mapRooms(userInfoResponse.rooms)
         val groupObjects = mapGroups(userInfoResponse.groups)
@@ -32,7 +76,7 @@ class YandexApiResponseMapper {
         return UserInfo(roomObjects, groupObjects, deviceObjects, scenarioObjects, householdObjects)
     }
 
-    fun mapUserInfoToResponseJson(userInfo: UserInfo): YandexUserInfoResponse {
+    fun mapUserInfoToResponseYandexUserInfoResponse(userInfo: UserInfo): YandexUserInfoResponse {
         return YandexUserInfoResponse(
             rooms = mapRoomsToJson(userInfo.rooms),
             groups = mapGroupsToJson(userInfo.groups),
@@ -57,7 +101,7 @@ class YandexApiResponseMapper {
             groups = deviceStateResponse.groups,
             capabilities = mapCapabilities(deviceStateResponse.capabilities),
             properties = mapProperties(deviceStateResponse.properties),
-            quasarInfo = null
+            quasarInfo = deviceStateResponse.quasarInfo?.let { mapQuasarInfo(it) }
         )
     }
 
@@ -89,6 +133,13 @@ class YandexApiResponseMapper {
             })
             device.quasarInfo?.let { put("quasar_info", mapQuasarInfoToJson(it)) }
         }
+    }
+
+    private fun mapQuasarInfo(quasarInfo: JsonObject): QuasarInfo {
+        return QuasarInfo(
+            deviceId = quasarInfo["device_id"]?.jsonPrimitive?.content ?: "",
+            platform = quasarInfo["platform"]?.jsonPrimitive?.content ?: ""
+        )
     }
 
     private fun mapQuasarInfoToJson(quasarInfo: QuasarInfo): JsonObject {

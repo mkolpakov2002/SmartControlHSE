@@ -189,8 +189,8 @@ object TestConstants {
 
     val responseUserInfoJson = """
         {
-          "status": "ok",
-          "request_id": "9f055dc8-5407-499a-87d7-b31af8ec289f",
+          "status": "",
+          "request_id": "",
           "rooms": [
             {
               "id": "ca82a680-0317-4bec-b92e-5c3dd27c61eb",

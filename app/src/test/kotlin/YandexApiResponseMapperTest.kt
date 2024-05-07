@@ -22,10 +22,10 @@ import ru.hse.smart_control.model.entities.universal.scheme.DeviceType
 import ru.hse.smart_control.model.entities.universal.scheme.DeviceTypeWrapper
 import ru.hse.smart_control.model.entities.universal.scheme.OnOffCapabilityStateObjectInstance
 import ru.hse.smart_control.model.entities.universal.scheme.TestConstants
-import ru.hse.smart_control.model.entities.universal.scheme.UniversalScheme
 import ru.hse.smart_control.model.entities.universal.scheme.YandexApiResponseMapper
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import net.javacrumbs.jsonunit.JsonAssert.assertJsonEquals
 
 class YandexApiResponseMapperTest {
 
@@ -66,6 +66,9 @@ class YandexApiResponseMapperTest {
         assertEquals(emptyList(), result.devices[0].capabilities)
         assertEquals(1, result.devices[0].properties.size)
 
+        assertEquals("Лампочка", result.devices[2].name)
+        assertEquals(6500, (result.devices[2].capabilities[0].state?.value as ColorSettingCapabilityStateObjectValueInteger).value)
+
         assertEquals(0, result.scenarios.size)
 
         assertEquals(2, result.households.size)
@@ -73,9 +76,15 @@ class YandexApiResponseMapperTest {
         assertEquals("Мой дом", result.households[0].name)
 //        assertEquals("households.types.personal", result.households[0].type)
 
-        val jsonDBResult = mapper.mapUserInfoToResponseJson(result)
-        val dbResult = mapper.mapUserInfoResponse(jsonDBResult)
-        assertEquals(result, dbResult)
+        val yandexObjectResult = mapper.mapUserInfoToResponseYandexUserInfoResponse(result)
+        val jsonDBResult = mapper.mapYandexUserInfoResponseToJson(yandexObjectResult)
+
+        assertJsonEquals(TestConstants.responseUserInfoJson, jsonDBResult)
+
+        val responseFromDB = Json.decodeFromString<YandexUserInfoResponse>(jsonDBResult)
+        val resultFromDB = mapper.mapUserInfoResponse(responseFromDB)
+
+        assertEquals(result, resultFromDB)
 
     }
 

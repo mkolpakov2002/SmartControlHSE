@@ -147,7 +147,5 @@ dependencies {
     implementation("dev.bright.codified:enums:1.8.22.2")
     implementation("dev.bright.codified:enums-serializer:1.8.22.2")
 
-    // Database
-    implementation("io.objectbox:objectbox-kotlin:3.8.0")
-    testImplementation("io.objectbox:objectbox-windows:3.8.0")
+    testImplementation 'net.javacrumbs.json-unit:json-unit:3.2.7'
 }

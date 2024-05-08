@@ -12,17 +12,19 @@ import ru.hse.smart_control.databinding.FragmentConnectionTypeBinding
 
 class ConnectionTypeFragment : Fragment() {
 
+    private var _binding: FragmentConnectionTypeBinding? = null
+    private val binding get() = _binding!!
+
     private val viewModel: ConnectionTypeViewModel by lazy {
         ViewModelProvider(this)[ConnectionTypeViewModel::class.java]
     }
-    private lateinit var binding: FragmentConnectionTypeBinding
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentConnectionTypeBinding.inflate(inflater, container, false)
+        _binding = FragmentConnectionTypeBinding.inflate(inflater, container, false)
         return binding.root
     }
 

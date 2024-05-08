@@ -13,27 +13,26 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener
-import ru.hse.smart_control.domain.connection.ConnectionFactory.bluetoothBounded
-import ru.hse.smart_control.model.entities.DeviceOld
 import ru.hse.smart_control.R
 import ru.hse.smart_control.databinding.FragmentBluetoothPairedDevicesBinding
+import ru.hse.smart_control.domain.connection.ConnectionFactory.bluetoothBounded
+import ru.hse.smart_control.model.entities.DeviceOld
 
 class BluetoothPairedDevicesFragment : Fragment(), NewBtDevicesAdapter.OnDeviceClicked, OnRefreshListener {
-    private lateinit var binding: FragmentBluetoothPairedDevicesBinding
+
+    private var _binding: FragmentBluetoothPairedDevicesBinding? = null
+    private val binding get() = _binding!!
+
     private lateinit var pairedList: RecyclerView
     private lateinit var pairedDevicesTitleTextView: TextView
     private lateinit var swipeToRefreshLayout: SwipeRefreshLayout
     var newBtDevicesAdapter: NewBtDevicesAdapter? = null
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // Inflate the layout for this fragment
-        binding = FragmentBluetoothPairedDevicesBinding.inflate(inflater,container,false)
+        _binding = FragmentBluetoothPairedDevicesBinding.inflate(inflater, container, false)
         return binding.root
     }
 

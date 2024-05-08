@@ -148,4 +148,19 @@ dependencies {
     implementation("dev.bright.codified:enums-serializer:1.8.22.2")
 
     testImplementation 'net.javacrumbs.json-unit:json-unit:3.2.7'
+
+    // Snackbar
+    implementation("com.github.Musfick:Snackify:0.1.2")
+
+    // Retrofit
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
+
+    // OkHttp
+    implementation("com.squareup.okhttp3:okhttp:4.10.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.10.0")
+
+    // Gson
+    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 }

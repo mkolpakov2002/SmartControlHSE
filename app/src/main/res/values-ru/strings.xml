@@ -78,4 +78,8 @@
     <string name="dialog_permissions_general_rationale">Приложению требуются необходимые разрешения для корректной работы.</string>
     <!-- Диалоги -->
     <string name="dialog_permissions_bluetooth_rationale">Чтобы использовать приложение Роботы ВШЭ, предоставьте разрешения на доступ к Bluetooth и хранилищу.</string>
+
+    <string name="register">Регистрация</string>
+    <string name="login">Вход</string>
+
 </resources>

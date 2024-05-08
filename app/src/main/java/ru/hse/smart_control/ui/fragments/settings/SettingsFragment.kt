@@ -1,7 +1,6 @@
 package ru.hse.smart_control.ui.fragments.settings
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -13,25 +12,17 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import ru.hse.smart_control.R
 import ru.hse.smart_control.databinding.FragmentSettingsBinding
 
-private const val REQUEST_CODE_PERMISSION = 100
-private const val REQUEST_CODE_PICK_FILE = 101
 class SettingsFragment : Fragment(){
-    private var fragmentContext: Context? = null
-    private val dataBinding by lazy {
-        FragmentSettingsBinding.inflate(layoutInflater)
-    }
 
-    override fun onAttach(context: Context) {
-        fragmentContext = context
-        super.onAttach(context)
-    }
+    private var _binding: FragmentSettingsBinding? = null
+    private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // Inflate the layout for this fragment
-        return dataBinding.root
+        _binding = FragmentSettingsBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -41,7 +32,7 @@ class SettingsFragment : Fragment(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val recyclerView = dataBinding.settingItems
+        val recyclerView = binding.settingItems
         val layoutManager = LinearLayoutManager(requireContext())
         layoutManager.orientation = LinearLayoutManager.VERTICAL
         recyclerView.layoutManager = layoutManager
@@ -79,6 +70,13 @@ class SettingsFragment : Fragment(){
             //TODO
             // Если разрешение уже есть, вызвать функцию для выбора xml файла из памяти
         }
+    }
+
+    companion object {
+
+        private const val REQUEST_CODE_PERMISSION = 100
+        private const val REQUEST_CODE_PICK_FILE = 101
+
     }
 
 }

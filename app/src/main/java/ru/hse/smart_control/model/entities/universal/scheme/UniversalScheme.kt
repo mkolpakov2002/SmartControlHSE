@@ -161,7 +161,7 @@ data class DeviceObject(
     @SerialName("external_id") override val externalId: String,
     @SerialName("skill_id") override val skillId: String,
     @SerialName("household_id") val householdId: String,
-    override val room: String?,
+    @SerialName("room") override val room: String? = null,
     override val groups: List<String>,
     override val capabilities: List<DeviceCapabilityObject>,
     override val properties: List<DevicePropertyObject>,
@@ -178,7 +178,8 @@ data class ScenarioObject(
 @Serializable
 data class HouseholdObject(
     @SerialName("id") val id: String,
-    @SerialName("name") val name: String
+    @SerialName("name") val name: String,
+    @SerialName("type") val type: String
 )
 
 @Serializable

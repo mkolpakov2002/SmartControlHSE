@@ -119,7 +119,7 @@ class YandexApiResponseMapper {
             put("external_id", device.externalId)
             put("skill_id", device.skillId)
             put("household_id", device.householdId)
-            device.room?.let { put("room", it) }
+            put("room", device.room)
             putJsonArray("groups") {
                 device.groups.forEach { group ->
                     add(JsonPrimitive(group))
@@ -231,7 +231,7 @@ class YandexApiResponseMapper {
                 groups = deviceJson["groups"]?.jsonArray?.map { it.jsonPrimitive.content } ?: emptyList(),
                 capabilities = deviceJson["capabilities"]?.jsonArray?.mapNotNull { mapCapability(it.jsonObject) } ?: emptyList(),
                 properties = deviceJson["properties"]?.jsonArray?.mapNotNull { mapProperty(it.jsonObject) } ?: emptyList(),
-                quasarInfo = null
+                quasarInfo = deviceJson["quasar_info"]?.jsonObject?.let { mapQuasarInfo(it) }
             )
         }
     }
@@ -276,16 +276,14 @@ class YandexApiResponseMapper {
     private fun mapCapabilityToJson(deviceCapability: DeviceCapabilityObject): JsonObject {
         val type = deviceCapability.type
         val parametersJson = mapCapabilityParametersToJson(type, deviceCapability.parameters)
-        val stateJson = deviceCapability.state?.let {
-            mapCapabilityStateToJson(type, it)
-        }
+        val stateJson = deviceCapability.state?.let { mapCapabilityStateToJson(type, it) }
 
         return buildJsonObject {
             put("type", type.type.code())
             put("reportable", deviceCapability.reportable)
             put("retrievable", deviceCapability.retrievable)
             put("parameters", parametersJson)
-            stateJson?.let { put("state", it) } ?: put("state", JsonNull)
+            stateJson?.let { put("state", it) }
             put("last_updated", deviceCapability.lastUpdated)
         }
     }
@@ -400,6 +398,7 @@ class YandexApiResponseMapper {
                         }
                     }
                     capabilityParameters.looped?.let { put("looped", it) }
+                    capabilityParameters.unit?.let { put("unit", it.unit.code()) }
                 }
             }
             CapabilityTypeWrapper(CapabilityType.TOGGLE.codifiedEnum()) -> {
@@ -498,7 +497,6 @@ class YandexApiResponseMapper {
                             put("s", value.value.s)
                             put("v", value.value.v)
                         }
-                        else -> JsonNull
                     })
                 }
             }
@@ -721,7 +719,8 @@ class YandexApiResponseMapper {
         return households.map { householdJson ->
             HouseholdObject(
                 id = householdJson["id"]?.jsonPrimitive?.content ?: "",
-                name = householdJson["name"]?.jsonPrimitive?.content ?: ""
+                name = householdJson["name"]?.jsonPrimitive?.content ?: "",
+                type = householdJson["type"]?.jsonPrimitive?.content ?: ""
             )
         }
     }
@@ -731,6 +730,7 @@ class YandexApiResponseMapper {
             buildJsonObject {
                 put("id", household.id)
                 put("name", household.name)
+                put("type", household.type)
             }
         }
     }

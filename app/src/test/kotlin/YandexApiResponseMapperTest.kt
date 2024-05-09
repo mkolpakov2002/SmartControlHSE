@@ -12,20 +12,19 @@ import ru.hse.miem.yandexsmarthomeapi.entity.YandexManageDeviceCapabilitiesState
 import ru.hse.miem.yandexsmarthomeapi.entity.YandexManageDeviceCapabilitiesStateResponse
 import ru.hse.miem.yandexsmarthomeapi.entity.YandexManageGroupCapabilitiesStateResponse
 import ru.hse.miem.yandexsmarthomeapi.entity.YandexUserInfoResponse
-import ru.hse.smart_control.model.entities.universal.scheme.CapabilityType
-import ru.hse.smart_control.model.entities.universal.scheme.ColorModel
-import ru.hse.smart_control.model.entities.universal.scheme.ColorSettingCapabilityParameterObject
-import ru.hse.smart_control.model.entities.universal.scheme.ColorSettingCapabilityStateObjectInstance
-import ru.hse.smart_control.model.entities.universal.scheme.ColorSettingCapabilityStateObjectInstanceWrapper
-import ru.hse.smart_control.model.entities.universal.scheme.ColorSettingCapabilityStateObjectValueInteger
-import ru.hse.smart_control.model.entities.universal.scheme.DeviceType
-import ru.hse.smart_control.model.entities.universal.scheme.DeviceTypeWrapper
-import ru.hse.smart_control.model.entities.universal.scheme.OnOffCapabilityStateObjectInstance
 import ru.hse.smart_control.model.entities.universal.scheme.TestConstants
 import ru.hse.smart_control.model.entities.universal.scheme.YandexApiResponseMapper
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.DeviceType
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.DeviceTypeWrapper
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.CapabilityType
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.ColorModel
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.ColorSettingCapabilityParameterObject
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.ColorSettingCapabilityStateObjectInstance
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.ColorSettingCapabilityStateObjectInstanceWrapper
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.ColorSettingCapabilityStateObjectValueInteger
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.OnOffCapabilityStateObjectInstance
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import net.javacrumbs.jsonunit.JsonAssert.assertJsonEquals
 
 class YandexApiResponseMapperTest {
 
@@ -34,7 +33,7 @@ class YandexApiResponseMapperTest {
     @Test
     fun `test mapUserInfoResponse`() {
         val response = Json.decodeFromString<YandexUserInfoResponse>(TestConstants.responseUserInfoJson)
-        val result = mapper.mapUserInfoResponse(response)
+        val result = mapper.mapUserInfoResponseFromJson(response)
 
         assertEquals(4, result.rooms.size)
         assertEquals("ca82a680-0317-4bec-b92e-5c3dd27c61eb", result.rooms[0].id)
@@ -51,7 +50,8 @@ class YandexApiResponseMapperTest {
         assertEquals("f80b6641-8880-49d5-be31-1b35745c321a", result.groups[0].householdId)
         assertEquals(2, result.groups[0].capabilities.size)
         assertEquals(CapabilityType.COLOR_SETTING.codifiedEnum(), result.groups[0].capabilities[0].type.type)
-        assertEquals(ColorSettingCapabilityStateObjectInstanceWrapper(ColorSettingCapabilityStateObjectInstance.TEMPERATURE_K.codifiedEnum()), result.groups[0].capabilities[0].state?.instance)
+        assertEquals(ColorSettingCapabilityStateObjectInstanceWrapper(
+            ColorSettingCapabilityStateObjectInstance.TEMPERATURE_K.codifiedEnum()), result.groups[0].capabilities[0].state?.instance)
         assertEquals(6500, (result.groups[0].capabilities[0].state?.value as ColorSettingCapabilityStateObjectValueInteger).value)
 
         assertEquals(3, result.devices.size)
@@ -81,7 +81,7 @@ class YandexApiResponseMapperTest {
 //        assertJsonEquals(TestConstants.responseUserInfoJson, jsonDBResult)
 
         val responseFromDB = Json.decodeFromString<YandexUserInfoResponse>(jsonDBResult)
-        val resultFromDB = mapper.mapUserInfoResponse(responseFromDB)
+        val resultFromDB = mapper.mapUserInfoResponseFromJson(responseFromDB)
 
         assertEquals(result, resultFromDB)
 
@@ -90,7 +90,7 @@ class YandexApiResponseMapperTest {
     @Test
     fun `test mapDeviceStateResponse`() {
         val response = Json.decodeFromString<YandexDeviceStateResponse>(TestConstants.responseDeviceStateJson)
-        val result = mapper.mapDeviceStateResponse(response)
+        val result = mapper.mapDeviceStateResponseFromYandexDeviceStateResponse(response)
 
         assertEquals("51e797a4-93cf-4bc4-832e-698b6703467c", result.id)
         assertEquals("Лампа", result.name)

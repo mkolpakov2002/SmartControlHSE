@@ -78,7 +78,7 @@ data class YandexDeviceStateResponse(
     @SerialName("skill_id") val skillId: String,
     val capabilities: List<JsonObject>,
     val properties: List<JsonObject>,
-    val quasarInfo: JsonObject?
+    val quasarInfo: JsonObject? = null
 ) : YandexResponse
 
 /**

@@ -2,7 +2,6 @@ package ru.hse.smart_control.model.entities.universal.scheme
 
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
@@ -23,6 +22,79 @@ import kotlinx.serialization.json.putJsonObject
 import pl.brightinventions.codified.enums.codifiedEnum
 import ru.hse.miem.yandexsmarthomeapi.entity.YandexDeviceStateResponse
 import ru.hse.miem.yandexsmarthomeapi.entity.YandexUserInfoResponse
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.DeviceObject
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.DeviceType
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.DeviceTypeWrapper
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.GroupObject
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.HouseholdObject
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.MeasurementUnitWrapper
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.QuasarInfo
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.RoomObject
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.ScenarioObject
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.SmartHomeInfo
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.CapabilityParameterObject
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.CapabilityStateObjectData
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.CapabilityType
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.CapabilityTypeWrapper
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.ColorModelWrapper
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.ColorScene
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.ColorSettingCapabilityParameterObject
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.ColorSettingCapabilityStateObjectData
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.ColorSettingCapabilityStateObjectInstance
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.ColorSettingCapabilityStateObjectInstanceWrapper
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.ColorSettingCapabilityStateObjectValueInteger
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.ColorSettingCapabilityStateObjectValueObjectHSV
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.ColorSettingCapabilityStateObjectValueObjectScene
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.DeviceCapabilityObject
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.GroupCapabilityObject
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.HSVObject
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.ModeCapability
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.ModeCapabilityInstanceWrapper
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.ModeCapabilityMode
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.ModeCapabilityModeWrapper
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.ModeCapabilityParameterObject
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.ModeCapabilityStateObjectData
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.ModeObject
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.OnOffCapabilityParameterObject
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.OnOffCapabilityStateObjectData
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.OnOffCapabilityStateObjectInstance
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.OnOffCapabilityStateObjectInstanceWrapper
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.OnOffCapabilityStateObjectValue
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.Range
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.RangeCapability
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.RangeCapabilityParameterObject
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.RangeCapabilityStateObjectData
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.RangeCapabilityStateObjectDataValue
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.RangeCapabilityWrapper
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.Scene
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.SceneObject
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.SceneObjectWrapper
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.TemperatureK
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.ToggleCapability
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.ToggleCapabilityParameterObject
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.ToggleCapabilityStateObjectData
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.ToggleCapabilityStateObjectDataValue
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.ToggleCapabilityWrapper
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.VideoStreamCapabilityParameterObject
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.VideoStreamCapabilityParameterObjectStreamProtocolWrapper
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.property.DevicePropertyObject
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.property.EventObject
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.property.EventObjectValue
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.property.EventObjectValueWrapper
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.property.EventPropertyParameterObject
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.property.EventPropertyState
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.property.EventPropertyStateObjectData
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.property.FloatObjectValue
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.property.FloatPropertyParameterObject
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.property.FloatPropertyState
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.property.FloatPropertyStateObjectData
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.property.MeasurementUnit
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.property.PropertyFunction
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.property.PropertyFunctionWrapper
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.property.PropertyParameterObject
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.property.PropertyStateObjectData
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.property.PropertyType
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.property.PropertyTypeWrapper
 
 class YandexApiResponseMapper {
 
@@ -67,16 +139,16 @@ class YandexApiResponseMapper {
         return json.encodeToString(JsonElement.serializer(), responseJson)
     }
 
-    fun mapUserInfoResponse(userInfoResponse: YandexUserInfoResponse): UserInfo {
-        val roomObjects = mapRooms(userInfoResponse.rooms)
-        val groupObjects = mapGroups(userInfoResponse.groups)
-        val deviceObjects = mapDevices(userInfoResponse.devices)
-        val scenarioObjects = mapScenarios(userInfoResponse.scenarios)
-        val householdObjects = mapHouseholds(userInfoResponse.households)
-        return UserInfo(roomObjects, groupObjects, deviceObjects, scenarioObjects, householdObjects)
+    fun mapUserInfoResponseFromJson(userInfoResponse: YandexUserInfoResponse): SmartHomeInfo {
+        val roomObjects = mapRoomsFromJson(userInfoResponse.rooms)
+        val groupObjects = mapGroupsFromJson(userInfoResponse.groups)
+        val deviceObjects = mapDevicesFromJson(userInfoResponse.devices)
+        val scenarioObjects = mapScenariosFromJson(userInfoResponse.scenarios)
+        val householdObjects = mapHouseholdsFromJson(userInfoResponse.households)
+        return SmartHomeInfo(roomObjects, groupObjects, deviceObjects, scenarioObjects, householdObjects)
     }
 
-    fun mapUserInfoToResponseYandexUserInfoResponse(userInfo: UserInfo): YandexUserInfoResponse {
+    fun mapUserInfoToResponseYandexUserInfoResponse(userInfo: SmartHomeInfo): YandexUserInfoResponse {
         return YandexUserInfoResponse(
             rooms = mapRoomsToJson(userInfo.rooms),
             groups = mapGroupsToJson(userInfo.groups),
@@ -88,7 +160,7 @@ class YandexApiResponseMapper {
         )
     }
 
-    fun mapDeviceStateResponse(deviceStateResponse: YandexDeviceStateResponse): DeviceObject {
+    fun mapDeviceStateResponseFromYandexDeviceStateResponse(deviceStateResponse: YandexDeviceStateResponse): DeviceObject {
         return DeviceObject(
             id = deviceStateResponse.id,
             name = deviceStateResponse.name,
@@ -99,14 +171,14 @@ class YandexApiResponseMapper {
             householdId = "",
             room = deviceStateResponse.room,
             groups = deviceStateResponse.groups,
-            capabilities = mapCapabilities(deviceStateResponse.capabilities),
-            properties = mapProperties(deviceStateResponse.properties),
+            capabilities = mapCapabilitiesFromJson(deviceStateResponse.capabilities),
+            properties = mapPropertiesFromJson(deviceStateResponse.properties),
             quasarInfo = deviceStateResponse.quasarInfo?.let { mapQuasarInfo(it) }
         )
     }
 
     @OptIn(ExperimentalSerializationApi::class)
-    fun mapDeviceToObjectJson(device: DeviceObject): JsonObject {
+    fun mapDeviceToJson(device: DeviceObject): JsonObject {
         return buildJsonObject {
             put("id", device.id)
             put("name", device.name)
@@ -149,7 +221,7 @@ class YandexApiResponseMapper {
         }
     }
 
-    private fun mapRooms(rooms: List<JsonObject>): List<RoomObject> {
+    private fun mapRoomsFromJson(rooms: List<JsonObject>): List<RoomObject> {
         return rooms.map { roomJson ->
             RoomObject(
                 id = roomJson["id"]?.jsonPrimitive?.content ?: "",
@@ -175,7 +247,7 @@ class YandexApiResponseMapper {
         }
     }
 
-    private fun mapGroups(groups: List<JsonObject>): List<GroupObject> {
+    private fun mapGroupsFromJson(groups: List<JsonObject>): List<GroupObject> {
         return groups.map { groupJson ->
             GroupObject(
                 id = groupJson["id"]?.jsonPrimitive?.content ?: "",
@@ -183,7 +255,7 @@ class YandexApiResponseMapper {
                 aliases = groupJson["aliases"]?.jsonArray?.map { it.jsonPrimitive.content } ?: emptyList(),
                 type = groupJson["type"]?.jsonPrimitive?.content?.let { DeviceTypeWrapper(it.codifiedEnum()) }
                     ?: DeviceTypeWrapper(DeviceType.OTHER.codifiedEnum()),
-                capabilities = groupJson["capabilities"]?.jsonArray?.map { mapGroupCapability(it.jsonObject) } ?: emptyList(),
+                capabilities = groupJson["capabilities"]?.jsonArray?.map { mapGroupCapabilityFromJson(it.jsonObject) } ?: emptyList(),
                 devices = groupJson["devices"]?.jsonArray?.map { it.jsonPrimitive.content } ?: emptyList(),
                 householdId = groupJson["household_id"]?.jsonPrimitive?.content ?: ""
             )
@@ -216,7 +288,7 @@ class YandexApiResponseMapper {
         }
     }
 
-    private fun mapDevices(devices: List<JsonObject>): List<DeviceObject> {
+    private fun mapDevicesFromJson(devices: List<JsonObject>): List<DeviceObject> {
         return devices.map { deviceJson ->
             DeviceObject(
                 id = deviceJson["id"]?.jsonPrimitive?.content ?: "",
@@ -229,8 +301,8 @@ class YandexApiResponseMapper {
                 householdId = deviceJson["household_id"]?.jsonPrimitive?.content ?: "",
                 room = deviceJson["room"]?.jsonPrimitive?.contentOrNull,
                 groups = deviceJson["groups"]?.jsonArray?.map { it.jsonPrimitive.content } ?: emptyList(),
-                capabilities = deviceJson["capabilities"]?.jsonArray?.mapNotNull { mapCapability(it.jsonObject) } ?: emptyList(),
-                properties = deviceJson["properties"]?.jsonArray?.mapNotNull { mapProperty(it.jsonObject) } ?: emptyList(),
+                capabilities = deviceJson["capabilities"]?.jsonArray?.mapNotNull { mapCapabilityFromJson(it.jsonObject) } ?: emptyList(),
+                properties = deviceJson["properties"]?.jsonArray?.mapNotNull { mapPropertyFromJson(it.jsonObject) } ?: emptyList(),
                 quasarInfo = deviceJson["quasar_info"]?.jsonObject?.let { mapQuasarInfo(it) }
             )
         }
@@ -238,12 +310,12 @@ class YandexApiResponseMapper {
 
     private fun mapDevicesToJson(devices: List<DeviceObject>): List<JsonObject> {
         return devices.map { device ->
-            mapDeviceToObjectJson(device)
+            mapDeviceToJson(device)
         }
     }
 
-    private fun mapCapabilities(capabilities: List<JsonObject>): List<DeviceCapabilityObject> {
-        return capabilities.mapNotNull { mapCapability(it) }
+    private fun mapCapabilitiesFromJson(capabilities: List<JsonObject>): List<DeviceCapabilityObject> {
+        return capabilities.mapNotNull { mapCapabilityFromJson(it) }
     }
 
     private fun mapCapabilitiesToJson(capabilities: List<DeviceCapabilityObject>): List<JsonObject> {
@@ -252,13 +324,13 @@ class YandexApiResponseMapper {
         }
     }
 
-    private fun mapCapability(capabilityJson: JsonObject): DeviceCapabilityObject? {
+    private fun mapCapabilityFromJson(capabilityJson: JsonObject): DeviceCapabilityObject? {
         val type = CapabilityTypeWrapper(capabilityJson["type"]?.jsonPrimitive?.content!!.codifiedEnum())
-        val parameters = capabilityJson["parameters"]?.jsonObject?.let { mapCapabilityParameters(type, it) }
+        val parameters = capabilityJson["parameters"]?.jsonObject?.let { mapCapabilityParametersFromJson(type, it) }
         val state = if(capabilityJson["state"] is JsonNull)
             null
         else
-            capabilityJson["state"]?.jsonObject?.let { mapCapabilityState(type, it) }
+            capabilityJson["state"]?.jsonObject?.let { mapCapabilityStateFromJson(type, it) }
         return if (parameters != null) {
             DeviceCapabilityObject(
                 type = type,
@@ -288,7 +360,7 @@ class YandexApiResponseMapper {
         }
     }
 
-    private fun mapCapabilityParameters(typeWrapper: CapabilityTypeWrapper, parametersJson: JsonObject): CapabilityParameterObject {
+    private fun mapCapabilityParametersFromJson(typeWrapper: CapabilityTypeWrapper, parametersJson: JsonObject): CapabilityParameterObject {
         return when (typeWrapper) {
             CapabilityTypeWrapper(CapabilityType.COLOR_SETTING.codifiedEnum()) -> ColorSettingCapabilityParameterObject(
                 colorModel = parametersJson["color_model"]?.jsonPrimitive?.contentOrNull?.let { ColorModelWrapper(it.codifiedEnum()) },
@@ -421,7 +493,7 @@ class YandexApiResponseMapper {
         }
     }
 
-    private fun mapCapabilityState(typeWrapper: CapabilityTypeWrapper, stateJson: JsonObject): CapabilityStateObjectData? {
+    private fun mapCapabilityStateFromJson(typeWrapper: CapabilityTypeWrapper, stateJson: JsonObject): CapabilityStateObjectData? {
         return when (typeWrapper) {
             CapabilityTypeWrapper(CapabilityType.ON_OFF.codifiedEnum()) ->
                 OnOffCapabilityStateObjectData(
@@ -433,7 +505,8 @@ class YandexApiResponseMapper {
             CapabilityTypeWrapper(CapabilityType.COLOR_SETTING.codifiedEnum()) ->
                 ColorSettingCapabilityStateObjectData(
                     instance = stateJson["instance"]?.jsonPrimitive?.content?.let { ColorSettingCapabilityStateObjectInstanceWrapper(it.codifiedEnum()) }
-                        ?: ColorSettingCapabilityStateObjectInstanceWrapper(ColorSettingCapabilityStateObjectInstance.TEMPERATURE_K.codifiedEnum()),
+                        ?: ColorSettingCapabilityStateObjectInstanceWrapper(
+                            ColorSettingCapabilityStateObjectInstance.TEMPERATURE_K.codifiedEnum()),
                     value = when (val valueJson = stateJson["value"]) {
                         is JsonPrimitive -> ColorSettingCapabilityStateObjectValueInteger(value = valueJson.int)
                         is JsonObject -> when (valueJson["type"]?.jsonPrimitive?.content) {
@@ -442,7 +515,8 @@ class YandexApiResponseMapper {
                                 h = valueJson["h"]?.jsonPrimitive?.int ?: 0,
                                 s = valueJson["s"]?.jsonPrimitive?.int ?: 0,
                                 v = valueJson["v"]?.jsonPrimitive?.int ?: 0
-                            ))
+                            )
+                            )
                         }
                         else -> ColorSettingCapabilityStateObjectValueInteger(0)
                     }
@@ -530,8 +604,8 @@ class YandexApiResponseMapper {
         }
     }
 
-    private fun mapProperties(properties: List<JsonObject>): List<DevicePropertyObject> {
-        return properties.mapNotNull { mapProperty(it) }
+    private fun mapPropertiesFromJson(properties: List<JsonObject>): List<DevicePropertyObject> {
+        return properties.mapNotNull { mapPropertyFromJson(it) }
     }
 
     private fun mapPropertiesToJson(properties: List<DevicePropertyObject>): List<JsonObject> {
@@ -540,10 +614,10 @@ class YandexApiResponseMapper {
         }
     }
 
-    private fun mapProperty(propertyJson: JsonObject): DevicePropertyObject? {
+    private fun mapPropertyFromJson(propertyJson: JsonObject): DevicePropertyObject? {
         val type = PropertyTypeWrapper(propertyJson["type"]?.jsonPrimitive?.content!!.codifiedEnum())
-        val parameters = propertyJson["parameters"]?.jsonObject?.let { mapPropertyParameters(type, it) }
-        val state = if(propertyJson["state"] !is JsonNull) mapPropertyState(type, propertyJson["state"]!!.jsonObject) else null
+        val parameters = propertyJson["parameters"]?.jsonObject?.let { mapPropertyParametersFromJson(type, it) }
+        val state = if(propertyJson["state"] !is JsonNull) mapPropertyStateFromJson(type, propertyJson["state"]!!.jsonObject) else null
         return if (parameters != null) {
             DevicePropertyObject(
                 type = type,
@@ -573,7 +647,7 @@ class YandexApiResponseMapper {
         }
     }
 
-    private fun mapPropertyParameters(type: PropertyTypeWrapper, parametersJson: JsonObject): PropertyParameterObject {
+    private fun mapPropertyParametersFromJson(type: PropertyTypeWrapper, parametersJson: JsonObject): PropertyParameterObject {
         return when (type) {
             PropertyTypeWrapper(PropertyType.FLOAT.codifiedEnum()) -> FloatPropertyParameterObject(
                 instance = parametersJson["instance"]?.jsonPrimitive?.content?.let { PropertyFunctionWrapper(it.codifiedEnum()) }
@@ -619,7 +693,7 @@ class YandexApiResponseMapper {
         }
     }
 
-    private fun mapPropertyState(type: PropertyTypeWrapper, stateJson: JsonObject): PropertyStateObjectData? {
+    private fun mapPropertyStateFromJson(type: PropertyTypeWrapper, stateJson: JsonObject): PropertyStateObjectData? {
         return type.let {
             when (it) {
                 PropertyTypeWrapper(PropertyType.FLOAT.codifiedEnum()) -> FloatPropertyStateObjectData(
@@ -670,7 +744,7 @@ class YandexApiResponseMapper {
         }
     }
 
-    private fun mapScenarios(scenarios: List<JsonObject>): List<ScenarioObject> {
+    private fun mapScenariosFromJson(scenarios: List<JsonObject>): List<ScenarioObject> {
         return scenarios.map { scenarioJson ->
             ScenarioObject(
                 id = scenarioJson["id"]?.jsonPrimitive?.content ?: "",
@@ -690,14 +764,14 @@ class YandexApiResponseMapper {
         }
     }
 
-    private fun mapGroupCapability(capabilityJson: JsonObject): GroupCapabilityObject {
+    private fun mapGroupCapabilityFromJson(capabilityJson: JsonObject): GroupCapabilityObject {
         val type = CapabilityTypeWrapper(capabilityJson["type"]?.jsonPrimitive?.content!!.codifiedEnum())
-        val parameters = mapCapabilityParameters(type, capabilityJson["parameters"]?.jsonObject!!)
+        val parameters = mapCapabilityParametersFromJson(type, capabilityJson["parameters"]?.jsonObject!!)
         return GroupCapabilityObject(
             type = type,
             retrievable = capabilityJson["retrievable"]?.jsonPrimitive?.boolean ?: false,
             parameters = parameters,
-            state = capabilityJson["state"]?.jsonObject?.let { mapCapabilityState(type, it) }
+            state = capabilityJson["state"]?.jsonObject?.let { mapCapabilityStateFromJson(type, it) }
         )
     }
 
@@ -715,7 +789,7 @@ class YandexApiResponseMapper {
         }
     }
 
-    private fun mapHouseholds(households: List<JsonObject>): List<HouseholdObject> {
+    private fun mapHouseholdsFromJson(households: List<JsonObject>): List<HouseholdObject> {
         return households.map { householdJson ->
             HouseholdObject(
                 id = householdJson["id"]?.jsonPrimitive?.content ?: "",

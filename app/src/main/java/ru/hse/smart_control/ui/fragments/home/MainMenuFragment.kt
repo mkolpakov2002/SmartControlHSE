@@ -36,40 +36,28 @@ import ru.hse.smart_control.ui.MainActivity
 
 class MainMenuFragment : Fragment(), OnRefreshListener, MultipleTypesAdapterKt.OnItemClickListener,
     MultipleTypesAdapterKt.OnItemLongClickListener {
+
     private lateinit  var multipleTypesAdapter: MultipleTypesAdapterKt
-    private lateinit var fragmentContext: Context
-    private var ma: MainActivity? = null
     private lateinit var bottomSheetDialogToAdd: BottomSheetDialog
     private var isMultiSelectVisible = false
 
-    private val dataBinding by lazy {
-        FragmentMainBinding.inflate(layoutInflater)
-    }
+    private var _binding: FragmentMainBinding? = null
+    private val binding get() = _binding!!
 
     private lateinit var deviceOldItemTypeList: List<DeviceOld>
-
-    override fun onAttach(context: Context) {
-        fragmentContext = context
-        ma = fragmentContext as MainActivity?
-        super.onAttach(context)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return dataBinding.root
-    }
-
-    override fun onStart() {
-        super.onStart()
-        //onRefresh()
+        _binding = FragmentMainBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        fragmentContext.registerReceiver(
+        requireContext().registerReceiver(
             bluetoothStateChanged,
             IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
         )
@@ -87,14 +75,14 @@ class MainMenuFragment : Fragment(), OnRefreshListener, MultipleTypesAdapterKt.O
         val orientation = this.resources.configuration.orientation
         val gridLayoutManager: GridLayoutManager = if (orientation == Configuration.ORIENTATION_PORTRAIT) {
             // code for portrait mode
-            GridLayoutManager(fragmentContext, 3, LinearLayoutManager.VERTICAL, false)
+            GridLayoutManager(requireContext(), 3, LinearLayoutManager.VERTICAL, false)
         } else {
             // code for landscape mode
-            GridLayoutManager(fragmentContext, 6, LinearLayoutManager.VERTICAL, false)
+            GridLayoutManager(requireContext(), 6, LinearLayoutManager.VERTICAL, false)
         }
 
-        dataBinding.swipeRefreshLayout.setOnRefreshListener(this)
-        dataBinding.floatingActionButtonStartSendingData.setOnClickListener {
+        binding.swipeRefreshLayout.setOnRefreshListener(this)
+        binding.floatingActionButtonStartSendingData.setOnClickListener {
             if (multipleTypesAdapter.areDevicesConnectable()){
                 val list = ArrayList<Int>()
                 for (item in multipleTypesAdapter.getSelectedItems()) {
@@ -102,36 +90,37 @@ class MainMenuFragment : Fragment(), OnRefreshListener, MultipleTypesAdapterKt.O
                 }
                 val b = Bundle()
                 b.putIntegerArrayList("deviceIdList", list)
-                findNavController(dataBinding.root).navigate(R.id.action_mainMenuFragment_to_connectionTypeFragment, b)
+                findNavController(binding.root).navigate(R.id.action_mainMenuFragment_to_connectionTypeFragment, b)
             } else {
                 (Snackbar.make(
-                        dataBinding.root,
+                    binding.root,
                         getString(R.string.selection_class_device_error),
                         Snackbar.LENGTH_LONG
                     ).setAction(getString(R.string.ok)) {}).show()
             }
         }
-        dataBinding.floatingActionButtonDeleteSelected.hide()
-        dataBinding.floatingActionButtonDeleteSelected.setOnClickListener {
+        binding.floatingActionButtonDeleteSelected.hide()
+        binding.floatingActionButtonDeleteSelected.setOnClickListener {
             CoroutineScope(Dispatchers.IO).launch {
                 for(item in multipleTypesAdapter.getSelectedItems())
                     AppDatabase.getInstance(requireContext()).deviceOldItemTypeDao()?.delete(item.id)
                 onRefresh()
             }
         }
-        dataBinding.recyclerMain.layoutManager = gridLayoutManager
-        dataBinding.recyclerMain.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+        binding.recyclerMain.layoutManager = gridLayoutManager
+        binding.recyclerMain.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                if (dy > 0 && dataBinding.floatingActionButtonStartSendingData.isExtended) {
-                    dataBinding.floatingActionButtonStartSendingData.shrink()
-                } else if (dy < 0 && !dataBinding.floatingActionButtonStartSendingData.isExtended) {
-                    dataBinding.floatingActionButtonStartSendingData.extend()
+                if (dy > 0 && binding.floatingActionButtonStartSendingData.isExtended) {
+                    binding.floatingActionButtonStartSendingData.shrink()
+                } else if (dy < 0 && !binding.floatingActionButtonStartSendingData.isExtended) {
+                    binding.floatingActionButtonStartSendingData.extend()
                 }
             }
         })
-        dataBinding.recyclerMain.clipToPadding = false
-        ma?.bottomAppBarSize?.let { dataBinding.recyclerMain.setPadding(0, 0, 0, it) }
-        bottomSheetDialogToAdd = BottomSheetDialog(fragmentContext)
+        binding.recyclerMain.clipToPadding = false
+//        ma?.bottomAppBarSize?.let { dataBinding.recyclerMain.setPadding(0, 0, 0, it) }
+        (activity as MainActivity).bottomAppBarSize?.let { binding.recyclerMain.setPadding(0, 0, 0, it) }
+        bottomSheetDialogToAdd = BottomSheetDialog(requireContext())
         bottomSheetDialogToAdd.setContentView(R.layout.bottom_sheet_dialog_add_device)
         bottomSheetDialogToAdd.setCancelable(true)
         bottomSheetDialogToAdd.dismiss()
@@ -146,7 +135,7 @@ class MainMenuFragment : Fragment(), OnRefreshListener, MultipleTypesAdapterKt.O
             if (!ConnectionFactory.isBtSupported) {
                 val snackbar = Snackbar
                     .make(
-                        dataBinding.swipeRefreshLayout, getString(R.string.suggestionNoBtAdapter),
+                        binding.swipeRefreshLayout, getString(R.string.suggestionNoBtAdapter),
                         Snackbar.LENGTH_LONG
                     )
                     .setAction(getString(R.string.ok)) { }
@@ -159,25 +148,25 @@ class MainMenuFragment : Fragment(), OnRefreshListener, MultipleTypesAdapterKt.O
             } else if (!ConnectionFactory.isBtEnabled) {
                 val snackbar = Snackbar
                     .make(
-                        dataBinding.swipeRefreshLayout, getString(R.string.en_bt_for_list),
+                        binding.swipeRefreshLayout, getString(R.string.en_bt_for_list),
                         Snackbar.LENGTH_LONG
                     )
                     .setAction(getString(R.string.ok)) {
                         val intentBtEnabled =
                             Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                        fragmentContext.startActivity(intentBtEnabled)
+                        requireContext().startActivity(intentBtEnabled)
                     }
                 snackbar.show()
             } else {
                 val snackbar = Snackbar
                     .make(
-                        dataBinding.swipeRefreshLayout, getString(R.string.no_devices_added),
+                        binding.swipeRefreshLayout, getString(R.string.no_devices_added),
                         Snackbar.LENGTH_LONG
                     )
                     .setAction(getString(R.string.ok)) {
                         val intentBtEnabled =
                             Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                        fragmentContext.startActivity(intentBtEnabled)
+                        requireContext().startActivity(intentBtEnabled)
                     }
                 snackbar.show()
             }
@@ -193,20 +182,20 @@ class MainMenuFragment : Fragment(), OnRefreshListener, MultipleTypesAdapterKt.O
         lifecycleScope.launch {
             withContext(Dispatchers.Main) {
                 hideAllButtons()
-                dataBinding.pairedDevicesTitleAddActivity.setText(R.string.favorites_devices)
+                binding.pairedDevicesTitleAddActivity.setText(R.string.favorites_devices)
                 if (!this@MainMenuFragment::multipleTypesAdapter.isInitialized) {
                     initAdapter()
                 } else {
                     multipleTypesAdapter.updateItems(deviceOldItemTypeList)
                 }
-                dataBinding.swipeRefreshLayout.isRefreshing = false
+                binding.swipeRefreshLayout.isRefreshing = false
             }
         }
     }
 
     private fun initAdapter(){
         multipleTypesAdapter = MultipleTypesAdapterKt(requireContext(), deviceOldItemTypeList)
-        dataBinding.recyclerMain.adapter = multipleTypesAdapter
+        binding.recyclerMain.adapter = multipleTypesAdapter
         multipleTypesAdapter.onItemLongClickListener = this
         multipleTypesAdapter.onItemClickListener = this
     }
@@ -221,8 +210,8 @@ class MainMenuFragment : Fragment(), OnRefreshListener, MultipleTypesAdapterKt.O
     private fun hideAllButtons() {
         lifecycleScope.launch {
             withContext(Dispatchers.Main) {
-                dataBinding.floatingActionButtonDeleteSelected.hide()
-                dataBinding.floatingActionButtonStartSendingData.hide()
+                binding.floatingActionButtonDeleteSelected.hide()
+                binding.floatingActionButtonStartSendingData.hide()
                 hideBottomSheetToAdd()
                 isMultiSelectVisible = false
             }
@@ -231,8 +220,8 @@ class MainMenuFragment : Fragment(), OnRefreshListener, MultipleTypesAdapterKt.O
 
     private fun showItemSelectionMenu() {
         hideBottomSheetToAdd()
-        dataBinding.floatingActionButtonDeleteSelected.show()
-        dataBinding.floatingActionButtonStartSendingData.show()
+        binding.floatingActionButtonDeleteSelected.show()
+        binding.floatingActionButtonStartSendingData.show()
         isMultiSelectVisible = true
     }
 
@@ -253,7 +242,7 @@ class MainMenuFragment : Fragment(), OnRefreshListener, MultipleTypesAdapterKt.O
             val args = Bundle()
             args.putBoolean("isNew", false)
             args.putSerializable("deviceOld", item.deviceOld)
-            findNavController(dataBinding.root).navigate(R.id.deviceMenuFragment, args)
+            findNavController(binding.root).navigate(R.id.deviceMenuFragment, args)
         }
 
     }

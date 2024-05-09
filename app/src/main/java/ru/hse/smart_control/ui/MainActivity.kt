@@ -18,6 +18,7 @@ import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import android.view.MenuItem
+import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -25,6 +26,7 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI.setupWithNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -40,15 +42,31 @@ import ru.hse.smart_control.utility.AppConstants.WRITE_EXTERNAL_STORAGE_PERMISSI
 import ru.hse.smart_control.utility.ThemeUtils.onActivityCreateSetTheme
 import ru.hse.smart_control.R
 import ru.hse.smart_control.databinding.ActivityMainBinding
+import ru.hse.smart_control.model.prefs.SharedPreferences
 import java.util.*
 
-class MainActivity : AppCompatActivity(){
+class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
+    private val topDestinationIds = setOf(
+        R.id.authControlFragment
+    )
+
+    private val sharedPreferences: SharedPreferences by lazy {
+        SharedPreferences(this)
+    }
+
+    private var token = ""
     private val viewModel: MainViewModel by viewModels()
+
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
+
+//        private val graph = inflater.inflate(R.navigation.nav_graph)
+
+        token = sharedPreferences.getStringValue("token").toString()
+
         onActivityCreateSetTheme(this)
         setContentView(binding.root)
         setUpNavigation()
@@ -61,22 +79,27 @@ class MainActivity : AppCompatActivity(){
                     getString(R.string.instruction_alert),
                     getString(R.string.instruction_for_app)
                 )
+
                 R.id.settingsFragment -> createOneButtonAlertDialog(
                     getString(R.string.instruction_alert),
                     getString(R.string.instruction_for_app_settings)
                 )
+
                 R.id.deviceMenuFragment -> createOneButtonAlertDialog(
                     getString(R.string.instruction_alert),
                     getString(R.string.instruction_for_app_device_menu)
                 )
+
                 R.id.addDeviceFragment -> createOneButtonAlertDialog(
                     getString(R.string.instruction_alert),
                     getString(R.string.instruction_for_app_add_device)
                 )
+
                 else -> {}
             }
             true
         }
+
     }
 
     private fun setUpNavigation() {
@@ -89,9 +112,34 @@ class MainActivity : AppCompatActivity(){
                 navHost.navController
             )
 
+//            navHost.navController.graph.startDestinationId = if (token.isEmpty()) {
+//                R.id.authControlFragment
+//            } else {
+//                R.id.mainMenuFragment
+//            }
+
+//            val navController = navHost.navController
+//            val inflater = navController.navInflater
+//            val graph = inflater.inflate(R.navigation.nav_graph)
+//
+//            if (token.isEmpty()) {
+//                graph.setStartDestination(R.id.authControlFragment)
+//            } else {
+//                graph.setStartDestination(R.id.mainMenuFragment)
+//            }
+//
+//            // Назначьте новый навигационный граф.
+//            navController.graph = graph
+
             navHost.navController.addOnDestinationChangedListener { _, destination, _ ->
                 Log.e(APP_LOG_TAG, "onDestinationChanged: " + destination.label)
                 viewModel.setCurrentVisibleFragment(destination)
+
+                if (destination.id in topDestinationIds) {
+                    binding.bottomnav.visibility = View.GONE
+                } else {
+                    binding.bottomnav.visibility = View.VISIBLE
+                }
             }
 
             binding.bottomnav.setOnItemSelectedListener { item: MenuItem ->
@@ -100,24 +148,32 @@ class MainActivity : AppCompatActivity(){
                         navHost.navController.navigate(R.id.mainMenuFragment)
                         true
                     }
+
                     R.id.settingsFragment -> {
                         navHost.navController.navigate(R.id.settingsFragment)
                         true
                     }
+
                     else -> false
                 }
             }
+
+
         }
     }
 
     private fun checkForBtAdapter() {
         if (!ConnectionFactory.isBtWiFiSupported) {
-            val dialog = MaterialAlertDialogBuilder(this,
-                    com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog).create()
+            val dialog = MaterialAlertDialogBuilder(
+                this,
+                com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog
+            ).create()
             dialog.setTitle(getString(R.string.error));
             dialog.setMessage(getString(R.string.suggestionNoBtWiFiAdapter))
-            dialog.setButton(AlertDialog.BUTTON_NEUTRAL, getString(R.string.ok)) {
-                dialogInterface: DialogInterface, _: Int ->
+            dialog.setButton(
+                AlertDialog.BUTTON_NEUTRAL,
+                getString(R.string.ok)
+            ) { dialogInterface: DialogInterface, _: Int ->
                 dialogInterface.dismiss()
             }
             dialog.show()
@@ -177,6 +233,7 @@ class MainActivity : AppCompatActivity(){
                     Log.d(APP_LOG_TAG, "Permission missing: $BLUETOOTH_SCAN")
                 }
             }
+
             else -> {
                 if (!application.applicationContext.isPermissionGranted(BLUETOOTH_ADMIN)) {
                     list.add(BLUETOOTH_ADMIN)
@@ -187,7 +244,8 @@ class MainActivity : AppCompatActivity(){
                     Log.d(APP_LOG_TAG, "Permission missing: $CHANGE_WIFI_STATE")
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
-                    && !application.applicationContext.isPermissionGranted(MANAGE_WIFI_INTERFACES)) {
+                    && !application.applicationContext.isPermissionGranted(MANAGE_WIFI_INTERFACES)
+                ) {
                     list.add(MANAGE_WIFI_INTERFACES)
                     Log.d(APP_LOG_TAG, "Permission missing: $MANAGE_WIFI_INTERFACES")
                 }
@@ -204,7 +262,10 @@ class MainActivity : AppCompatActivity(){
     private val permissionList: LiveData<List<String>> = _permissionList
 
     private fun Context.isPermissionGranted(permission: String): Boolean {
-        return ActivityCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
+        return ActivityCompat.checkSelfPermission(
+            this,
+            permission
+        ) == PackageManager.PERMISSION_GRANTED
     }
 
     private fun onRequestPermissionsResult(
@@ -225,23 +286,31 @@ class MainActivity : AppCompatActivity(){
             deniedPermissions.contains(BLUETOOTH_CONNECT_PERMISSION) -> {
                 getString(R.string.dialog_permissions_bluetooth_connect_rationale)
             }
+
             deniedPermissions.contains(BLUETOOTH_ADMIN_PERMISSION) -> {
                 getString(R.string.dialog_permissions_bluetooth_admin_rationale)
             }
+
             deniedPermissions.contains(CHANGE_WIFI_STATE) -> {
                 getString(R.string.dialog_permissions_change_wifi_state_rationale)
             }
+
             deniedPermissions.contains(MANAGE_WIFI_NETWORK_SELECTION) -> {
                 getString(R.string.dialog_permissions_manage_wifi_network_selection_rationale)
             }
+
             deniedPermissions.contains(WRITE_EXTERNAL_STORAGE_PERMISSION) -> {
                 getString(R.string.dialog_permissions_write_external_storage_rationale)
             }
+
             else -> {
                 getString(R.string.dialog_permissions_general_rationale)
             }
         }
-        return MaterialAlertDialogBuilder(context, R.style.ThemeOverlay_MaterialComponents_Dialog_Alert)
+        return MaterialAlertDialogBuilder(
+            context,
+            R.style.ThemeOverlay_MaterialComponents_Dialog_Alert
+        )
             .setTitle(R.string.error)
             .setMessage(message)
             .setPositiveButton(R.string.ok) { dialog, _ ->
@@ -267,8 +336,10 @@ class MainActivity : AppCompatActivity(){
         message.putString("dialogText", content)
         message.putString("dialogTitle", title)
         (supportFragmentManager
-            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment?)?.
-        navController?.navigate(R.id.oneButtonAlertDialogFragment, message)
+            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment?)?.navController?.navigate(
+            R.id.oneButtonAlertDialogFragment,
+            message
+        )
     }
 
     val bottomAppBarSize: Int

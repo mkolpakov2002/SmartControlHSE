@@ -11,18 +11,21 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.Navigation.findNavController
 import ru.hse.smart_control.R
-import ru.hse.smart_control.model.entities.DeviceOld
 import ru.hse.smart_control.databinding.FragmentDeviceMenuBinding
+import ru.hse.smart_control.model.entities.DeviceOld
 
 class DeviceMenuFragment : Fragment() {
-    private lateinit var binding: FragmentDeviceMenuBinding
+
+    private var _binding: FragmentDeviceMenuBinding? = null
+    private val binding get() = _binding!!
+
     private val viewModel: DeviceViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentDeviceMenuBinding.inflate(inflater)
+        _binding = FragmentDeviceMenuBinding.inflate(inflater, container, false)
         return binding.root
     }
 

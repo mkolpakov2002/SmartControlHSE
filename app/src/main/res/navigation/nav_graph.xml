@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/mainMenuFragment">
+    app:startDestination="@id/authControlFragment"
+    >
 
     <fragment
         android:id="@+id/mainMenuFragment"
@@ -110,4 +111,12 @@
         android:id="@+id/commandsFragment"
         android:name="ru.hse.smart_control.ui.fragments.connection.CommandsFragment"
         android:label="CommandsFragment" />
+    <fragment
+        android:id="@+id/authControlFragment"
+        android:name="ru.hse.smart_control.ui.fragments.auth.AuthControlFragment"
+        android:label="AuthControlFragment" >
+        <action
+            android:id="@+id/action_authControlFragment_to_mainMenuFragment"
+            app:destination="@id/mainMenuFragment" />
+    </fragment>
 </navigation>

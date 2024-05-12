@@ -6,7 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavDestination
 import kotlinx.coroutines.flow.Flow
 import ru.hse.smart_control.model.db.AppDatabase
-import ru.hse.smart_control.model.entities.DeviceOld
+import ru.hse.smart_control.model.entities.UniversalSchemeEntity
 
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
@@ -27,6 +27,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val database = AppDatabase.getInstance(application.applicationContext)
     private val deviceDao = database.deviceOldItemTypeDao()
     private val _devices = deviceDao?.getAll()
-    val devices: Flow<List<DeviceOld>>?
+    val devices: Flow<List<UniversalSchemeEntity>>?
         get() = _devices
 }

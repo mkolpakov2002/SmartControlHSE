@@ -29,7 +29,7 @@ import kotlinx.coroutines.withContext
 import ru.hse.smart_control.R
 import ru.hse.smart_control.domain.connection.ConnectionFactory
 import ru.hse.smart_control.model.db.AppDatabase
-import ru.hse.smart_control.model.entities.DeviceOld
+import ru.hse.smart_control.model.entities.UniversalSchemeEntity
 import ru.hse.smart_control.databinding.FragmentMainBinding
 import ru.hse.smart_control.ui.MainActivity
 
@@ -44,7 +44,7 @@ class MainMenuFragment : Fragment(), OnRefreshListener, MultipleTypesAdapterKt.O
     private var _binding: FragmentMainBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var deviceOldItemTypeList: List<DeviceOld>
+    private lateinit var universalSchemeEntityItemTypeList: List<UniversalSchemeEntity>
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -67,7 +67,7 @@ class MainMenuFragment : Fragment(), OnRefreshListener, MultipleTypesAdapterKt.O
         // Наблюдать за списком всех устройств
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.devices?.collect { devices ->
-                deviceOldItemTypeList = devices
+                universalSchemeEntityItemTypeList = devices
                 onRefresh()
             }
         }
@@ -186,7 +186,7 @@ class MainMenuFragment : Fragment(), OnRefreshListener, MultipleTypesAdapterKt.O
                 if (!this@MainMenuFragment::multipleTypesAdapter.isInitialized) {
                     initAdapter()
                 } else {
-                    multipleTypesAdapter.updateItems(deviceOldItemTypeList)
+                    multipleTypesAdapter.updateItems(universalSchemeEntityItemTypeList)
                 }
                 binding.swipeRefreshLayout.isRefreshing = false
             }
@@ -194,7 +194,7 @@ class MainMenuFragment : Fragment(), OnRefreshListener, MultipleTypesAdapterKt.O
     }
 
     private fun initAdapter(){
-        multipleTypesAdapter = MultipleTypesAdapterKt(requireContext(), deviceOldItemTypeList)
+        multipleTypesAdapter = MultipleTypesAdapterKt(requireContext(), universalSchemeEntityItemTypeList)
         binding.recyclerMain.adapter = multipleTypesAdapter
         multipleTypesAdapter.onItemLongClickListener = this
         multipleTypesAdapter.onItemClickListener = this
@@ -241,7 +241,7 @@ class MainMenuFragment : Fragment(), OnRefreshListener, MultipleTypesAdapterKt.O
         } else if(!multipleTypesAdapter.isMultiSelect){
             val args = Bundle()
             args.putBoolean("isNew", false)
-            args.putSerializable("deviceOld", item.deviceOld)
+            args.putSerializable("deviceOld", item.universalSchemeEntity)
             findNavController(binding.root).navigate(R.id.deviceMenuFragment, args)
         }
 

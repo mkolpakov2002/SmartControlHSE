@@ -12,7 +12,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.Navigation.findNavController
 import ru.hse.smart_control.R
 import ru.hse.smart_control.databinding.FragmentDeviceMenuBinding
-import ru.hse.smart_control.model.entities.DeviceOld
+import ru.hse.smart_control.model.entities.UniversalSchemeEntity
 
 class DeviceMenuFragment : Fragment() {
 
@@ -33,9 +33,9 @@ class DeviceMenuFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val isNew = arguments?.getBoolean("isNew", true) ?: true
-        val inputDeviceOld = arguments?.getSerializable("deviceOld") as? DeviceOld ?: DeviceOld()
+        val inputUniversalSchemeEntity = arguments?.getSerializable("deviceOld") as? UniversalSchemeEntity ?: UniversalSchemeEntity()
 
-        viewModel.setCurrentDevice(inputDeviceOld)
+        viewModel.setCurrentDevice(inputUniversalSchemeEntity)
         setupViews(isNew)
         observeCurrentDevice()
     }
@@ -49,7 +49,7 @@ class DeviceMenuFragment : Fragment() {
             }
 
             deviceConnect.setOnClickListener {
-                val deviceIdList = arrayListOf(viewModel.currentDeviceOld.value?.id)
+                val deviceIdList = arrayListOf(viewModel.currentUniversalSchemeEntity.value?.id)
                 val bundle = Bundle().apply { putIntegerArrayList("deviceIdList", deviceIdList) }
                 findNavController(binding.root)
                     .navigate(R.id.action_deviceMenuFragment_to_connectionTypeFragment, bundle)
@@ -69,7 +69,7 @@ class DeviceMenuFragment : Fragment() {
     }
 
     private fun observeCurrentDevice() {
-        viewModel.currentDeviceOld.observe(viewLifecycleOwner) { device ->
+        viewModel.currentUniversalSchemeEntity.observe(viewLifecycleOwner) { device ->
             binding.apply {
                 deviceNameEdit.setText(device.name)
                 deviceMacEdit.setText(device.bluetoothAddress)

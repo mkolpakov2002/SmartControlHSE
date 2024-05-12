@@ -9,14 +9,14 @@ import androidx.room.TypeConverters
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
-import ru.hse.smart_control.model.entities.DeviceOld
+import ru.hse.smart_control.model.entities.UniversalSchemeEntity
 import ru.hse.smart_control.ui.packages.XmlTag
 
 /**
  * Класс локальной базы данных
  */
 @Database(
-    entities = [DeviceOld::class],
+    entities = [UniversalSchemeEntity::class],
     version = 1
 )
 @TypeConverters(Converters::class)

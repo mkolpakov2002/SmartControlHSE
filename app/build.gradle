@@ -112,7 +112,7 @@ dependencies {
     implementation 'com.github.kirich1409:viewbindingpropertydelegate-noreflection:1.5.9'
 
     // Fragment ktx
-    implementation 'androidx.fragment:fragment-ktx:1.6.2'
+    implementation 'androidx.fragment:fragment-ktx:1.7.0'
 
     // USB serial for usb arduino communication
     implementation 'com.github.mik3y:usb-serial-for-android:3.5.1'
@@ -157,10 +157,17 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
 
     // OkHttp
-    implementation("com.squareup.okhttp3:okhttp:4.10.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.10.0")
 
     // Gson
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    testImplementation "org.json:json:20180813"
+
+    implementation("org.slf4j:slf4j-api:2.0.9")
+    implementation("org.slf4j:slf4j-simple:2.0.9")
+
+    implementation("org.jetbrains.kotlin:kotlin-reflect:2.0.0-RC3")
 }

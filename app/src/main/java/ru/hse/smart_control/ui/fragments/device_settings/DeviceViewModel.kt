@@ -8,31 +8,31 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.hse.smart_control.model.db.AppDatabase
-import ru.hse.smart_control.model.entities.DeviceOld
+import ru.hse.smart_control.model.entities.UniversalSchemeEntity
 
 class DeviceViewModel(application: Application) : AndroidViewModel(application) {
-    private val _currentDeviceOld = MutableLiveData<DeviceOld>()
-    val currentDeviceOld: LiveData<DeviceOld> = _currentDeviceOld
+    private val _currentUniversalSchemeEntity = MutableLiveData<UniversalSchemeEntity>()
+    val currentUniversalSchemeEntity: LiveData<UniversalSchemeEntity> = _currentUniversalSchemeEntity
     private val database = AppDatabase.getInstance(application.applicationContext)
     private val deviceDao = database.deviceOldItemTypeDao()
 
-    fun setCurrentDevice(deviceOld: DeviceOld) {
-        _currentDeviceOld.value = deviceOld
+    fun setCurrentDevice(universalSchemeEntity: UniversalSchemeEntity) {
+        _currentUniversalSchemeEntity.value = universalSchemeEntity
     }
 
-    fun updateCurrentDevice(deviceOld: DeviceOld) {
-        _currentDeviceOld.value = deviceOld
+    fun updateCurrentDevice(universalSchemeEntity: UniversalSchemeEntity) {
+        _currentUniversalSchemeEntity.value = universalSchemeEntity
     }
 
     fun saveDevice() {
         viewModelScope.launch(Dispatchers.IO) {
-            deviceDao?.insertAll(currentDeviceOld.value!!)
+            deviceDao?.insertAll(currentUniversalSchemeEntity.value!!)
         }
     }
 
     fun deleteDevice() {
         viewModelScope.launch(Dispatchers.IO) {
-            deviceDao?.delete(currentDeviceOld.value!!.id)
+            deviceDao?.delete(currentUniversalSchemeEntity.value!!.id)
         }
     }
 }

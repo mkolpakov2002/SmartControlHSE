@@ -9,7 +9,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import ru.hse.smart_control.R
-import ru.hse.smart_control.model.entities.DeviceOld
+import ru.hse.smart_control.model.entities.UniversalSchemeEntity
 import ru.hse.smart_control.ui.fragments.device_settings.NewBtDevicesAdapter.DevicesAdapterVh
 
 class NewBtDevicesAdapter(
@@ -46,7 +46,7 @@ class NewBtDevicesAdapter(
 
 
     interface OnDeviceClicked {
-        fun selectedDevice(deviceOldPrototype: DeviceOld?)
+        fun selectedDevice(universalSchemeEntityPrototype: UniversalSchemeEntity?)
     }
 
     inner class DevicesAdapterVh @SuppressLint("MissingPermission") constructor(itemView: View) :
@@ -57,7 +57,7 @@ class NewBtDevicesAdapter(
 
         init {
             itemView.setOnClickListener { view: View? ->
-                val selected = DeviceOld()
+                val selected = UniversalSchemeEntity()
                 selected.name = devicePrototypeList[bindingAdapterPosition].name
                 selected.bluetoothAddress = devicePrototypeList[bindingAdapterPosition].address
                 onDeviceClicked.selectedDevice(selected)

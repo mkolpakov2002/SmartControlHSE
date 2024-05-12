@@ -68,7 +68,7 @@ public class Viz2DView extends WidgetGroupView {
     public void setWidgetEntity(BaseEntity widgetEntity) {
         super.setWidgetEntity(widgetEntity);
 
-        layerView.getCamera().jumpToFrame(((Viz2DEntity)widgetEntity).frame);
+        layerView.getCamera().jumpToFrame(((Viz2DEntity) widgetEntity).frame);
     }
 
     @Override

@@ -6,6 +6,7 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonObjectBuilder
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.addJsonObject
 import kotlinx.serialization.json.boolean
@@ -87,8 +88,10 @@ import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.pr
 import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.property.FloatPropertyState
 import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.property.FloatPropertyStateObjectData
 import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.property.MeasurementUnit
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.property.Property
 import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.property.PropertyFunction
 import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.property.PropertyFunctionWrapper
+import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.property.PropertyObject
 import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.property.PropertyParameterObject
 import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.property.PropertyStateObjectData
 import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.property.PropertyType
@@ -107,9 +110,22 @@ fun List<GroupCapabilityObject>.toYandexManageGroupCapabilitiesStateRequest(): Y
 }
 
 fun List<DeviceObject>.toYandexManageDeviceCapabilitiesStateRequest(): YandexManageDeviceCapabilitiesStateRequest {
-    val devices = map { it.toYandexDeviceActionsJsonObject() }
+    val devices = map { (it.toDeviceActionsObject() ).toYandexDeviceActionsJsonObject() }
     return YandexManageDeviceCapabilitiesStateRequest(devices)
 }
+
+fun DeviceObject.toDeviceActionsObject(): DeviceActionsObject {
+    return DeviceActionsObject(
+        id = this.id,
+        actions = this.capabilities.map { capability ->
+            CapabilityObject(
+                type = capability.type,
+                state = capability.state
+            )
+        }.toMutableList()
+    )
+}
+
 
 fun GroupCapabilityObject.toYandexCapabilityJsonObject(): JsonObject {
     val capabilityType = type.type.code()
@@ -121,14 +137,13 @@ fun GroupCapabilityObject.toYandexCapabilityJsonObject(): JsonObject {
     }
 }
 
-fun DeviceObject.toYandexDeviceActionsJsonObject(): JsonObject {
-    val deviceId = id
-    val actions = capabilities.map { it.toYandexCapabilityJsonObject() }
-
+fun DeviceActionsObject.toYandexDeviceActionsJsonObject(): JsonObject {
     return buildJsonObject {
-        put("id", deviceId)
+        put("id", id)
         putJsonArray("actions") {
-            actions.forEach { add(it) }
+            actions.forEach {
+                add(it.toYandexJson())
+            }
         }
     }
 }
@@ -239,44 +254,135 @@ fun YandexUserInfoResponse.toUniversalSchemeJson(): String {
     return json.encodeToString(JsonElement.serializer(), responseJson)
 }
 
-fun YandexUserInfoResponse.toSmartHomeInfo(): SmartHomeInfo {
+fun JsonObject.toSmartHomeInfo(): SmartHomeInfo {
+
+    val rooms = jsonObject["rooms"]?.jsonArray?.map { it.jsonObject } ?: emptyList()
+    val groups = jsonObject["groups"]?.jsonArray?.map { it.jsonObject } ?: emptyList()
+    val devices = jsonObject["devices"]?.jsonArray?.map { it.jsonObject } ?: emptyList()
+    val scenarios = jsonObject["scenarios"]?.jsonArray?.map { it.jsonObject } ?: emptyList()
+    val households = jsonObject["households"]?.jsonArray?.map { it.jsonObject } ?: emptyList()
+
     val roomObjects = rooms.map { roomJson ->
         RoomObject(
             id = roomJson["id"]?.jsonPrimitive?.content ?: "",
             name = roomJson["name"]?.jsonPrimitive?.content ?: "",
-            devices = roomJson["devices"]?.jsonArray?.map { it.jsonPrimitive.content } ?: emptyList(),
+            devices = roomJson["devices"]?.jsonArray?.map { it.jsonPrimitive.content }
+                ?.toMutableList() ?: mutableListOf(),
             householdId = roomJson["household_id"]?.jsonPrimitive?.content ?: ""
         )
-    }
+    }.toMutableList()
     val groupObjects = groups.map { groupJson ->
         GroupObject(
             id = groupJson["id"]?.jsonPrimitive?.content ?: "",
             name = groupJson["name"]?.jsonPrimitive?.content ?: "",
-            aliases = groupJson["aliases"]?.jsonArray?.map { it.jsonPrimitive.content } ?: emptyList(),
+            aliases = groupJson["aliases"]?.jsonArray?.map { it.jsonPrimitive.content }?.toMutableList()
+                ?: mutableListOf(),
             type = groupJson["type"]?.jsonPrimitive?.content?.let { DeviceTypeWrapper(it.codifiedEnum()) }
                 ?: DeviceTypeWrapper(DeviceType.OTHER.codifiedEnum()),
-            capabilities = groupJson["capabilities"]?.jsonArray?.map { it.jsonObject.toGroupCapabilityObject() } ?: emptyList(),
-            devices = groupJson["devices"]?.jsonArray?.map { it.jsonPrimitive.content } ?: emptyList(),
+            capabilities = groupJson["capabilities"]?.jsonArray?.map { it.jsonObject.toGroupCapabilityObject() }?.toMutableList()
+                ?: mutableListOf(),
+            devices = groupJson["devices"]?.jsonArray?.map { it.jsonPrimitive.content }?.toMutableList()
+                ?: mutableListOf(),
             householdId = groupJson["household_id"]?.jsonPrimitive?.content ?: ""
         )
-    }
+    }.toMutableList()
     val deviceObjects = devices.map { deviceJson ->
         deviceJson.toDeviceObject()
-    }
+    }.toMutableList()
     val scenarioObjects = scenarios.map { scenarioJson ->
         ScenarioObject(
             id = scenarioJson["id"]?.jsonPrimitive?.content ?: "",
             name = scenarioJson["name"]?.jsonPrimitive?.content ?: "",
             isActive = scenarioJson["is_active"]?.jsonPrimitive?.boolean ?: false
         )
-    }
+    }.toMutableList()
     val householdObjects = households.map { householdJson ->
         HouseholdObject(
             id = householdJson["id"]?.jsonPrimitive?.content ?: "",
             name = householdJson["name"]?.jsonPrimitive?.content ?: "",
             type = householdJson["type"]?.jsonPrimitive?.content ?: ""
         )
+    }.toMutableList()
+    return SmartHomeInfo(roomObjects, groupObjects, deviceObjects, scenarioObjects, householdObjects)
+}
+
+fun SmartHomeInfo.toJson(): JsonObject {
+    val roomsJson = buildJsonArray {
+        rooms.forEach { room ->
+            add(room.toYandexJson())
+        }
     }
+    val groupsJson = buildJsonArray {
+        groups.forEach { group ->
+            add(group.toYandexJson())
+        }
+    }
+    val devicesJson = buildJsonArray {
+        devices.forEach { device ->
+            add(device.toYandexJson())
+        }
+    }
+    val scenariosJson = buildJsonArray {
+        scenarios.forEach { scenario ->
+            add(scenario.toYandexJson())
+        }
+    }
+    val householdsJson = buildJsonArray {
+        households.forEach { household ->
+            add(household.toYandexJson())
+        }
+    }
+    return buildJsonObject {
+        put("rooms", roomsJson)
+        put("groups", groupsJson)
+        put("devices", devicesJson)
+        put("scenarios", scenariosJson)
+        put("households", householdsJson)
+    }
+}
+
+fun YandexUserInfoResponse.toSmartHomeInfo(): SmartHomeInfo {
+    val roomObjects = rooms.map { roomJson ->
+        RoomObject(
+            id = roomJson["id"]?.jsonPrimitive?.content ?: "",
+            name = roomJson["name"]?.jsonPrimitive?.content ?: "",
+            devices = roomJson["devices"]?.jsonArray?.map { it.jsonPrimitive.content }?.toMutableList()
+                ?: mutableListOf(),
+            householdId = roomJson["household_id"]?.jsonPrimitive?.content ?: ""
+        )
+    }.toMutableList()
+    val groupObjects = groups.map { groupJson ->
+        GroupObject(
+            id = groupJson["id"]?.jsonPrimitive?.content ?: "",
+            name = groupJson["name"]?.jsonPrimitive?.content ?: "",
+            aliases = groupJson["aliases"]?.jsonArray?.map { it.jsonPrimitive.content }?.toMutableList()
+                ?: mutableListOf(),
+            type = groupJson["type"]?.jsonPrimitive?.content?.let { DeviceTypeWrapper(it.codifiedEnum()) }
+                ?: DeviceTypeWrapper(DeviceType.OTHER.codifiedEnum()),
+            capabilities = groupJson["capabilities"]?.jsonArray?.map { it.jsonObject.toGroupCapabilityObject() }?.toMutableList()
+                ?: mutableListOf(),
+            devices = groupJson["devices"]?.jsonArray?.map { it.jsonPrimitive.content }?.toMutableList()
+                ?: mutableListOf(),
+            householdId = groupJson["household_id"]?.jsonPrimitive?.content ?: ""
+        )
+    }.toMutableList()
+    val deviceObjects = devices.map { deviceJson ->
+        deviceJson.toDeviceObject()
+    }.toMutableList()
+    val scenarioObjects = scenarios.map { scenarioJson ->
+        ScenarioObject(
+            id = scenarioJson["id"]?.jsonPrimitive?.content ?: "",
+            name = scenarioJson["name"]?.jsonPrimitive?.content ?: "",
+            isActive = scenarioJson["is_active"]?.jsonPrimitive?.boolean ?: false
+        )
+    }.toMutableList()
+    val householdObjects = households.map { householdJson ->
+        HouseholdObject(
+            id = householdJson["id"]?.jsonPrimitive?.content ?: "",
+            name = householdJson["name"]?.jsonPrimitive?.content ?: "",
+            type = householdJson["type"]?.jsonPrimitive?.content ?: ""
+        )
+    }.toMutableList()
     return SmartHomeInfo(roomObjects, groupObjects, deviceObjects, scenarioObjects, householdObjects)
 }
 
@@ -296,15 +402,15 @@ fun YandexDeviceStateResponse.toDeviceObject(): DeviceObject {
     return DeviceObject(
         id = id,
         name = name,
-        aliases = aliases,
+        aliases = aliases.toMutableList(),
         type = DeviceTypeWrapper(type.content.codifiedEnum()),
         externalId = externalId,
         skillId = skillId,
         householdId = "",
         room = room,
-        groups = groups,
-        capabilities = capabilities.mapNotNull { it.toDeviceCapabilityObject() },
-        properties = properties.mapNotNull { it.toDevicePropertyObject() },
+        groups = groups.toMutableList(),
+        capabilities = capabilities.mapNotNull { it.toDeviceCapabilityObject() }.toMutableList(),
+        properties = properties.mapNotNull { it.toDevicePropertyObject() }.toMutableList(),
         quasarInfo = quasarInfo?.toQuasarInfo()
     )
 }
@@ -330,10 +436,14 @@ fun DeviceObject.toYandexJson(): JsonObject {
             }
         }
         put("capabilities", buildJsonArray {
-            addAll(capabilities.map { it.toYandexJson() })
+            capabilities.forEach { capability ->
+                add(capability.toYandexJson())
+            }
         })
         put("properties", buildJsonArray {
-            addAll(properties.map { it.toYandexJson() })
+            properties.forEach { property ->
+                add(property.toYandexJson())
+            }
         })
         quasarInfo?.let { put("quasar_info", it.toYandexJson()) }
     }
@@ -343,21 +453,26 @@ fun JsonObject.toDeviceObject(): DeviceObject {
     return DeviceObject(
         id = this["id"]?.jsonPrimitive?.content ?: "",
         name = this["name"]?.jsonPrimitive?.content ?: "",
-        aliases = this["aliases"]?.jsonArray?.map { it.jsonPrimitive.content } ?: emptyList(),
+        aliases = this["aliases"]?.jsonArray?.map { it.jsonPrimitive.content }?.toMutableList()
+            ?: mutableListOf(),
         type = this["type"]?.jsonPrimitive?.content?.let { DeviceTypeWrapper(it.codifiedEnum()) }
             ?: DeviceTypeWrapper(DeviceType.OTHER.codifiedEnum()),
         externalId = this["external_id"]?.jsonPrimitive?.content ?: "",
         skillId = this["skill_id"]?.jsonPrimitive?.content ?: "",
         householdId = this["household_id"]?.jsonPrimitive?.content ?: "",
-        room = this["room"]?.jsonPrimitive?.content ?: "",
-        groups = this["groups"]?.jsonArray?.map { it.jsonPrimitive.content } ?: emptyList(),
-        capabilities = this["capabilities"]?.jsonArray?.mapNotNull { it.jsonObject.toDeviceCapabilityObject() } ?: emptyList(),
-        properties = this["properties"]?.jsonArray?.mapNotNull { it.jsonObject.toDevicePropertyObject() } ?: emptyList(),
+        room = this["room"]?.jsonPrimitive?.contentOrNull,
+        groups = this["groups"]?.jsonArray?.map { it.jsonPrimitive.content }?.toMutableList()
+            ?: mutableListOf(),
+        capabilities = this["capabilities"]?.jsonArray?.mapNotNull { it.jsonObject.toDeviceCapabilityObject() }?.toMutableList()
+            ?: mutableListOf(),
+        properties = this["properties"]?.jsonArray?.mapNotNull { it.jsonObject.toDevicePropertyObject() }?.toMutableList()
+            ?: mutableListOf(),
         quasarInfo = this["quasar_info"]?.jsonObject?.toQuasarInfo()
     )
 }
 
-fun JsonObject.toQuasarInfo(): QuasarInfo {
+fun JsonObject?.toQuasarInfo(): QuasarInfo? {
+    if (this == null) return null
     return QuasarInfo(
         deviceId = this["device_id"]?.jsonPrimitive?.content ?: "",
         platform = this["platform"]?.jsonPrimitive?.content ?: ""
@@ -444,55 +559,96 @@ fun DeviceCapabilityObject.toYandexJson(): JsonObject {
     }
 }
 
-fun JsonObject.toCapabilityParameterObject(typeWrapper: CapabilityTypeWrapper): CapabilityParameterObject {
+fun JsonObject?.toColorSettingCapabilityParameterObject(): ColorSettingCapabilityParameterObject? {
+    if (this == null) return null
+    return ColorSettingCapabilityParameterObject(
+        colorModel = this["color_model"]?.jsonPrimitive?.contentOrNull?.let { ColorModelWrapper(it.codifiedEnum()) },
+        temperatureK = this["temperature_k"]?.jsonObject?.toTemperatureK(),
+        colorScene = this["color_scene"]?.jsonObject?.toColorScene()
+    )
+}
+
+fun JsonObject?.toTemperatureK(): TemperatureK? {
+    if (this == null) return null
+    return TemperatureK(
+        min = this["min"]?.jsonPrimitive?.int ?: 0,
+        max = this["max"]?.jsonPrimitive?.int ?: 0
+    )
+}
+
+fun JsonObject?.toColorScene(): ColorScene? {
+    if (this == null) return null
+    return ColorScene(scenes = this["scenes"]?.jsonArray?.map { sceneJson ->
+        Scene(id = SceneObjectWrapper(
+            sceneJson.jsonObject["id"]?.jsonPrimitive?.content?.codifiedEnum()
+                ?: SceneObject.ALARM.codifiedEnum()))
+    } ?: emptyList())
+}
+
+fun JsonObject?.toOnOffCapabilityParameterObject(): OnOffCapabilityParameterObject? {
+    if (this == null) return null
+    return OnOffCapabilityParameterObject(
+        split = this["split"]?.jsonPrimitive?.boolean ?: false
+    )
+}
+
+fun JsonObject?.toModeCapabilityParameterObject(): ModeCapabilityParameterObject? {
+    if (this == null) return null
+    return ModeCapabilityParameterObject(
+        instance = this["instance"]?.jsonPrimitive?.content?.let { ModeCapabilityInstanceWrapper(it.codifiedEnum()) }
+            ?: ModeCapabilityInstanceWrapper(ModeCapability.THERMOSTAT.codifiedEnum()),
+        modes = this["modes"]?.jsonArray?.map {
+            ModeObject(value = ModeCapabilityModeWrapper(it.jsonObject["value"]?.jsonPrimitive?.content?.codifiedEnum()
+                ?: ModeCapabilityMode.AUTO.codifiedEnum()))
+        } ?: emptyList()
+    )
+}
+
+fun JsonObject?.toRangeCapabilityParameterObject(): RangeCapabilityParameterObject? {
+    if (this == null) return null
+    return RangeCapabilityParameterObject(
+        instance = this["instance"]?.jsonPrimitive?.content?.let { RangeCapabilityWrapper(it.codifiedEnum()) }
+            ?: RangeCapabilityWrapper(RangeCapability.BRIGHTNESS.codifiedEnum()),
+        randomAccess = this["random_access"]?.jsonPrimitive?.boolean ?: false,
+        range = this["range"]?.jsonObject?.toRange(),
+        looped = this["looped"]?.jsonPrimitive?.boolean
+    )
+}
+
+fun JsonObject?.toRange(): Range? {
+    if (this == null) return null
+    return Range(
+        min = this["min"]?.jsonPrimitive?.float ?: 0.0f,
+        max = this["max"]?.jsonPrimitive?.float ?: 0.0f,
+        precision = this["precision"]?.jsonPrimitive?.float ?: 0.0f
+    )
+}
+
+fun JsonObject?.toToggleCapabilityParameterObject(): ToggleCapabilityParameterObject? {
+    if (this == null) return null
+    return ToggleCapabilityParameterObject(
+        instance = this["instance"]?.jsonPrimitive?.content?.let { ToggleCapabilityWrapper(it.codifiedEnum()) }
+            ?: ToggleCapabilityWrapper(ToggleCapability.BACKLIGHT.codifiedEnum())
+    )
+}
+
+fun JsonObject?.toVideoStreamCapabilityParameterObject(): VideoStreamCapabilityParameterObject? {
+    if (this == null) return null
+    return VideoStreamCapabilityParameterObject(
+        protocols = this["protocols"]?.jsonArray?.map {
+            VideoStreamCapabilityParameterObjectStreamProtocolWrapper(it.jsonPrimitive.content.codifiedEnum())
+        } ?: emptyList()
+    )
+}
+
+fun JsonObject?.toCapabilityParameterObject(typeWrapper: CapabilityTypeWrapper): CapabilityParameterObject? {
     return when (typeWrapper) {
-        CapabilityTypeWrapper(CapabilityType.COLOR_SETTING.codifiedEnum()) -> ColorSettingCapabilityParameterObject(
-            colorModel = this["color_model"]?.jsonPrimitive?.contentOrNull?.let { ColorModelWrapper(it.codifiedEnum()) },
-            temperatureK = this["temperature_k"]?.jsonObject?.let {
-                TemperatureK(
-                    min = it["min"]?.jsonPrimitive?.int ?: 0,
-                    max = it["max"]?.jsonPrimitive?.int ?: 0
-                )
-            },
-            colorScene = this["color_scene"]?.jsonObject?.let {
-                ColorScene(scenes = it["scenes"]?.jsonArray?.map { sceneJson ->
-                    Scene(id = SceneObjectWrapper(sceneJson.jsonObject["id"]?.jsonPrimitive?.content?.codifiedEnum() ?: SceneObject.ALARM.codifiedEnum()))
-                } ?: emptyList())
-            }
-        )
-        CapabilityTypeWrapper(CapabilityType.ON_OFF.codifiedEnum()) -> OnOffCapabilityParameterObject(
-            split = this["split"]?.jsonPrimitive?.boolean ?: false
-        )
-        CapabilityTypeWrapper(CapabilityType.MODE.codifiedEnum()) -> ModeCapabilityParameterObject(
-            instance = this["instance"]?.jsonPrimitive?.content?.let { ModeCapabilityInstanceWrapper(it.codifiedEnum()) }
-                ?: ModeCapabilityInstanceWrapper(ModeCapability.THERMOSTAT.codifiedEnum()),
-            modes = this["modes"]?.jsonArray?.map {
-                ModeObject(value = ModeCapabilityModeWrapper(it.jsonObject["value"]?.jsonPrimitive?.content?.codifiedEnum()
-                    ?: ModeCapabilityMode.AUTO.codifiedEnum()))
-            } ?: emptyList()
-        )
-        CapabilityTypeWrapper(CapabilityType.RANGE.codifiedEnum()) -> RangeCapabilityParameterObject(
-            instance = this["instance"]?.jsonPrimitive?.content?.let { RangeCapabilityWrapper(it.codifiedEnum()) }
-                ?: RangeCapabilityWrapper(RangeCapability.BRIGHTNESS.codifiedEnum()),
-            randomAccess = this["random_access"]?.jsonPrimitive?.boolean ?: false,
-            range = this["range"]?.jsonObject?.let {
-                Range(
-                    min = it["min"]?.jsonPrimitive?.float ?: 0.0f,
-                    max = it["max"]?.jsonPrimitive?.float ?: 0.0f,
-                    precision = it["precision"]?.jsonPrimitive?.float ?: 0.0f
-                )
-            },
-            looped = this["looped"]?.jsonPrimitive?.boolean
-        )
-        CapabilityTypeWrapper(CapabilityType.TOGGLE.codifiedEnum()) -> ToggleCapabilityParameterObject(
-            instance = this["instance"]?.jsonPrimitive?.content?.let { ToggleCapabilityWrapper(it.codifiedEnum()) }
-                ?: ToggleCapabilityWrapper(ToggleCapability.BACKLIGHT.codifiedEnum())
-        )
-        CapabilityTypeWrapper(CapabilityType.VIDEO_STREAM.codifiedEnum()) -> VideoStreamCapabilityParameterObject(
-            protocols = this["protocols"]?.jsonArray?.map {
-                VideoStreamCapabilityParameterObjectStreamProtocolWrapper(it.jsonPrimitive.content.codifiedEnum())
-            } ?: emptyList()
-        )
+        CapabilityTypeWrapper(CapabilityType.COLOR_SETTING.codifiedEnum()) -> this.toColorSettingCapabilityParameterObject()
+        CapabilityTypeWrapper(CapabilityType.ON_OFF.codifiedEnum()) -> this.toOnOffCapabilityParameterObject()
+        CapabilityTypeWrapper(CapabilityType.MODE.codifiedEnum()) -> this.toModeCapabilityParameterObject()
+        CapabilityTypeWrapper(CapabilityType.RANGE.codifiedEnum()) -> this.toRangeCapabilityParameterObject()
+        CapabilityTypeWrapper(CapabilityType.TOGGLE.codifiedEnum()) -> this.toToggleCapabilityParameterObject()
+        CapabilityTypeWrapper(CapabilityType.VIDEO_STREAM.codifiedEnum()) -> this.toVideoStreamCapabilityParameterObject()
         else -> error("Unsupported capability type")
     }
 }
@@ -514,26 +670,27 @@ fun CapabilityParameterObject.toYandexJson(typeWrapper: CapabilityTypeWrapper): 
         else -> error("Unsupported capability type")
     }
 }
-
 fun ColorSettingCapabilityParameterObject.toYandexJson(): JsonObject = buildJsonObject {
     colorModel?.let { put("color_model", it.colorModel.code()) }
-    temperatureK?.let {
-        putJsonObject("temperature_k") {
-            put("min", it.min)
-            put("max", it.max)
+    temperatureK?.let { put("temperature_k", it.toJson()) }
+    colorScene?.let { put("color_scene", it.toJson()) }
+}
+
+fun TemperatureK.toJson(): JsonObject = buildJsonObject {
+    put("min", min)
+    put("max", max)
+}
+
+fun ColorScene.toJson(): JsonObject = buildJsonObject {
+    putJsonArray("scenes") {
+        scenes.forEach { scene ->
+            add(scene.toJson())
         }
     }
-    colorScene?.let {
-        putJsonObject("color_scene") {
-            putJsonArray("scenes") {
-                it.scenes.forEach { scene ->
-                    addJsonObject {
-                        put("id", scene.id.scene.code())
-                    }
-                }
-            }
-        }
-    }
+}
+
+fun Scene.toJson(): JsonObject = buildJsonObject {
+    put("id", id.scene.code())
 }
 
 fun OnOffCapabilityParameterObject.toYandexJson(): JsonObject = buildJsonObject {
@@ -544,25 +701,27 @@ fun ModeCapabilityParameterObject.toYandexJson(): JsonObject = buildJsonObject {
     put("instance", instance.mode.code())
     putJsonArray("modes") {
         modes.forEach { mode ->
-            addJsonObject {
-                put("value", mode.value.mode.code())
-            }
+            add(mode.toJson())
         }
     }
+}
+
+fun ModeObject.toJson(): JsonObject = buildJsonObject {
+    put("value", value.mode.code())
 }
 
 fun RangeCapabilityParameterObject.toYandexJson(): JsonObject = buildJsonObject {
     put("instance", instance.range.code())
     put("random_access", randomAccess)
-    range?.let {
-        putJsonObject("range") {
-            put("min", it.min)
-            put("max", it.max)
-            put("precision", it.precision)
-        }
-    }
-    looped?.let { put("looped", it) }
-    unit?.let { put("unit", it.unit.code()) }
+    range?.let { put("range", it.toJson()) }
+    put("looped", looped)
+    put("unit", unit?.unit?.code())
+}
+
+fun Range.toJson(): JsonObject = buildJsonObject {
+    put("min", min)
+    put("max", max)
+    put("precision", precision)
 }
 
 fun ToggleCapabilityParameterObject.toYandexJson(): JsonObject = buildJsonObject {
@@ -670,19 +829,23 @@ fun ColorSettingCapabilityStateObjectData.toYandexJson(): JsonObject {
     }
 }
 
-fun ColorSettingCapabilityStateObjectValue.toYandexJson(): JsonElement {
-    return when (this) {
-        is ColorSettingCapabilityStateObjectValueInteger -> JsonPrimitive(value)
-        is ColorSettingCapabilityStateObjectValueObjectScene -> buildJsonObject {
-            put("type", "scene")
-            put("id", value.scene.code())
-        }
-        is ColorSettingCapabilityStateObjectValueObjectHSV -> buildJsonObject {
-            put("type", "hsv")
-            put("h", value.h)
-            put("s", value.s)
-            put("v", value.v)
-        }
+fun ColorSettingCapabilityStateObjectValue.toYandexJson(): JsonElement = when (this) {
+    is ColorSettingCapabilityStateObjectValueInteger -> JsonPrimitive(value)
+    is ColorSettingCapabilityStateObjectValueObjectScene -> toJson()
+    is ColorSettingCapabilityStateObjectValueObjectHSV -> toJson()
+}
+
+fun ColorSettingCapabilityStateObjectValueObjectScene.toJson(): JsonObject = buildJsonObject {
+    put("type", "scene")
+    put("id", value.scene.code())
+}
+
+fun ColorSettingCapabilityStateObjectValueObjectHSV.toJson(): JsonObject = buildJsonObject {
+    put("type", "hsv")
+    value.let {
+        put("h", it.h)
+        put("s", it.s)
+        put("v", it.v)
     }
 }
 
@@ -907,13 +1070,13 @@ fun JsonObject.toGroupCapabilityObject(): GroupCapabilityObject {
 }
 
 fun GroupCapabilityObject.toYandexJson(): JsonObject {
-    val parametersJson = parameters.toYandexJson(type)
+    val parametersJson = parameters?.toYandexJson(type)
     val stateJson = state?.toYandexJson(type)
 
     return buildJsonObject {
         put("type", type.type.code())
         put("retrievable", retrievable)
-        put("parameters", parametersJson)
+        put("parameters", parametersJson?: JsonNull)
         stateJson?.let { put("state", it) }
     }
 }
@@ -931,5 +1094,69 @@ fun HouseholdObject.toYandexJson(): JsonObject {
         put("id", id)
         put("name", name)
         put("type", type)
+    }
+}
+
+fun Capability.toYandexJson(): JsonObject {
+    return when (this) {
+        is DeviceCapabilityObject -> this.toYandexJson()
+        is CapabilityObject -> buildJsonObject {
+            put("type", type.type.code())
+//            retrievable?.let { put("retrievable", it) }
+//            parameters?.let { put("parameters", it.toYandexJson(type)) }
+            state?.run { toYandexJson(type)?.let { put("state", it) } }
+//            lastUpdated?.let { put("last_updated", it) }
+        }
+    }
+}
+
+fun JsonObject.toCapabilityObject(type: CapabilityTypeWrapper): CapabilityObject {
+    return CapabilityObject(
+        type = type,
+//        retrievable = this["retrievable"]?.jsonPrimitive?.boolean,
+//        parameters = this["parameters"]?.jsonObject?.toCapabilityParameterObject(type),
+        state = this["state"]?.jsonObject?.toCapabilityStateObjectData(type),
+//        lastUpdated = this["last_updated"]?.jsonPrimitive?.float
+    )
+}
+
+fun JsonObject.toCapability(): Capability {
+    val type = CapabilityTypeWrapper(this["type"]?.jsonPrimitive?.content!!.codifiedEnum())
+
+    return when {
+        "reportable" in this -> toDeviceCapabilityObject() ?: toCapabilityObject(type)
+        else -> toCapabilityObject(type)
+    }
+}
+
+fun Property.toYandexJson(): JsonObject {
+    return when (this) {
+        is DevicePropertyObject -> this.toYandexJson()
+        is PropertyObject -> buildJsonObject {
+            put("type", type.type.code())
+            put("retrievable", retrievable)
+            put("parameters", parameters.toYandexJson(type))
+            state?.run { toYandexJson(type)?.let { put("state", it) } }
+            put("last_updated", lastUpdated)
+        }
+    }
+}
+
+fun JsonObject.toPropertyObject(type: PropertyTypeWrapper): PropertyObject {
+    return PropertyObject(
+        type = type,
+        retrievable = this["retrievable"]?.jsonPrimitive?.boolean ?: false,
+        parameters = this["parameters"]?.jsonObject?.toPropertyParameterObject(type)!!,
+        state = this["state"]?.jsonObject?.toPropertyStateObjectData(type),
+        lastUpdated = this["last_updated"]?.jsonPrimitive?.float ?: 0f
+    )
+}
+
+fun JsonObject.toProperty(): Property {
+    val type = PropertyTypeWrapper(this["type"]?.jsonPrimitive?.content!!.codifiedEnum())
+
+    return when {
+        "reportable" in this -> toDevicePropertyObject() ?: toPropertyObject(type)
+        else -> toPropertyObject(type)
     }
 }

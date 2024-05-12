@@ -26,4 +26,26 @@ class MasterEntity {
     var ip: String = "192.168.0.0"
     @JvmField
     var port: Int = 11311
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as MasterEntity
+
+        if (id != other.id) return false
+        if (configId != other.configId) return false
+        if (ip != other.ip) return false
+        if (port != other.port) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = id.hashCode()
+        result = 31 * result + configId.hashCode()
+        result = 31 * result + ip.hashCode()
+        result = 31 * result + port
+        return result
+    }
 }

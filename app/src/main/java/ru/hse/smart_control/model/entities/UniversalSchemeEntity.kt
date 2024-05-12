@@ -16,19 +16,20 @@ import java.io.Serializable
 /**
  * Model класс сложного устройства для общения по протоколу
  */
+// TODO: переписать на UniversalDeviceObject
 @Entity(tableName = AppConstants.DATABASE_NAME)
-data class DeviceOld(@PrimaryKey(autoGenerate = true)
+data class UniversalSchemeEntity(@PrimaryKey(autoGenerate = true)
                        var id: Int = 0,
-                     var name: String = DEFAULT_DEVICE_NAME,
-                     var nameByUser: String = DEFAULT_DEVICE_NAME,
-                     var protocol: String = DEFAULT_DEVICE_PROTOCOL,
-                     var protocolEncryption: String = EncryptionType.NONE.name,
-                     override var bluetoothAddress: String = DEFAULT_DEVICE_BLUETOOTH_ADDRESS,
-                     var manufacture: String = DEFAULT_DEVICE_MANUFACTURE,
-                     var model: String = DEFAULT_DEVICE_MODEL,
-                     override var wifiAddress: String = DEFAULT_DEVICE_WIFI_ADDRESS,
-                     override var port: Int = DEFAULT_DEVICE_PORT,
-                     var vendorId: Int = 0,
+                                 var name: String = DEFAULT_DEVICE_NAME,
+                                 var nameByUser: String = DEFAULT_DEVICE_NAME,
+                                 var protocol: String = DEFAULT_DEVICE_PROTOCOL,
+                                 var protocolEncryption: String = EncryptionType.NONE.name,
+                                 override var bluetoothAddress: String = DEFAULT_DEVICE_BLUETOOTH_ADDRESS,
+                                 var manufacture: String = DEFAULT_DEVICE_MANUFACTURE,
+                                 var model: String = DEFAULT_DEVICE_MODEL,
+                                 override var wifiAddress: String = DEFAULT_DEVICE_WIFI_ADDRESS,
+                                 override var port: Int = DEFAULT_DEVICE_PORT,
+                                 var vendorId: Int = 0,
 )
     :
     Serializable,
@@ -37,7 +38,7 @@ data class DeviceOld(@PrimaryKey(autoGenerate = true)
     DeviceSelectable {
 
     // Копирующий конструктор
-    constructor(other: DeviceOld) : this(
+    constructor(other: UniversalSchemeEntity) : this(
         id = other.id,
         name = other.name,
         protocol = other.protocol,

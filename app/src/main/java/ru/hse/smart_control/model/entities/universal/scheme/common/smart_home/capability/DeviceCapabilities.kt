@@ -24,7 +24,7 @@ data class GroupCapabilityObject(
     @SerialName("type")
     val type: CapabilityTypeWrapper,
     @SerialName("retrievable") val retrievable: Boolean,
-    @SerialName("parameters") val parameters: CapabilityParameterObject,
+    @SerialName("parameters") val parameters: CapabilityParameterObject?,
     @SerialName("state") val state: CapabilityStateObjectData?
 )
 
@@ -46,29 +46,29 @@ data class CapabilityTypeWrapper(
 
 sealed interface Capability{
     @SerialName("type")  val type: CapabilityTypeWrapper
-    @SerialName("retrievable") val retrievable: Boolean?
-    @SerialName("parameters") val parameters: CapabilityParameterObject?
+//    @SerialName("retrievable") val retrievable: Boolean?
+//    @SerialName("parameters") val parameters: CapabilityParameterObject?
     @SerialName("state") val state: CapabilityStateObjectData?
-    @SerialName("last_updated") val lastUpdated: Float?
+//    @SerialName("last_updated") val lastUpdated: Float?
 }
 
 @Serializable
 data class DeviceCapabilityObject(
     override val type: CapabilityTypeWrapper,
     val reportable: Boolean,
-    override val retrievable: Boolean,
-    override val parameters: CapabilityParameterObject,
+    val retrievable: Boolean,
+    val parameters: CapabilityParameterObject,
     override val state: CapabilityStateObjectData?,
-    override val lastUpdated: Float
+    val lastUpdated: Float
 ) : Capability
 
 @Serializable
 data class CapabilityObject(
     override val type: CapabilityTypeWrapper,
-    override val retrievable: Boolean? = null,
-    override val parameters: CapabilityParameterObject? = null,
+//    override val retrievable: Boolean? = null,
+//    override val parameters: CapabilityParameterObject? = null,
     override val state: CapabilityStateObjectData?,
-    @SerialName("last_updated") override val lastUpdated: Float? = null
+//    @SerialName("last_updated") override val lastUpdated: Float? = null
 ) : Capability
 
 @Serializable
@@ -114,12 +114,12 @@ data class RangeCapabilityParameterObject(
     val looped: Boolean? = null
 ): CapabilityParameterObject() {
     init {
-        unit = when (instance.range.knownOrNull()) {
-            RangeCapability.BRIGHTNESS,
-            RangeCapability.HUMIDITY,
-            RangeCapability.OPEN -> MeasurementUnitWrapper(MeasurementUnit.PERCENT.codifiedEnum())
-            else -> {
-                MeasurementUnitWrapper(MeasurementUnit.TEMPERATURE_CELSIUS.codifiedEnum())
+        unit = instance.range.knownOrNull()?.let {
+            when (it) {
+                RangeCapability.BRIGHTNESS,
+                RangeCapability.HUMIDITY,
+                RangeCapability.OPEN -> MeasurementUnitWrapper(MeasurementUnit.PERCENT.codifiedEnum())
+                else -> MeasurementUnitWrapper(MeasurementUnit.TEMPERATURE_CELSIUS.codifiedEnum())
             }
         }
     }

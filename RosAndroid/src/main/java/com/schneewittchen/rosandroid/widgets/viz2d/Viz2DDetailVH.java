@@ -40,7 +40,7 @@ public class Viz2DDetailVH  extends WidgetGroupViewHolder implements TextView.On
     @Override
     protected void updateEntity(BaseEntity entity) {
         Viz2DEntity viz2d = (Viz2DEntity) entity;
-        viz2d.frame = frameEditText.getText().toString();
+        viz2d.frame = (frameEditText.getText().toString());
     }
 
     @Override

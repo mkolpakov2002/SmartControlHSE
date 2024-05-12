@@ -80,7 +80,7 @@ class YandexApiExtensionsTest {
         assertEquals("L00BN1200M42ZY.yandexmicro", result.devices[0].externalId)
         assertEquals("Q", result.devices[0].skillId)
         assertEquals("f80b6641-8880-49d5-be31-1b35745c321a", result.devices[0].householdId)
-//        assertEquals(null, result.devices[0].room)
+        assertEquals(null, result.devices[0].room)
         assertEquals(emptyList(), result.devices[0].groups)
         assertEquals(emptyList(), result.devices[0].capabilities)
         assertEquals(1, result.devices[0].properties.size)
@@ -141,14 +141,14 @@ class YandexApiExtensionsTest {
             DeviceObject(
                 id = "lamp-id-1",
                 name = "",
-                aliases = emptyList(),
+                aliases = mutableListOf(),
                 type = DeviceTypeWrapper(DeviceType.SOCKET.codifiedEnum()),
                 externalId = "",
                 skillId = "",
                 householdId = "",
                 room = "",
-                groups = emptyList(),
-                capabilities = listOf(
+                groups = mutableListOf(),
+                capabilities = mutableListOf(
                     DeviceCapabilityObject(
                         type = CapabilityTypeWrapper(CapabilityType.ON_OFF.codifiedEnum()),
                         reportable = true,
@@ -190,7 +190,7 @@ class YandexApiExtensionsTest {
                         lastUpdated = 0f
                     )
                 ),
-                properties = emptyList()
+                properties = mutableListOf()
             )
         )
 

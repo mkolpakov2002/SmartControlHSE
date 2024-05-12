@@ -16,7 +16,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener
 import ru.hse.smart_control.R
 import ru.hse.smart_control.databinding.FragmentBluetoothPairedDevicesBinding
 import ru.hse.smart_control.domain.connection.ConnectionFactory.bluetoothBounded
-import ru.hse.smart_control.model.entities.DeviceOld
+import ru.hse.smart_control.model.entities.UniversalSchemeEntity
 
 class BluetoothPairedDevicesFragment : Fragment(), NewBtDevicesAdapter.OnDeviceClicked, OnRefreshListener {
 
@@ -77,9 +77,9 @@ class BluetoothPairedDevicesFragment : Fragment(), NewBtDevicesAdapter.OnDeviceC
         swipeToRefreshLayout.isRefreshing = false
     }
 
-    fun checkDeviceAddress(deviceOldPrototype: DeviceOld?) {
+    fun checkDeviceAddress(universalSchemeEntityPrototype: UniversalSchemeEntity?) {
         val b = Bundle()
-        b.putSerializable("deviceOld", deviceOldPrototype)
+        b.putSerializable("deviceOld", universalSchemeEntityPrototype)
         findNavController(requireView()).navigate(R.id.deviceMenuFragment, b)
     }
 
@@ -94,7 +94,7 @@ class BluetoothPairedDevicesFragment : Fragment(), NewBtDevicesAdapter.OnDeviceC
         searchForDevice()
     }
 
-    override fun selectedDevice(deviceOldPrototype: DeviceOld?) {
-        checkDeviceAddress(deviceOldPrototype)
+    override fun selectedDevice(universalSchemeEntityPrototype: UniversalSchemeEntity?) {
+        checkDeviceAddress(universalSchemeEntityPrototype)
     }
 }

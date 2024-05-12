@@ -13,11 +13,11 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import ru.hse.smart_control.R
-import ru.hse.smart_control.model.entities.DeviceOld
+import ru.hse.smart_control.model.entities.UniversalSchemeEntity
 
 open class MultipleTypesAdapterKt(
     private val context: Context,
-    deviceOldItemTypes: List<DeviceOld>
+    universalSchemeEntityItemTypes: List<UniversalSchemeEntity>
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
@@ -25,7 +25,7 @@ open class MultipleTypesAdapterKt(
         const val TYPE_ITEM = 1
     }
 
-    data class Item(val deviceOld: DeviceOld?, var isSelected: Boolean = false, var isButton: Boolean)
+    data class Item(val universalSchemeEntity: UniversalSchemeEntity?, var isSelected: Boolean = false, var isButton: Boolean)
 
     private var items = ArrayList<Item>()
     var isMultiSelect = false
@@ -33,8 +33,8 @@ open class MultipleTypesAdapterKt(
     var onItemClickListener: OnItemClickListener? = null
 
     init {
-        items.add(Item(deviceOld = null, isSelected = false, isButton = true))
-        items.addAll(deviceOldItemTypes.map { Item(deviceOld = it, isSelected = false, isButton = false) })
+        items.add(Item(universalSchemeEntity = null, isSelected = false, isButton = true))
+        items.addAll(universalSchemeEntityItemTypes.map { Item(universalSchemeEntity = it, isSelected = false, isButton = false) })
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -64,12 +64,12 @@ open class MultipleTypesAdapterKt(
     }
 
     private fun bindItemViewHolder(holder: ItemViewHolder, item: Item) {
-        holder.mName.text = item.deviceOld?.name ?: "NPE"
+        holder.mName.text = item.universalSchemeEntity?.name ?: "NPE"
         updateItemSelection(holder, item)
-        item.deviceOld?.let { holder.deviceImage.setImageResource(it.getDeviceImage()) }
+        item.universalSchemeEntity?.let { holder.deviceImage.setImageResource(it.getDeviceImage()) }
         holder.deviceImage.visibility = View.VISIBLE
-        holder.wifiSupportIcon.visibility = if (item.deviceOld?.isWiFiSupported == true) View.VISIBLE else View.GONE
-        holder.btSupportIcon.visibility = if (item.deviceOld?.isBluetoothSupported == true) View.VISIBLE else View.GONE
+        holder.wifiSupportIcon.visibility = if (item.universalSchemeEntity?.isWiFiSupported == true) View.VISIBLE else View.GONE
+        holder.btSupportIcon.visibility = if (item.universalSchemeEntity?.isBluetoothSupported == true) View.VISIBLE else View.GONE
         holder.itemView.setOnClickListener { handleItemClick(holder, item) }
         holder.itemView.setOnLongClickListener { handleItemLongClick(holder, item) }
     }
@@ -112,14 +112,14 @@ open class MultipleTypesAdapterKt(
 
     fun areDevicesConnectable(): Boolean = true
 
-    fun getSelectedItems(): ArrayList<DeviceOld> {
-        return ArrayList(items.mapNotNull { if (it.isSelected) it.deviceOld else null })
+    fun getSelectedItems(): ArrayList<UniversalSchemeEntity> {
+        return ArrayList(items.mapNotNull { if (it.isSelected) it.universalSchemeEntity else null })
     }
 
-    fun updateItems(newItems: List<DeviceOld>) {
+    fun updateItems(newItems: List<UniversalSchemeEntity>) {
         items.clear()
-        items.add(Item(deviceOld = null, isSelected = false, isButton = true))
-        items.addAll(newItems.map { Item(deviceOld = it, isSelected = false, isButton = false) })
+        items.add(Item(universalSchemeEntity = null, isSelected = false, isButton = true))
+        items.addAll(newItems.map { Item(universalSchemeEntity = it, isSelected = false, isButton = false) })
         notifyDataSetChanged()
     }
 

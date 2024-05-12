@@ -13,9 +13,9 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 class Viz2DEntity : GroupEntity() {
+
     @JvmField
     var frame: String
-
 
     init {
         this.width = 8

@@ -32,4 +32,28 @@ class ConfigEntity {
     var name: String = "DefaultName"
     @JvmField
     var isFavourite: Boolean = false
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ConfigEntity
+
+        if (id != other.id) return false
+        if (creationTime != other.creationTime) return false
+        if (lastUsed != other.lastUsed) return false
+        if (name != other.name) return false
+        if (isFavourite != other.isFavourite) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = id.hashCode()
+        result = 31 * result + creationTime.hashCode()
+        result = 31 * result + lastUsed.hashCode()
+        result = 31 * result + name.hashCode()
+        result = 31 * result + isFavourite.hashCode()
+        return result
+    }
 }

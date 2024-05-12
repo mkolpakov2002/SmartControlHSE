@@ -3,14 +3,11 @@ package ru.hse.smart_control.model.entities.universal.scheme.common.smart_home
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.json.put
 import pl.brightinventions.codified.Codified
 import pl.brightinventions.codified.enums.CodifiedEnum
 import pl.brightinventions.codified.enums.serializer.codifiedEnumSerializer
-import ru.hse.smart_control.model.entities.universal.scheme.common.TypeConnectionParameterObject
+import ru.hse.smart_control.model.entities.universal.scheme.common.UniversalDeviceObject
+import ru.hse.smart_control.model.entities.universal.scheme.common.UniversalPayload
 import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.Capability
 import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.CapabilityActionResultObject
 import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.CapabilityObject
@@ -22,12 +19,12 @@ import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.pr
 
 @Serializable
 data class SmartHomeInfo(
-    @SerialName("rooms") val rooms: List<RoomObject>,
-    @SerialName("groups") val groups: List<GroupObject>,
-    @SerialName("devices") val devices: List<DeviceObject>,
-    @SerialName("scenarios") val scenarios: List<ScenarioObject>,
-    @SerialName("households") val households: List<HouseholdObject>
-) : TypeConnectionParameterObject
+    @SerialName("rooms") val rooms: MutableList<RoomObject>,
+    @SerialName("groups") val groups: MutableList<GroupObject>,
+    @SerialName("devices") val devices: MutableList<DeviceObject>,
+    @SerialName("scenarios") val scenarios: MutableList<ScenarioObject>,
+    @SerialName("households") val households: MutableList<HouseholdObject>
+) : UniversalPayload
 
 @Serializable
 data class MeasurementUnitWrapper(
@@ -39,7 +36,7 @@ data class MeasurementUnitWrapper(
 data class RoomObject(
     @SerialName("id") val id: String,
     @SerialName("name") val name: String,
-    @SerialName("devices") val devices: List<String>,
+    @SerialName("devices") val devices: MutableList<String>,
     @SerialName("household_id") val householdId: String
 )
 
@@ -47,10 +44,10 @@ data class RoomObject(
 data class GroupObject(
     @SerialName("id") val id: String,
     @SerialName("name") val name: String,
-    @SerialName("aliases") val aliases: List<String>,
+    @SerialName("aliases") val aliases: MutableList<String>,
     @SerialName("type") val type: DeviceTypeWrapper,
-    @SerialName("capabilities") val capabilities: List<GroupCapabilityObject>,
-    @SerialName("devices") val devices: List<String>,
+    @SerialName("capabilities") val capabilities: MutableList<GroupCapabilityObject>,
+    @SerialName("devices") val devices: MutableList<String>,
     @SerialName("household_id") val householdId: String
 )
 
@@ -64,8 +61,8 @@ sealed interface BaseDeviceObject {
     @SerialName("room") val room: String?
     @SerialName("external_id") val externalId: String?
     @SerialName("skill_id") val skillId: String?
-    @SerialName("capabilities") val capabilities: List<Capability>?
-    @SerialName("properties") val properties: List<Property>?
+    @SerialName("capabilities") val capabilities: List<Capability>
+    @SerialName("properties") val properties: List<Property>
 }
 
 enum class DeviceType(override val code: String) : Codified<String> {
@@ -115,17 +112,17 @@ data class DeviceTypeWrapper(
 data class DeviceObject(
     override val id: String,
     override val name: String,
-    override val aliases: List<String>,
+    override val aliases: MutableList<String>,
     override val type: DeviceTypeWrapper,
     @SerialName("external_id") override val externalId: String,
     @SerialName("skill_id") override val skillId: String,
     @SerialName("household_id") val householdId: String,
     @SerialName("room") override val room: String? = null,
-    override val groups: List<String>,
-    override val capabilities: List<DeviceCapabilityObject>,
-    override val properties: List<DevicePropertyObject>,
+    override val groups: MutableList<String>,
+    override val capabilities: MutableList<DeviceCapabilityObject>,
+    override val properties: MutableList<DevicePropertyObject>,
     @SerialName("quasar_info") val quasarInfo: QuasarInfo? = null
-) : BaseDeviceObject
+) : BaseDeviceObject, UniversalDeviceObject
 
 @Serializable
 data class ScenarioObject(
@@ -159,13 +156,13 @@ enum class DeviceState(override val code: String) : Codified<String> {
 @Serializable
 data class DeviceActionsObject(
     val id: String,
-    val actions: List<CapabilityObject>
+    val actions: MutableList<CapabilityObject>
 )
 
 @Serializable
 data class DeviceActionsResultObject(
     val id: String,
-    val capabilities: List<CapabilityActionResultObject>
+    val capabilities: MutableList<CapabilityActionResultObject>
 )
 
 @Serializable

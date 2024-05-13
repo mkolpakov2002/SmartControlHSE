@@ -26,14 +26,13 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI.setupWithNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import ru.hse.smart_control.domain.connection.ConnectionFactory
-import ru.hse.smart_control.ui.fragments.home.MainMenuFragment
+import ru.hse.smart_control.ui.fragments.home.MainControlFragment
 import ru.hse.smart_control.ui.fragments.home.MainViewModel
 import ru.hse.smart_control.utility.AppConstants.APP_LOG_TAG
 import ru.hse.smart_control.utility.AppConstants.BLUETOOTH_ADMIN_PERMISSION
@@ -75,7 +74,7 @@ class MainActivity : AppCompatActivity() {
         toolbar.inflateMenu(R.menu.main_toolbar_menu)
         toolbar.setOnMenuItemClickListener {
             when (viewModel.getCurrentVisibleFragment()?.id) {
-                R.id.mainMenuFragment -> createOneButtonAlertDialog(
+                R.id.mainControlFragment -> createOneButtonAlertDialog(
                     getString(R.string.instruction_alert),
                     getString(R.string.instruction_for_app)
                 )
@@ -144,8 +143,8 @@ class MainActivity : AppCompatActivity() {
 
             binding.bottomnav.setOnItemSelectedListener { item: MenuItem ->
                 return@setOnItemSelectedListener when (item.itemId) {
-                    R.id.mainMenuFragment -> {
-                        navHost.navController.navigate(R.id.mainMenuFragment)
+                    R.id.mainControlFragment -> {
+                        navHost.navController.navigate(R.id.mainControlFragment)
                         true
                     }
 
@@ -359,7 +358,7 @@ class MainActivity : AppCompatActivity() {
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         val currentFragment = supportFragmentManager.findFragmentById(R.id.container)
-        if (currentFragment is MainMenuFragment) {
+        if (currentFragment is MainControlFragment) {
             handleBackPressedOnMainMenu()
         } else {
             super.onBackPressed()

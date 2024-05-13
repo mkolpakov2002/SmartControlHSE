@@ -11,7 +11,7 @@ import ru.hse.smart_control.model.user.RegisterModel
 import ru.hse.smart_control.model.user.TokenModel
 import java.util.concurrent.TimeUnit
 
-const val BASE_URL = "https://8a49-188-66-38-126.ngrok-free.app/"
+const val BASE_URL = "https://0a80-188-66-38-126.ngrok-free.app/"
 
 interface NestApi {
     @POST("auth/register")

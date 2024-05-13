@@ -165,4 +165,8 @@
     <string name="register">Registration</string>
     <string name="login">Entrance</string>
 
+    <string name="yandex_tab">Yandex</string>
+    <string name="arduino_tab">Arduino</string>
+    <string name="ros_tab">ROS</string>
+
 </resources>

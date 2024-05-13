@@ -33,8 +33,7 @@ import ru.hse.smart_control.model.entities.UniversalSchemeEntity
 import ru.hse.smart_control.databinding.FragmentMainBinding
 import ru.hse.smart_control.ui.MainActivity
 
-
-class MainMenuFragment : Fragment(), OnRefreshListener, MultipleTypesAdapterKt.OnItemClickListener,
+class MainDeviceListFragment(private val text: String) : Fragment(), OnRefreshListener, MultipleTypesAdapterKt.OnItemClickListener,
     MultipleTypesAdapterKt.OnItemLongClickListener {
 
     private lateinit  var multipleTypesAdapter: MultipleTypesAdapterKt
@@ -57,6 +56,7 @@ class MainMenuFragment : Fragment(), OnRefreshListener, MultipleTypesAdapterKt.O
     @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         requireContext().registerReceiver(
             bluetoothStateChanged,
             IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
@@ -94,9 +94,9 @@ class MainMenuFragment : Fragment(), OnRefreshListener, MultipleTypesAdapterKt.O
             } else {
                 (Snackbar.make(
                     binding.root,
-                        getString(R.string.selection_class_device_error),
-                        Snackbar.LENGTH_LONG
-                    ).setAction(getString(R.string.ok)) {}).show()
+                    getString(R.string.selection_class_device_error),
+                    Snackbar.LENGTH_LONG
+                ).setAction(getString(R.string.ok)) {}).show()
             }
         }
         binding.floatingActionButtonDeleteSelected.hide()
@@ -118,7 +118,6 @@ class MainMenuFragment : Fragment(), OnRefreshListener, MultipleTypesAdapterKt.O
             }
         })
         binding.recyclerMain.clipToPadding = false
-//        ma?.bottomAppBarSize?.let { dataBinding.recyclerMain.setPadding(0, 0, 0, it) }
         (activity as MainActivity).bottomAppBarSize?.let { binding.recyclerMain.setPadding(0, 0, 0, it) }
         bottomSheetDialogToAdd = BottomSheetDialog(requireContext())
         bottomSheetDialogToAdd.setContentView(R.layout.bottom_sheet_dialog_add_device)
@@ -182,8 +181,7 @@ class MainMenuFragment : Fragment(), OnRefreshListener, MultipleTypesAdapterKt.O
         lifecycleScope.launch {
             withContext(Dispatchers.Main) {
                 hideAllButtons()
-                binding.pairedDevicesTitleAddActivity.setText(R.string.favorites_devices)
-                if (!this@MainMenuFragment::multipleTypesAdapter.isInitialized) {
+                if (!this@MainDeviceListFragment::multipleTypesAdapter.isInitialized) {
                     initAdapter()
                 } else {
                     multipleTypesAdapter.updateItems(universalSchemeEntityItemTypeList)

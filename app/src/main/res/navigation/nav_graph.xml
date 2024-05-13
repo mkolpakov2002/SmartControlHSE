@@ -7,8 +7,8 @@
     >
 
     <fragment
-        android:id="@+id/mainMenuFragment"
-        android:name="ru.hse.smart_control.ui.fragments.home.MainMenuFragment"
+        android:id="@+id/mainControlFragment"
+        android:name="ru.hse.smart_control.ui.fragments.home.MainControlFragment"
         android:label="main"
         app:defaultNavHost="true"
         tools:layout="@layout/fragment_main">
@@ -35,7 +35,7 @@
         tools:layout="@layout/fragment_settings">
         <action
             android:id="@+id/action_settings_Fragment_to_mainMenuFragment"
-            app:destination="@id/mainMenuFragment" />
+            app:destination="@id/mainControlFragment" />
         <action
             android:id="@+id/action_settingsFragment_to_navigationDialog"
             app:destination="@id/navigationDialog" />
@@ -47,7 +47,7 @@
         android:label="dialog_connection">
         <action
             android:id="@+id/action_connection_dialog_to_mainMenuFragment"
-            app:destination="@id/mainMenuFragment" />
+            app:destination="@id/mainControlFragment" />
         <action
             android:id="@+id/action_connection_dialog_to_oneButtonAlertDialogFragment"
             app:destination="@id/oneButtonAlertDialogFragment" />
@@ -62,7 +62,7 @@
 
         <action
             android:id="@+id/action_oneButtonAlertDialogFragment_to_mainMenuFragment"
-            app:destination="@id/mainMenuFragment" />
+            app:destination="@id/mainControlFragment" />
     </dialog>
     <fragment
         android:id="@+id/deviceMenuFragment"
@@ -71,7 +71,7 @@
         tools:layout="@layout/fragment_device_menu">
         <action
             android:id="@+id/action_deviceMenuFragment_to_mainMenuFragment"
-            app:destination="@id/mainMenuFragment" />
+            app:destination="@id/mainControlFragment" />
         <action
             android:id="@+id/action_deviceMenuFragment_to_addDeviceFragment"
             app:destination="@id/addDeviceFragment" />
@@ -89,7 +89,7 @@
             app:destination="@id/deviceMenuFragment" />
         <action
             android:id="@+id/action_addDeviceFragment_to_mainMenuFragment"
-            app:destination="@id/mainMenuFragment" />
+            app:destination="@id/mainControlFragment" />
     </fragment>
     <fragment
         android:id="@+id/connectionTypeFragment"
@@ -117,6 +117,6 @@
         android:label="AuthControlFragment" >
         <action
             android:id="@+id/action_authControlFragment_to_mainMenuFragment"
-            app:destination="@id/mainMenuFragment" />
+            app:destination="@id/mainControlFragment" />
     </fragment>
 </navigation>

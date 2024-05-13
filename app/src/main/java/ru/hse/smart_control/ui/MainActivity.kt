@@ -203,7 +203,7 @@ class MainActivity : AppCompatActivity() {
             val time = format.parse(
                 sharedPreferences.getStringValue("AUTHORISATION_TIME") ?: return false
             )?.time ?: return false
-            return Date().time < (time + 1000 * 60 )
+            return Date().time < (time + 1000 * 60 * 60 * 24)
         } catch (_: Exception) {
         }
         return false

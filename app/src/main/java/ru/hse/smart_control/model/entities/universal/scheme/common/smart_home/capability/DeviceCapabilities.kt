@@ -46,10 +46,7 @@ data class CapabilityTypeWrapper(
 
 sealed interface Capability{
     @SerialName("type")  val type: CapabilityTypeWrapper
-//    @SerialName("retrievable") val retrievable: Boolean?
-//    @SerialName("parameters") val parameters: CapabilityParameterObject?
     @SerialName("state") val state: CapabilityStateObjectData?
-//    @SerialName("last_updated") val lastUpdated: Float?
 }
 
 @Serializable
@@ -58,17 +55,14 @@ data class DeviceCapabilityObject(
     val reportable: Boolean,
     val retrievable: Boolean,
     val parameters: CapabilityParameterObject,
-    override val state: CapabilityStateObjectData?,
+    override var state: CapabilityStateObjectData?,
     val lastUpdated: Float
 ) : Capability
 
 @Serializable
 data class CapabilityObject(
     override val type: CapabilityTypeWrapper,
-//    override val retrievable: Boolean? = null,
-//    override val parameters: CapabilityParameterObject? = null,
     override val state: CapabilityStateObjectData?,
-//    @SerialName("last_updated") override val lastUpdated: Float? = null
 ) : Capability
 
 @Serializable
@@ -438,7 +432,7 @@ sealed interface CapabilityStateObjectValue
 @Serializable
 data class OnOffCapabilityStateObjectData(
     override val instance: OnOffCapabilityStateObjectInstanceWrapper,
-    override val value: OnOffCapabilityStateObjectValue
+    override var value: OnOffCapabilityStateObjectValue
 ): CapabilityStateObjectData()
 
 @Serializable
@@ -459,7 +453,7 @@ data class OnOffCapabilityStateObjectInstanceWrapper(
 @Serializable
 data class ColorSettingCapabilityStateObjectData(
     override val instance: ColorSettingCapabilityStateObjectInstanceWrapper,
-    override val value: ColorSettingCapabilityStateObjectValue
+    override var value: ColorSettingCapabilityStateObjectValue
 ): CapabilityStateObjectData()
 
 @Serializable
@@ -500,7 +494,7 @@ data class HSVObject(val h: Int, val s: Int, val v: Int)
 @Serializable
 data class VideoStreamCapabilityStateObjectData(
     override val instance: VideoStreamCapabilityStateObjectInstanceWrapper,
-    override val value: VideoStreamCapabilityStateObjectDataValue
+    override var value: VideoStreamCapabilityStateObjectDataValue
 ): CapabilityStateObjectData()
 
 @Serializable
@@ -536,7 +530,7 @@ data class VideoStreamCapabilityStateObjectActionResult(
 @Serializable
 data class ModeCapabilityStateObjectData(
     override val instance: ModeCapabilityInstanceWrapper,
-    override val value: ModeCapabilityModeWrapper
+    override var value: ModeCapabilityModeWrapper
 ): CapabilityStateObjectData()
 
 @Serializable
@@ -548,7 +542,7 @@ data class ModeCapabilityStateObjectActionResult(
 @Serializable
 data class RangeCapabilityStateObjectData(
     override val instance: RangeCapabilityWrapper,
-    override val value: RangeCapabilityStateObjectDataValue,
+    override var value: RangeCapabilityStateObjectDataValue,
     @SerialName("relative") val relative: Boolean? = null
 ): CapabilityStateObjectData()
 
@@ -566,7 +560,7 @@ data class RangeCapabilityStateObjectActionResult(
 @Serializable
 data class ToggleCapabilityStateObjectData(
     override val instance: ToggleCapabilityWrapper,
-    override val value: ToggleCapabilityStateObjectDataValue
+    override var value: ToggleCapabilityStateObjectDataValue
 ): CapabilityStateObjectData()
 
 @Serializable

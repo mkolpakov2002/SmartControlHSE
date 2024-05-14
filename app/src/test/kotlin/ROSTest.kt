@@ -16,7 +16,7 @@ import ru.hse.smart_control.model.entities.universal.scheme.common.ros.ROSDevice
 import ru.hse.smart_control.model.entities.universal.scheme.common.ros.ROSInfo
 import ru.hse.smart_control.model.entities.universal.scheme.common.ros.toJson
 import ru.hse.smart_control.model.entities.universal.scheme.common.ros.toROSInfo
-import kotlin.test.Test
+import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 class ROSTest {

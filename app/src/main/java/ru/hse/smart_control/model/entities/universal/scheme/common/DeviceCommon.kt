@@ -1,12 +1,14 @@
 package ru.hse.smart_control.model.entities.universal.scheme.common
 
+import kotlinx.serialization.Serializable
 import ru.hse.smart_control.model.entities.universal.scheme.common.arduino.ArduinoInfo
 import ru.hse.smart_control.model.entities.universal.scheme.common.ros.ROSInfo
 import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.SmartHomeInfo
 
+@Serializable(with = UniversalSchemeSerializer::class)
 data class UniversalScheme(
     var id: Long,
-    var objects: List<UniversalSchemeObject> = emptyList()
+    var objects: List<UniversalSchemeObject> = mutableListOf()
 )
 
 sealed interface UniversalSchemeObject {

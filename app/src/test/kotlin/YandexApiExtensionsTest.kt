@@ -1,11 +1,9 @@
 
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import net.javacrumbs.jsonunit.JsonAssert.assertJsonEquals
+import org.junit.jupiter.api.Test
 import pl.brightinventions.codified.enums.codifiedEnum
 import ru.hse.miem.yandexsmarthomeapi.entity.YandexDeviceStateResponse
-import ru.hse.miem.yandexsmarthomeapi.entity.YandexManageGroupCapabilitiesStateRequest
-import ru.hse.miem.yandexsmarthomeapi.entity.YandexManageGroupCapabilitiesStateResponse
 import ru.hse.miem.yandexsmarthomeapi.entity.YandexUserInfoResponse
 import ru.hse.smart_control.model.entities.universal.scheme.TestConstants
 import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.DeviceObject
@@ -38,9 +36,7 @@ import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.to
 import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.toYandexManageDeviceCapabilitiesStateRequest
 import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.toYandexManageGroupCapabilitiesStateRequest
 import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.toYandexUserInfoResponse
-import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 class YandexApiExtensionsTest {
 
@@ -96,8 +92,6 @@ class YandexApiExtensionsTest {
 
         val yandexObjectResult = result.toYandexUserInfoResponse()
         val jsonDBResult = yandexObjectResult.toUniversalSchemeJson()
-
-//        assertJsonEquals(TestConstants.responseUserInfoJson, jsonDBResult)
 
         val responseFromDB = json.decodeFromString<YandexUserInfoResponse>(jsonDBResult)
         val resultFromDB = responseFromDB.toSmartHomeInfo()
@@ -219,5 +213,4 @@ class YandexApiExtensionsTest {
 
         assertEquals(TestConstants.requestManageGroupCapabilitiesJson, serializedRequest)
     }
-
 }

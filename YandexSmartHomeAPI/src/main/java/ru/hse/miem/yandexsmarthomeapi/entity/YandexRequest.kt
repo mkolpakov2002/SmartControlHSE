@@ -1,5 +1,6 @@
 package ru.hse.miem.yandexsmarthomeapi.entity
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 
@@ -12,5 +13,6 @@ data class YandexManageDeviceCapabilitiesStateRequest(
 //JsonObject = CapabilityObject
 @Serializable
 data class YandexManageGroupCapabilitiesStateRequest(
+     @SerialName("actions")
     val actions: List<JsonObject>
 )

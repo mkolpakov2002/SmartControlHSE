@@ -32,7 +32,7 @@ import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.Sm
 import ru.hse.smart_control.model.entities.universal.scheme.common.toJson
 import ru.hse.smart_control.model.entities.universal.scheme.common.toUniversalScheme
 import kotlin.reflect.full.memberProperties
-import kotlin.test.Test
+import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 

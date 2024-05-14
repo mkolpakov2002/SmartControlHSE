@@ -21,10 +21,8 @@ import com.schneewittchen.rosandroid.widgets.rqtplot.RqtPlotEntity
 import com.schneewittchen.rosandroid.widgets.touchgoal.TouchGoalEntity
 import com.schneewittchen.rosandroid.widgets.viz2d.Viz2DEntity
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.add
 import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject

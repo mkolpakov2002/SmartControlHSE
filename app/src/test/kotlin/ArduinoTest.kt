@@ -20,7 +20,7 @@ import ru.hse.smart_control.model.entities.universal.scheme.common.arduino.TypeT
 import ru.hse.smart_control.model.entities.universal.scheme.common.arduino.toArduinoPacket
 import ru.hse.smart_control.model.entities.universal.scheme.common.arduino.toArduinoPacketConfiguration
 import ru.hse.smart_control.model.entities.universal.scheme.common.arduino.toJson
-import kotlin.test.Test
+import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 class ArduinoTest{

@@ -1,4 +1,4 @@
-import kotlin.test.Test
+import org.junit.jupiter.api.Test
 
 class MainTest {
 
@@ -14,5 +14,7 @@ class MainTest {
         YandexApiExtensionsTest().`test mapDeviceStateResponse`()
         YandexApiExtensionsTest().`test mapUserInfoResponse`()
         UniversalSchemeTest().`test SmartHome configuration`()
+        YandexSmartHomeClientOnlineTest().`test individual lamp capabilities modifications`()
+        YandexSmartHomeClientOnlineTest().`test group lamp capabilities modifications`()
     }
 }

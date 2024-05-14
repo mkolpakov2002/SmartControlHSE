@@ -6,9 +6,7 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonObjectBuilder
 import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.addJsonObject
 import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
@@ -20,15 +18,8 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
-import kotlinx.serialization.json.putJsonObject
-import org.slf4j.MDC.put
 import pl.brightinventions.codified.enums.codifiedEnum
-import ru.hse.miem.yandexsmarthomeapi.entity.YandexDeviceStateResponse
-import ru.hse.miem.yandexsmarthomeapi.entity.YandexManageDeviceCapabilitiesStateRequest
-import ru.hse.miem.yandexsmarthomeapi.entity.YandexManageGroupCapabilitiesStateRequest
-import ru.hse.miem.yandexsmarthomeapi.entity.YandexUserInfoResponse
 import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.Capability
-import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.CapabilityActionResultObject
 import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.CapabilityObject
 import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.CapabilityParameterObject
 import ru.hse.smart_control.model.entities.universal.scheme.common.smart_home.capability.CapabilityStateObjectData
@@ -104,16 +95,6 @@ val json = Json {
     encodeDefaults = true
 }
 
-fun List<GroupCapabilityObject>.toYandexManageGroupCapabilitiesStateRequest(): YandexManageGroupCapabilitiesStateRequest {
-    val actions = map { it.toYandexCapabilityJsonObject() }
-    return YandexManageGroupCapabilitiesStateRequest(actions)
-}
-
-fun List<DeviceObject>.toYandexManageDeviceCapabilitiesStateRequest(): YandexManageDeviceCapabilitiesStateRequest {
-    val devices = map { (it.toDeviceActionsObject() ).toYandexDeviceActionsJsonObject() }
-    return YandexManageDeviceCapabilitiesStateRequest(devices)
-}
-
 fun DeviceObject.toDeviceActionsObject(): DeviceActionsObject {
     return DeviceActionsObject(
         id = this.id,
@@ -126,132 +107,15 @@ fun DeviceObject.toDeviceActionsObject(): DeviceActionsObject {
     )
 }
 
-
-fun GroupCapabilityObject.toYandexCapabilityJsonObject(): JsonObject {
-    val capabilityType = type.type.code()
-    val state = state?.toYandexCapabilityStateJsonObject(capabilityType)
-
-    return buildJsonObject {
-        put("type", capabilityType)
-        state?.let { put("state", it) }
-    }
-}
-
-fun DeviceActionsObject.toYandexDeviceActionsJsonObject(): JsonObject {
+fun DeviceActionsObject.toJson(): JsonObject {
     return buildJsonObject {
         put("id", id)
         putJsonArray("actions") {
             actions.forEach {
-                add(it.toYandexJson())
+                add(it.toJson())
             }
         }
     }
-}
-
-fun DeviceCapabilityObject.toYandexCapabilityJsonObject(): JsonObject {
-    val capabilityType = type.type.code()
-    val state = state?.toYandexCapabilityStateJsonObject(capabilityType)
-
-    return buildJsonObject {
-        put("type", capabilityType)
-        state?.let { put("state", it) }
-    }
-}
-
-fun CapabilityStateObjectData.toYandexCapabilityStateJsonObject(capabilityType: String): JsonObject {
-    return when (capabilityType) {
-        "devices.capabilities.on_off" -> (this as OnOffCapabilityStateObjectData).toYandexOnOffCapabilityStateJsonObject()
-        "devices.capabilities.color_setting" -> (this as ColorSettingCapabilityStateObjectData).toYandexColorSettingCapabilityStateJsonObject()
-        "devices.capabilities.range" -> (this as RangeCapabilityStateObjectData).toYandexRangeCapabilityStateJsonObject()
-        "devices.capabilities.mode" -> (this as ModeCapabilityStateObjectData).toYandexModeCapabilityStateJsonObject()
-        "devices.capabilities.toggle" -> (this as ToggleCapabilityStateObjectData).toYandexToggleCapabilityStateJsonObject()
-        else -> error("Unsupported capability type: $capabilityType")
-    }
-}
-
-fun OnOffCapabilityStateObjectData.toYandexOnOffCapabilityStateJsonObject(): JsonObject {
-    return buildJsonObject {
-        put("instance", instance.onOff.code())
-        put("value", value.value)
-    }
-}
-
-fun ColorSettingCapabilityStateObjectData.toYandexColorSettingCapabilityStateJsonObject(): JsonObject {
-    return buildJsonObject {
-        put("instance", instance.colorSetting.code())
-        when (val value = value) {
-            is ColorSettingCapabilityStateObjectValueInteger -> put("value", value.value)
-            is ColorSettingCapabilityStateObjectValueObjectHSV -> {
-                putJsonObject("value") {
-                    put("h", value.value.h)
-                    put("s", value.value.s)
-                    put("v", value.value.v)
-                }
-            }
-            is ColorSettingCapabilityStateObjectValueObjectScene -> {
-                putJsonObject("value") {
-                    put("type", "scene")
-                    put("id", value.value.scene.code())
-                }
-            }
-        }
-    }
-}
-
-fun RangeCapabilityStateObjectData.toYandexRangeCapabilityStateJsonObject(): JsonObject {
-    return buildJsonObject {
-        put("instance", instance.range.code())
-        put("value", value.value)
-        relative?.let { put("relative", it) }
-    }
-}
-
-fun ModeCapabilityStateObjectData.toYandexModeCapabilityStateJsonObject(): JsonObject {
-    return buildJsonObject {
-        put("instance", instance.mode.code())
-        put("value", value.mode.code())
-    }
-}
-
-fun ToggleCapabilityStateObjectData.toYandexToggleCapabilityStateJsonObject(): JsonObject {
-    return buildJsonObject {
-        put("instance", instance.toggle.code())
-        put("value", value.value)
-    }
-}
-
-@OptIn(ExperimentalSerializationApi::class)
-fun YandexUserInfoResponse.toUniversalSchemeJson(): String {
-    val responseJson = buildJsonObject {
-        put("status", status)
-        put("request_id", requestId)
-        putJsonArray("rooms") {
-            rooms.forEach { room ->
-                add(room)
-            }
-        }
-        putJsonArray("groups") {
-            groups.forEach { group ->
-                add(group)
-            }
-        }
-        putJsonArray("devices") {
-            devices.forEach { device ->
-                add(device)
-            }
-        }
-        putJsonArray("scenarios") {
-            scenarios.forEach { scenario ->
-                add(scenario)
-            }
-        }
-        putJsonArray("households") {
-            households.forEach { household ->
-                add(household)
-            }
-        }
-    }
-    return json.encodeToString(JsonElement.serializer(), responseJson)
 }
 
 fun JsonObject.toSmartHomeInfo(): SmartHomeInfo {
@@ -309,27 +173,27 @@ fun JsonObject.toSmartHomeInfo(): SmartHomeInfo {
 fun SmartHomeInfo.toJson(): JsonObject {
     val roomsJson = buildJsonArray {
         rooms.forEach { room ->
-            add(room.toYandexJson())
+            add(room.toJson())
         }
     }
     val groupsJson = buildJsonArray {
         groups.forEach { group ->
-            add(group.toYandexJson())
+            add(group.toJson())
         }
     }
     val devicesJson = buildJsonArray {
         devices.forEach { device ->
-            add(device.toYandexJson())
+            add(device.toJson())
         }
     }
     val scenariosJson = buildJsonArray {
         scenarios.forEach { scenario ->
-            add(scenario.toYandexJson())
+            add(scenario.toJson())
         }
     }
     val householdsJson = buildJsonArray {
         households.forEach { household ->
-            add(household.toYandexJson())
+            add(household.toJson())
         }
     }
     return buildJsonObject {
@@ -341,82 +205,8 @@ fun SmartHomeInfo.toJson(): JsonObject {
     }
 }
 
-fun YandexUserInfoResponse.toSmartHomeInfo(): SmartHomeInfo {
-    val roomObjects = rooms.map { roomJson ->
-        RoomObject(
-            id = roomJson["id"]?.jsonPrimitive?.content ?: "",
-            name = roomJson["name"]?.jsonPrimitive?.content ?: "",
-            devices = roomJson["devices"]?.jsonArray?.map { it.jsonPrimitive.content }?.toMutableList()
-                ?: mutableListOf(),
-            householdId = roomJson["household_id"]?.jsonPrimitive?.content ?: ""
-        )
-    }.toMutableList()
-    val groupObjects = groups.map { groupJson ->
-        GroupObject(
-            id = groupJson["id"]?.jsonPrimitive?.content ?: "",
-            name = groupJson["name"]?.jsonPrimitive?.content ?: "",
-            aliases = groupJson["aliases"]?.jsonArray?.map { it.jsonPrimitive.content }?.toMutableList()
-                ?: mutableListOf(),
-            type = groupJson["type"]?.jsonPrimitive?.content?.let { DeviceTypeWrapper(it.codifiedEnum()) }
-                ?: DeviceTypeWrapper(DeviceType.OTHER.codifiedEnum()),
-            capabilities = groupJson["capabilities"]?.jsonArray?.map { it.jsonObject.toGroupCapabilityObject() }?.toMutableList()
-                ?: mutableListOf(),
-            devices = groupJson["devices"]?.jsonArray?.map { it.jsonPrimitive.content }?.toMutableList()
-                ?: mutableListOf(),
-            householdId = groupJson["household_id"]?.jsonPrimitive?.content ?: ""
-        )
-    }.toMutableList()
-    val deviceObjects = devices.map { deviceJson ->
-        deviceJson.toDeviceObject()
-    }.toMutableList()
-    val scenarioObjects = scenarios.map { scenarioJson ->
-        ScenarioObject(
-            id = scenarioJson["id"]?.jsonPrimitive?.content ?: "",
-            name = scenarioJson["name"]?.jsonPrimitive?.content ?: "",
-            isActive = scenarioJson["is_active"]?.jsonPrimitive?.boolean ?: false
-        )
-    }.toMutableList()
-    val householdObjects = households.map { householdJson ->
-        HouseholdObject(
-            id = householdJson["id"]?.jsonPrimitive?.content ?: "",
-            name = householdJson["name"]?.jsonPrimitive?.content ?: "",
-            type = householdJson["type"]?.jsonPrimitive?.content ?: ""
-        )
-    }.toMutableList()
-    return SmartHomeInfo(roomObjects, groupObjects, deviceObjects, scenarioObjects, householdObjects)
-}
-
-fun SmartHomeInfo.toYandexUserInfoResponse(): YandexUserInfoResponse {
-    return YandexUserInfoResponse(
-        rooms = rooms.map { it.toYandexJson() },
-        groups = groups.map { it.toYandexJson() },
-        devices = devices.map { it.toYandexJson() },
-        scenarios = scenarios.map { it.toYandexJson() },
-        households = households.map { it.toYandexJson() },
-        requestId = "",
-        status = ""
-    )
-}
-
-fun YandexDeviceStateResponse.toDeviceObject(): DeviceObject {
-    return DeviceObject(
-        id = id,
-        name = name,
-        aliases = aliases.toMutableList(),
-        type = DeviceTypeWrapper(type.content.codifiedEnum()),
-        externalId = externalId,
-        skillId = skillId,
-        householdId = "",
-        room = room,
-        groups = groups.toMutableList(),
-        capabilities = capabilities.mapNotNull { it.toDeviceCapabilityObject() }.toMutableList(),
-        properties = properties.mapNotNull { it.toDevicePropertyObject() }.toMutableList(),
-        quasarInfo = quasarInfo?.toQuasarInfo()
-    )
-}
-
 @OptIn(ExperimentalSerializationApi::class, ExperimentalSerializationApi::class)
-fun DeviceObject.toYandexJson(): JsonObject {
+fun DeviceObject.toJson(): JsonObject {
     return buildJsonObject {
         put("id", id)
         put("name", name)
@@ -437,15 +227,15 @@ fun DeviceObject.toYandexJson(): JsonObject {
         }
         put("capabilities", buildJsonArray {
             capabilities.forEach { capability ->
-                add(capability.toYandexJson())
+                add(capability.toJson())
             }
         })
         put("properties", buildJsonArray {
             properties.forEach { property ->
-                add(property.toYandexJson())
+                add(property.toJson())
             }
         })
-        quasarInfo?.let { put("quasar_info", it.toYandexJson()) }
+        quasarInfo?.let { put("quasar_info", it.toJson()) }
     }
 }
 
@@ -479,14 +269,14 @@ fun JsonObject?.toQuasarInfo(): QuasarInfo? {
     )
 }
 
-fun QuasarInfo.toYandexJson(): JsonObject {
+fun QuasarInfo.toJson(): JsonObject {
     return buildJsonObject {
         put("device_id", deviceId)
         put("platform", platform)
     }
 }
 
-fun RoomObject.toYandexJson(): JsonObject {
+fun RoomObject.toJson(): JsonObject {
     return buildJsonObject {
         put("id", id)
         put("name", name)
@@ -499,7 +289,7 @@ fun RoomObject.toYandexJson(): JsonObject {
     }
 }
 
-fun GroupObject.toYandexJson(): JsonObject {
+fun GroupObject.toJson(): JsonObject {
     return buildJsonObject {
         put("id", id)
         put("name", name)
@@ -511,7 +301,7 @@ fun GroupObject.toYandexJson(): JsonObject {
         put("type", type.type.code())
         putJsonArray("capabilities") {
             capabilities.forEach { capability ->
-                add(capability.toYandexJson())
+                add(capability.toJson())
             }
         }
         putJsonArray("devices") {
@@ -544,10 +334,10 @@ fun JsonObject.toDeviceCapabilityObject(): DeviceCapabilityObject? {
     }
 }
 
-fun DeviceCapabilityObject.toYandexJson(): JsonObject {
+fun DeviceCapabilityObject.toJson(): JsonObject {
     val type = this.type
-    val parametersJson = parameters.toYandexJson(type)
-    val stateJson = state?.toYandexJson(type)
+    val parametersJson = parameters.toJson(type)
+    val stateJson = state?.toJson(type)
 
     return buildJsonObject {
         put("type", type.type.code())
@@ -653,24 +443,24 @@ fun JsonObject?.toCapabilityParameterObject(typeWrapper: CapabilityTypeWrapper):
     }
 }
 
-fun CapabilityParameterObject.toYandexJson(typeWrapper: CapabilityTypeWrapper): JsonObject {
+fun CapabilityParameterObject.toJson(typeWrapper: CapabilityTypeWrapper): JsonObject {
     return when (typeWrapper) {
         CapabilityTypeWrapper(CapabilityType.COLOR_SETTING.codifiedEnum()) ->
-            (this as? ColorSettingCapabilityParameterObject)?.toYandexJson() ?: error("Invalid capability parameters type")
+            (this as? ColorSettingCapabilityParameterObject)?.toJson() ?: error("Invalid capability parameters type")
         CapabilityTypeWrapper(CapabilityType.ON_OFF.codifiedEnum()) ->
-            (this as? OnOffCapabilityParameterObject)?.toYandexJson() ?: error("Invalid capability parameters type")
+            (this as? OnOffCapabilityParameterObject)?.toJson() ?: error("Invalid capability parameters type")
         CapabilityTypeWrapper(CapabilityType.MODE.codifiedEnum()) ->
-            (this as? ModeCapabilityParameterObject)?.toYandexJson() ?: error("Invalid capability parameters type")
+            (this as? ModeCapabilityParameterObject)?.toJson() ?: error("Invalid capability parameters type")
         CapabilityTypeWrapper(CapabilityType.RANGE.codifiedEnum()) ->
-            (this as? RangeCapabilityParameterObject)?.toYandexJson() ?: error("Invalid capability parameters type")
+            (this as? RangeCapabilityParameterObject)?.toJson() ?: error("Invalid capability parameters type")
         CapabilityTypeWrapper(CapabilityType.TOGGLE.codifiedEnum()) ->
-            (this as? ToggleCapabilityParameterObject)?.toYandexJson() ?: error("Invalid capability parameters type")
+            (this as? ToggleCapabilityParameterObject)?.toJson() ?: error("Invalid capability parameters type")
         CapabilityTypeWrapper(CapabilityType.VIDEO_STREAM.codifiedEnum()) ->
-            (this as? VideoStreamCapabilityParameterObject)?.toYandexJson() ?: error("Invalid capability parameters type")
+            (this as? VideoStreamCapabilityParameterObject)?.toJson() ?: error("Invalid capability parameters type")
         else -> error("Unsupported capability type")
     }
 }
-fun ColorSettingCapabilityParameterObject.toYandexJson(): JsonObject = buildJsonObject {
+fun ColorSettingCapabilityParameterObject.toJson(): JsonObject = buildJsonObject {
     colorModel?.let { put("color_model", it.colorModel.code()) }
     temperatureK?.let { put("temperature_k", it.toJson()) }
     colorScene?.let { put("color_scene", it.toJson()) }
@@ -693,11 +483,11 @@ fun Scene.toJson(): JsonObject = buildJsonObject {
     put("id", id.scene.code())
 }
 
-fun OnOffCapabilityParameterObject.toYandexJson(): JsonObject = buildJsonObject {
+fun OnOffCapabilityParameterObject.toJson(): JsonObject = buildJsonObject {
     put("split", split)
 }
 
-fun ModeCapabilityParameterObject.toYandexJson(): JsonObject = buildJsonObject {
+fun ModeCapabilityParameterObject.toJson(): JsonObject = buildJsonObject {
     put("instance", instance.mode.code())
     putJsonArray("modes") {
         modes.forEach { mode ->
@@ -710,7 +500,7 @@ fun ModeObject.toJson(): JsonObject = buildJsonObject {
     put("value", value.mode.code())
 }
 
-fun RangeCapabilityParameterObject.toYandexJson(): JsonObject = buildJsonObject {
+fun RangeCapabilityParameterObject.toJson(): JsonObject = buildJsonObject {
     put("instance", instance.range.code())
     put("random_access", randomAccess)
     range?.let { put("range", it.toJson()) }
@@ -724,11 +514,11 @@ fun Range.toJson(): JsonObject = buildJsonObject {
     put("precision", precision)
 }
 
-fun ToggleCapabilityParameterObject.toYandexJson(): JsonObject = buildJsonObject {
+fun ToggleCapabilityParameterObject.toJson(): JsonObject = buildJsonObject {
     put("instance", instance.toggle.code())
 }
 
-fun VideoStreamCapabilityParameterObject.toYandexJson(): JsonObject = buildJsonObject {
+fun VideoStreamCapabilityParameterObject.toJson(): JsonObject = buildJsonObject {
     putJsonArray("protocols") {
         protocols.forEach { protocol ->
             add(JsonPrimitive(protocol.streamProtocol.code()))
@@ -804,35 +594,35 @@ fun JsonObject.toToggleCapabilityStateObjectData(): ToggleCapabilityStateObjectD
     )
 }
 
-fun CapabilityStateObjectData.toYandexJson(typeWrapper: CapabilityTypeWrapper): JsonObject? {
+fun CapabilityStateObjectData.toJson(typeWrapper: CapabilityTypeWrapper): JsonObject? {
     return when (typeWrapper) {
-        CapabilityTypeWrapper(CapabilityType.ON_OFF.codifiedEnum()) -> (this as? OnOffCapabilityStateObjectData)?.toYandexJson()
-        CapabilityTypeWrapper(CapabilityType.COLOR_SETTING.codifiedEnum()) -> (this as? ColorSettingCapabilityStateObjectData)?.toYandexJson()
-        CapabilityTypeWrapper(CapabilityType.RANGE.codifiedEnum()) -> (this as? RangeCapabilityStateObjectData)?.toYandexJson()
-        CapabilityTypeWrapper(CapabilityType.MODE.codifiedEnum()) -> (this as? ModeCapabilityStateObjectData)?.toYandexJson()
-        CapabilityTypeWrapper(CapabilityType.TOGGLE.codifiedEnum()) -> (this as? ToggleCapabilityStateObjectData)?.toYandexJson()
+        CapabilityTypeWrapper(CapabilityType.ON_OFF.codifiedEnum()) -> (this as? OnOffCapabilityStateObjectData)?.toJson()
+        CapabilityTypeWrapper(CapabilityType.COLOR_SETTING.codifiedEnum()) -> (this as? ColorSettingCapabilityStateObjectData)?.toJson()
+        CapabilityTypeWrapper(CapabilityType.RANGE.codifiedEnum()) -> (this as? RangeCapabilityStateObjectData)?.toJson()
+        CapabilityTypeWrapper(CapabilityType.MODE.codifiedEnum()) -> (this as? ModeCapabilityStateObjectData)?.toJson()
+        CapabilityTypeWrapper(CapabilityType.TOGGLE.codifiedEnum()) -> (this as? ToggleCapabilityStateObjectData)?.toJson()
         else -> null
     }
 }
 
-fun OnOffCapabilityStateObjectData.toYandexJson(): JsonObject {
+fun OnOffCapabilityStateObjectData.toJson(): JsonObject {
     return buildJsonObject {
         put("instance", instance.onOff.code())
         put("value", value.value)
     }
 }
 
-fun ColorSettingCapabilityStateObjectData.toYandexJson(): JsonObject {
+fun ColorSettingCapabilityStateObjectData.toJson(): JsonObject {
     return buildJsonObject {
         put("instance", instance.colorSetting.code())
-        put("value", value.toYandexJson())
+        put("value", value.toJson())
     }
 }
 
-fun ColorSettingCapabilityStateObjectValue.toYandexJson(): JsonElement = when (this) {
+fun ColorSettingCapabilityStateObjectValue.toJson(): JsonElement = when (this) {
     is ColorSettingCapabilityStateObjectValueInteger -> JsonPrimitive(value)
-    is ColorSettingCapabilityStateObjectValueObjectScene -> toJson()
-    is ColorSettingCapabilityStateObjectValueObjectHSV -> toJson()
+    is ColorSettingCapabilityStateObjectValueObjectScene -> this@toJson.toJson()
+    is ColorSettingCapabilityStateObjectValueObjectHSV -> this@toJson.toJson()
 }
 
 fun ColorSettingCapabilityStateObjectValueObjectScene.toJson(): JsonObject = buildJsonObject {
@@ -849,7 +639,7 @@ fun ColorSettingCapabilityStateObjectValueObjectHSV.toJson(): JsonObject = build
     }
 }
 
-fun RangeCapabilityStateObjectData.toYandexJson(): JsonObject {
+fun RangeCapabilityStateObjectData.toJson(): JsonObject {
     return buildJsonObject {
         put("instance", instance.range.code())
         put("value", value.value)
@@ -857,14 +647,14 @@ fun RangeCapabilityStateObjectData.toYandexJson(): JsonObject {
     }
 }
 
-fun ModeCapabilityStateObjectData.toYandexJson(): JsonObject {
+fun ModeCapabilityStateObjectData.toJson(): JsonObject {
     return buildJsonObject {
         put("instance", instance.mode.code())
         put("value", value.mode.code())
     }
 }
 
-fun ToggleCapabilityStateObjectData.toYandexJson(): JsonObject {
+fun ToggleCapabilityStateObjectData.toJson(): JsonObject {
     return buildJsonObject {
         put("instance", instance.toggle.code())
         put("value", value.value)
@@ -889,10 +679,10 @@ fun JsonObject.toDevicePropertyObject(): DevicePropertyObject? {
     }
 }
 
-fun DevicePropertyObject.toYandexJson(): JsonObject {
+fun DevicePropertyObject.toJson(): JsonObject {
     val type = this.type
-    val parametersJson = parameters.toYandexJson(type)
-    val stateJson = state?.toYandexJson(type)
+    val parametersJson = parameters.toJson(type)
+    val stateJson = state?.toJson(type)
 
     return buildJsonObject {
         put("type", type.type.code())
@@ -940,37 +730,37 @@ fun JsonElement.toEventObject(): EventObject {
     )
 }
 
-fun PropertyParameterObject.toYandexJson(type: PropertyTypeWrapper): JsonObject {
+fun PropertyParameterObject.toJson(type: PropertyTypeWrapper): JsonObject {
     return when (type) {
-        PropertyTypeWrapper(PropertyType.FLOAT.codifiedEnum()) -> (this as? FloatPropertyParameterObject)?.toYandexJson() ?: error("Invalid property parameters type")
-        PropertyTypeWrapper(PropertyType.EVENT.codifiedEnum()) -> (this as? EventPropertyParameterObject)?.toYandexJson() ?: error("Invalid property parameters type")
+        PropertyTypeWrapper(PropertyType.FLOAT.codifiedEnum()) -> (this as? FloatPropertyParameterObject)?.toJson() ?: error("Invalid property parameters type")
+        PropertyTypeWrapper(PropertyType.EVENT.codifiedEnum()) -> (this as? EventPropertyParameterObject)?.toJson() ?: error("Invalid property parameters type")
         else -> error("Unsupported property type")
     }
 }
 
-fun FloatPropertyParameterObject.toYandexJson(): JsonObject {
+fun FloatPropertyParameterObject.toJson(): JsonObject {
     return buildJsonObject {
         put("instance", instance.function.code())
         put("unit", unit.unit.code())
     }
 }
 
-fun EventPropertyParameterObject.toYandexJson(): JsonObject {
+fun EventPropertyParameterObject.toJson(): JsonObject {
     return buildJsonObject {
         put("instance", instance.function.code())
-        put("events", events.toYandexJson())
+        put("events", events.toJson())
     }
 }
 
-fun List<EventObject>.toYandexJson(): JsonArray {
+fun List<EventObject>.toJson(): JsonArray {
     return buildJsonArray {
         forEach { event ->
-            add(event.toYandexJson())
+            add(event.toJson())
         }
     }
 }
 
-fun EventObject.toYandexJson(): JsonObject {
+fun EventObject.toJson(): JsonObject {
     return buildJsonObject {
         put("value", value.value.code())
     }
@@ -1024,34 +814,34 @@ fun JsonElement.toEventObjectValueWrapper(): EventObjectValueWrapper {
     return this.jsonPrimitive.content.let { EventObjectValueWrapper(it.codifiedEnum()) }
 }
 
-fun PropertyStateObjectData.toYandexJson(type: PropertyTypeWrapper): JsonObject? {
+fun PropertyStateObjectData.toJson(type: PropertyTypeWrapper): JsonObject? {
     return when (type) {
-        PropertyTypeWrapper(PropertyType.FLOAT.codifiedEnum()) -> (this as? FloatPropertyStateObjectData)?.toYandexJson()
-        PropertyTypeWrapper(PropertyType.EVENT.codifiedEnum()) -> (this as? EventPropertyStateObjectData)?.toYandexJson()
+        PropertyTypeWrapper(PropertyType.FLOAT.codifiedEnum()) -> (this as? FloatPropertyStateObjectData)?.toJson()
+        PropertyTypeWrapper(PropertyType.EVENT.codifiedEnum()) -> (this as? EventPropertyStateObjectData)?.toJson()
         else -> null
     }
 }
 
-fun FloatPropertyStateObjectData.toYandexJson(): JsonObject {
+fun FloatPropertyStateObjectData.toJson(): JsonObject {
     return buildJsonObject {
-        put("state", state.toYandexJson())
+        put("state", state.toJson())
     }
 }
 
-fun EventPropertyStateObjectData.toYandexJson(): JsonObject {
+fun EventPropertyStateObjectData.toJson(): JsonObject {
     return buildJsonObject {
-        put("state", state.toYandexJson())
+        put("state", state.toJson())
     }
 }
 
-fun FloatPropertyState.toYandexJson(): JsonObject {
+fun FloatPropertyState.toJson(): JsonObject {
     return buildJsonObject {
         put("function", propertyFunction.function.code())
         put("value", propertyValue.value)
     }
 }
 
-fun EventPropertyState.toYandexJson(): JsonObject {
+fun EventPropertyState.toJson(): JsonObject {
     return buildJsonObject {
         put("function", propertyFunction.function.code())
         put("value", propertyValue.value.value.code())
@@ -1069,9 +859,9 @@ fun JsonObject.toGroupCapabilityObject(): GroupCapabilityObject {
     )
 }
 
-fun GroupCapabilityObject.toYandexJson(): JsonObject {
-    val parametersJson = parameters?.toYandexJson(type)
-    val stateJson = state?.toYandexJson(type)
+fun GroupCapabilityObject.toJson(): JsonObject {
+    val parametersJson = parameters?.toJson(type)
+    val stateJson = state?.toJson(type)
 
     return buildJsonObject {
         put("type", type.type.code())
@@ -1081,7 +871,7 @@ fun GroupCapabilityObject.toYandexJson(): JsonObject {
     }
 }
 
-fun ScenarioObject.toYandexJson(): JsonObject {
+fun ScenarioObject.toJson(): JsonObject {
     return buildJsonObject {
         put("id", id)
         put("name", name)
@@ -1089,7 +879,7 @@ fun ScenarioObject.toYandexJson(): JsonObject {
     }
 }
 
-fun HouseholdObject.toYandexJson(): JsonObject {
+fun HouseholdObject.toJson(): JsonObject {
     return buildJsonObject {
         put("id", id)
         put("name", name)
@@ -1097,15 +887,12 @@ fun HouseholdObject.toYandexJson(): JsonObject {
     }
 }
 
-fun Capability.toYandexJson(): JsonObject {
+fun Capability.toJson(): JsonObject {
     return when (this) {
-        is DeviceCapabilityObject -> this.toYandexJson()
+        is DeviceCapabilityObject -> this.toJson()
         is CapabilityObject -> buildJsonObject {
             put("type", type.type.code())
-//            retrievable?.let { put("retrievable", it) }
-//            parameters?.let { put("parameters", it.toYandexJson(type)) }
-            state?.run { toYandexJson(type)?.let { put("state", it) } }
-//            lastUpdated?.let { put("last_updated", it) }
+            state?.run { toJson(type)?.let { put("state", it) } }
         }
     }
 }
@@ -1113,10 +900,7 @@ fun Capability.toYandexJson(): JsonObject {
 fun JsonObject.toCapabilityObject(type: CapabilityTypeWrapper): CapabilityObject {
     return CapabilityObject(
         type = type,
-//        retrievable = this["retrievable"]?.jsonPrimitive?.boolean,
-//        parameters = this["parameters"]?.jsonObject?.toCapabilityParameterObject(type),
         state = this["state"]?.jsonObject?.toCapabilityStateObjectData(type),
-//        lastUpdated = this["last_updated"]?.jsonPrimitive?.float
     )
 }
 
@@ -1129,14 +913,14 @@ fun JsonObject.toCapability(): Capability {
     }
 }
 
-fun Property.toYandexJson(): JsonObject {
+fun Property.toJson(): JsonObject {
     return when (this) {
-        is DevicePropertyObject -> this.toYandexJson()
+        is DevicePropertyObject -> this.toJson()
         is PropertyObject -> buildJsonObject {
             put("type", type.type.code())
             put("retrievable", retrievable)
-            put("parameters", parameters.toYandexJson(type))
-            state?.run { toYandexJson(type)?.let { put("state", it) } }
+            put("parameters", parameters.toJson(type))
+            state?.run { toJson(type)?.let { put("state", it) } }
             put("last_updated", lastUpdated)
         }
     }

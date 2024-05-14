@@ -28,6 +28,7 @@ class UniversalSchemeRepositoryTest {
         // временный файл для тестирования, чтобы избежать взаимодействия с реальной ФС
         tempFile = "test.json".toPath()
 
+
         // Инициализация репозитория
         repository = UniversalSchemeRepository(tempFile)
     }

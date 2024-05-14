@@ -26,16 +26,13 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.NavController
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI.setupWithNavController
-import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import ru.hse.smart_control.domain.connection.ConnectionFactory
-import ru.hse.smart_control.ui.fragments.home.MainMenuFragment
+import ru.hse.smart_control.ui.fragments.home.MainControlFragment
 import ru.hse.smart_control.ui.fragments.home.MainViewModel
 import ru.hse.smart_control.utility.AppConstants.APP_LOG_TAG
 import ru.hse.smart_control.utility.AppConstants.BLUETOOTH_ADMIN_PERMISSION
@@ -45,11 +42,10 @@ import ru.hse.smart_control.utility.ThemeUtils.onActivityCreateSetTheme
 import ru.hse.smart_control.R
 import ru.hse.smart_control.databinding.ActivityMainBinding
 import ru.hse.smart_control.model.prefs.SharedPreferences
-import java.text.SimpleDateFormat
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
-    lateinit var binding: ActivityMainBinding
+    private lateinit var binding: ActivityMainBinding
 
     private val topDestinationIds = setOf(
         R.id.authControlFragment
@@ -62,11 +58,11 @@ class MainActivity : AppCompatActivity() {
     private var token = ""
     private val viewModel: MainViewModel by viewModels()
 
-    private lateinit var navController: NavController
-
-    override fun onCreate(savedInstanceState: Bundle?) {
+    public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
+
+//        private val graph = inflater.inflate(R.navigation.nav_graph)
 
         token = sharedPreferences.getStringValue("token").toString()
 
@@ -78,7 +74,7 @@ class MainActivity : AppCompatActivity() {
         toolbar.inflateMenu(R.menu.main_toolbar_menu)
         toolbar.setOnMenuItemClickListener {
             when (viewModel.getCurrentVisibleFragment()?.id) {
-                R.id.mainMenuFragment -> createOneButtonAlertDialog(
+                R.id.mainControlFragment -> createOneButtonAlertDialog(
                     getString(R.string.instruction_alert),
                     getString(R.string.instruction_for_app)
                 )
@@ -106,20 +102,35 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setUpNavigation() {
-//        val navHostFragment = supportFragmentManager
-//            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment?
-
-
         val navHostFragment = supportFragmentManager
-            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        navController = navHostFragment.navController
+            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment?
 
-        binding.bottomnav.setupWithNavController(navController)
+        navHostFragment?.let { navHost ->
+            setupWithNavController(
+                binding.bottomnav,
+                navHost.navController
+            )
 
+//            navHost.navController.graph.startDestinationId = if (token.isEmpty()) {
+//                R.id.authControlFragment
+//            } else {
+//                R.id.mainMenuFragment
+//            }
 
-//        navHostFragment?.let { navHost ->
+//            val navController = navHost.navController
+//            val inflater = navController.navInflater
+//            val graph = inflater.inflate(R.navigation.nav_graph)
+//
+//            if (token.isEmpty()) {
+//                graph.setStartDestination(R.id.authControlFragment)
+//            } else {
+//                graph.setStartDestination(R.id.mainMenuFragment)
+//            }
+//
+//            // Назначьте новый навигационный граф.
+//            navController.graph = graph
 
-        navHostFragment.navController.addOnDestinationChangedListener { _, destination, _ ->
+            navHost.navController.addOnDestinationChangedListener { _, destination, _ ->
                 Log.e(APP_LOG_TAG, "onDestinationChanged: " + destination.label)
                 viewModel.setCurrentVisibleFragment(destination)
 
@@ -130,83 +141,24 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-//            binding.bottomnav.setOnItemSelectedListener { item: MenuItem ->
-//                return@setOnItemSelectedListener when (item.itemId) {
-//                    R.id.mainMenuFragment -> {
-//                        navHostFragment.navController.navigate(R.id.mainMenuFragment)
-//                        true
-//                    }
-//
-//                    R.id.settingsFragment -> {
-//                        navHost.navController.navigate(R.id.settingsFragment)
-//                        true
-//                    }
-//
-//                    else -> false
-//                }
-//            }
-
-
-            binding.bottomnav.setOnNavigationItemSelectedListener { menuItem ->
-                when (menuItem.itemId) {
-                    R.id.mainMenuFragment -> {
-                        if (!checkAuthTime()) {
-                            findNavController(R.id.nav_host_fragment).navigate(R.id.requireRegisterFragment)
-                        } else {
-                            findNavController(R.id.nav_host_fragment).navigate(R.id.mainMenuFragment)
-                        }
+            binding.bottomnav.setOnItemSelectedListener { item: MenuItem ->
+                return@setOnItemSelectedListener when (item.itemId) {
+                    R.id.mainControlFragment -> {
+                        navHost.navController.navigate(R.id.mainControlFragment)
                         true
                     }
 
                     R.id.settingsFragment -> {
-                        if (!checkAuthTime()) {
-                            findNavController(R.id.nav_host_fragment).navigate(R.id.requireRegisterFragment)
-                        } else {
-                            findNavController(R.id.nav_host_fragment).navigate(R.id.settingsFragment)
-                        }
+                        navHost.navController.navigate(R.id.settingsFragment)
                         true
                     }
 
                     else -> false
-
                 }
             }
 
-//            val navController = navHost.navController
-            val inflater = navController.navInflater
-            val graph = inflater.inflate(R.navigation.nav_graph)
 
-           if (!checkAuthTime()) {
-               graph.setStartDestination(R.id.authControlFragment)
-           } else {
-               graph.setStartDestination(R.id.mainMenuFragment)
-           }
-
-            navController.graph = graph
-
-
-
-//        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-
-
-
-    }
-
-    fun saveAuthTime() {
-        val format = SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault())
-        sharedPreferences.save("AUTHORISATION_TIME", format.format(Date()).toString())
-    }
-
-    fun checkAuthTime(): Boolean {
-        try {
-            val format = SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault())
-            val time = format.parse(
-                sharedPreferences.getStringValue("AUTHORISATION_TIME") ?: return false
-            )?.time ?: return false
-            return Date().time < (time + 1000 * 60 * 60 * 24)
-        } catch (_: Exception) {
         }
-        return false
     }
 
     private fun checkForBtAdapter() {
@@ -406,7 +358,7 @@ class MainActivity : AppCompatActivity() {
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         val currentFragment = supportFragmentManager.findFragmentById(R.id.container)
-        if (currentFragment is MainMenuFragment) {
+        if (currentFragment is MainControlFragment) {
             handleBackPressedOnMainMenu()
         } else {
             super.onBackPressed()

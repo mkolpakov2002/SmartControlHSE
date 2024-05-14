@@ -82,4 +82,8 @@
     <string name="register">Регистрация</string>
     <string name="login">Вход</string>
 
+    <string name="yandex_tab">Яндекс</string>
+    <string name="arduino_tab">Ардуино</string>
+    <string name="ros_tab">ROS</string>
+
 </resources>

@@ -1,11 +1,11 @@
 package ru.hse.smart_control.domain
 
 sealed class ApiResponse<out T> {
-    data class Success<out T>(val value: T): ApiResponse<T>()
-    data class Failure(val code: Int?,
-// val error: Throwable
+    data class Success<out T>(val value: T) : ApiResponse<T>()
+    data class Failure(
+        val code: Int?,
         val message: String
-    ): ApiResponse<Nothing>()
+    ) : ApiResponse<Nothing>()
 }
 
 data class ApiResponseError(

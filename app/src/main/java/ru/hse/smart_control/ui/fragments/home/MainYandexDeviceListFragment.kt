@@ -33,7 +33,7 @@ import ru.hse.smart_control.model.entities.UniversalSchemeEntity
 import ru.hse.smart_control.databinding.FragmentMainBinding
 import ru.hse.smart_control.ui.MainActivity
 
-class MainDeviceListFragment(private val text: String) : Fragment(), OnRefreshListener, MultipleTypesAdapterKt.OnItemClickListener,
+class MainYandexDeviceListFragment : Fragment(), OnRefreshListener, MultipleTypesAdapterKt.OnItemClickListener,
     MultipleTypesAdapterKt.OnItemLongClickListener {
 
     private lateinit  var multipleTypesAdapter: MultipleTypesAdapterKt
@@ -181,7 +181,7 @@ class MainDeviceListFragment(private val text: String) : Fragment(), OnRefreshLi
         lifecycleScope.launch {
             withContext(Dispatchers.Main) {
                 hideAllButtons()
-                if (!this@MainDeviceListFragment::multipleTypesAdapter.isInitialized) {
+                if (!this@MainYandexDeviceListFragment::multipleTypesAdapter.isInitialized) {
                     initAdapter()
                 } else {
                     multipleTypesAdapter.updateItems(universalSchemeEntityItemTypeList)

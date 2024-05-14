@@ -170,4 +170,7 @@ dependencies {
     implementation("org.slf4j:slf4j-simple:2.0.9")
 
     implementation("org.jetbrains.kotlin:kotlin-reflect:2.0.0-RC3")
+
+    //Flex
+    implementation("com.google.android.flexbox:flexbox:3.0.0")
 }

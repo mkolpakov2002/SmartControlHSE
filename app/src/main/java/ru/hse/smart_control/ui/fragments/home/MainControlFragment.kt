@@ -2,6 +2,7 @@ package ru.hse.smart_control.ui.fragments.home
 
 import android.content.Context
 import android.os.Bundle
+import android.util.SparseArray
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +12,9 @@ import com.google.android.material.tabs.TabLayoutMediator
 import ru.hse.smart_control.R
 import ru.hse.smart_control.databinding.FragmentMainControlBinding
 
+interface OnTabSelectedListener {
+    fun onTabSelected(position: Int)
+}
 
 class MainControlFragment : Fragment(){
     private var _binding: FragmentMainControlBinding? = null
@@ -49,6 +53,8 @@ class MainControlFragment : Fragment(){
             R.string.ros_tab
         )
 
+        private val fragmentList = SparseArray<Fragment>()
+
         fun getPageTitle(position: Int, context: Context): String {
             return context.getString(listTabName[position])
         }
@@ -56,15 +62,17 @@ class MainControlFragment : Fragment(){
         override fun getItemCount(): Int = listTabName.size
         override fun createFragment(position: Int): Fragment {
             val fragment = when (position) {
-                0 -> MainDeviceListFragment("Yandex")
-                1 -> MainDeviceListFragment("Arduino")
-                2 -> MainDeviceListFragment("ROS")
+                0 -> MainYandexDeviceListFragment()
+                1 -> MainArduinoDeviceListFragment()
+                2 -> MainRosDeviceListFragment()
                 else -> Fragment()
             }
+            fragmentList.put(position, fragment)
             return fragment
         }
+
+        fun getRegisteredFragment(position: Int): Fragment? {
+            return fragmentList.get(position)
+        }
     }
-
-
-
 }

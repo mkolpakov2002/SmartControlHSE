@@ -109,7 +109,7 @@ class YandexSmartHomeClientOnlineTest {
                     assertTrue(manageResult is YandexApiResponse.SuccessManageDeviceCapabilitiesState,
                         "Не удалось изменить состояние лампы: ${device.name}")
 
-                    delay(4.seconds)  // Задержка для проверки изменения состояния
+                    delay(6.seconds)  // Задержка для проверки изменения состояния
 
                     // Возвращаем предыдущее состояние лампы
                     newCurrentState = !newCurrentState
@@ -136,6 +136,7 @@ class YandexSmartHomeClientOnlineTest {
                     val revertResult = client.manageDeviceCapabilitiesState(revertDeviceRequest)
                     assertTrue(revertResult is YandexApiResponse.SuccessManageDeviceCapabilitiesState,
                         "Не удалось изменить состояние лампы: ${device.name}")
+                    delay(6.seconds)
                 }
             }
         }
@@ -171,12 +172,14 @@ class YandexSmartHomeClientOnlineTest {
                             (capability.state as ColorSettingCapabilityStateObjectData).copy(
                                 instance = ColorSettingCapabilityStateObjectInstanceWrapper(
                                     ColorSettingCapabilityStateObjectInstance.TEMPERATURE_K.codifiedEnum()),
-                                value = ColorSettingCapabilityStateObjectValueInteger(4500)
+                                value = ColorSettingCapabilityStateObjectValueInteger(1000)
                             )
                         }
                         else -> capability.state
                     }
                 }
+
+                val oldState = groupWithLamps.capabilities.map { it.state }
 
                 groupWithLamps.capabilities.forEachIndexed { index, capability ->
                     groupWithLamps.capabilities[index] = capability.copy(state = modifiedGroupActions[index])
@@ -189,6 +192,20 @@ class YandexSmartHomeClientOnlineTest {
 
                 val manageGroupResult = client.manageGroupCapabilitiesState(groupWithLamps.id, manageGroupRequest)
                 assertTrue(manageGroupResult is YandexApiResponse.SuccessManageGroupCapabilitiesState,
+                    "Не удалось выполнить групповое управление лампами.")
+
+                // Возвращаем предыдущее состояние ламп
+                groupWithLamps.capabilities.forEachIndexed { index, capability ->
+                    groupWithLamps.capabilities[index] = capability.copy(state = oldState[index])
+                }
+
+                // Отправляем запрос на изменение состояния группы устройств
+                val revertGroupRequest = groupWithLamps.capabilities.toYandexManageGroupCapabilitiesStateRequest()
+
+                println("Групповое управление лампами: $revertGroupRequest")
+
+                val revertGroupResult = client.manageGroupCapabilitiesState(groupWithLamps.id, revertGroupRequest)
+                assertTrue(revertGroupResult is YandexApiResponse.SuccessManageGroupCapabilitiesState,
                     "Не удалось выполнить групповое управление лампами.")
             } else {
                 println("Группа с лампами не найдена.")

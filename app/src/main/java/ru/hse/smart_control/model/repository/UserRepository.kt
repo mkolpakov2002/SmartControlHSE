@@ -12,8 +12,9 @@ interface UserRepository {
 
     // Network
     suspend fun register(user: RegisterModel): Flow<ApiResponse<Unit>>
+
     suspend fun register2(user: RegisterModel): Result<RegisterModel, DataError.Network>
 
-    suspend fun loginUser(user: LoginModel): TokenModel
+    suspend fun loginUser(user: LoginModel): Flow<ApiResponse<TokenModel>>
 
 }

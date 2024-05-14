@@ -19,7 +19,7 @@ interface NestApi {
     suspend fun register(@Body user: RegisterModel): Response<Unit>
 
     @POST("auth/login")
-    suspend fun login(@Body user: LoginModel): TokenModel
+    suspend fun login(@Body user: LoginModel): Response<TokenModel>
 }
 
 object RetrofitInstance {

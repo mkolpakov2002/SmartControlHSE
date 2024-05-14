@@ -62,20 +62,6 @@ class RegisterFragment : Fragment() {
             }
             hideKeyboard(it)
 
-//            viewModel.register2(RegisterModel(name, email, password))
-//            viewLifecycleOwner.lifecycleScope.launch {
-//                viewModel.events.collect { event ->
-//                    when (event) {
-//                        is UserEvent.Error -> {
-//                            // Handle error here
-//                            Log.d("TAG", "event.error: ${event.error}")
-//                            Toast.makeText(context, event.error, Toast.LENGTH_SHORT).show()
-//                        }
-//                        // If you have other events
-//                    }
-//                }
-//            }
-
              viewModel.register(RegisterModel(name, email, password))
             viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
                 viewModel.registerResult.collectLatest {
@@ -99,8 +85,6 @@ class RegisterFragment : Fragment() {
                                 Snackify.LENGTH_LONG
                             ).show()
                         }
-
-                        else -> {}
                     }
                 }
             }

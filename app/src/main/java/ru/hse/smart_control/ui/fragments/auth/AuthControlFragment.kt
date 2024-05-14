@@ -6,10 +6,12 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.google.android.material.tabs.TabLayoutMediator
 import ru.hse.smart_control.R
 import ru.hse.smart_control.databinding.FragmentAuthControlBinding
+import ru.hse.smart_control.ui.MainActivity
 
 class AuthControlFragment : Fragment(), RegisterFragment.OnButtonClickedListener {
 
@@ -25,10 +27,11 @@ class AuthControlFragment : Fragment(), RegisterFragment.OnButtonClickedListener
         return binding.root
     }
 
+
     private fun initTabLayout(){
         val context = activity?.applicationContext
-        binding.tabLayout.addTab(binding.tabLayout.newTab().setText(R.string.register))
         binding.tabLayout.addTab(binding.tabLayout.newTab().setText(R.string.login))
+        binding.tabLayout.addTab(binding.tabLayout.newTab().setText(R.string.register))
 
         val adapter = SubscribersDataCollectionAdapter(this)
         binding.viewpager.adapter = adapter
@@ -43,10 +46,8 @@ class AuthControlFragment : Fragment(), RegisterFragment.OnButtonClickedListener
         FragmentStateAdapter(fragment) {
 
         val listTabName = listOf(
-//            "Регистрация",
-//            "Вход"
-            R.string.register,
-            R.string.login
+            R.string.login,
+            R.string.register
         )
 
         fun getPageTitle(position: Int, context: Context): String {
@@ -56,8 +57,8 @@ class AuthControlFragment : Fragment(), RegisterFragment.OnButtonClickedListener
         override fun getItemCount(): Int = listTabName.size
         override fun createFragment(position: Int): Fragment {
             val fragment = when (position) {
-                0 -> RegisterFragment()
-                1 -> LoginFragment()
+                0 -> LoginFragment()
+                1 -> RegisterFragment()
                 else -> Fragment()
             }
             return fragment
@@ -65,7 +66,7 @@ class AuthControlFragment : Fragment(), RegisterFragment.OnButtonClickedListener
     }
 
     override fun onButtonClicked() {
-        binding.viewpager.currentItem = 1
+        binding.viewpager.currentItem = 0
     }
 
 }

@@ -18,6 +18,7 @@ import ru.hse.smart_control.R
 import ru.hse.smart_control.databinding.FragmentLoginBinding
 import ru.hse.smart_control.model.prefs.SharedPreferences
 import ru.hse.smart_control.model.user.LoginModel
+import ru.hse.smart_control.ui.MainActivity
 
 
 class LoginFragment : Fragment() {
@@ -66,6 +67,7 @@ class LoginFragment : Fragment() {
                     async {
                         sharedPreferences.save("token", it.accessToken)
                         sharedPreferences.save("token_expire_in", it.expiresIn.toString())
+                        (activity as MainActivity).saveAuthTime()
                     }.await()
                     withContext(Dispatchers.Main) {
 //                        (activity as MainActivity).binding.bottomNav.visibility = View.VISIBLE

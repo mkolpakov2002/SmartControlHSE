@@ -1,16 +1,26 @@
 package ru.hse.smart_control.ui.fragments.auth
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import com.musfickjamil.snackify.Snackify
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import ru.hse.smart_control.databinding.FragmentRegisterBinding
+import ru.hse.smart_control.domain.ApiResponse
 import ru.hse.smart_control.model.user.RegisterModel
-
+import android.content.Context
+import android.view.inputmethod.InputMethodManager
 
 class RegisterFragment : Fragment() {
 
@@ -50,12 +60,50 @@ class RegisterFragment : Fragment() {
                 email = tvEmail.text.toString()
                 password = tvPassword.text.toString()
             }
-            viewModel.registerUser(RegisterModel(name, email, password))
+            hideKeyboard(it)
 
-            // if success
-            buttonClickListener.onButtonClicked()
-            Snackify.success(binding.linearLayout, "Success message !", Snackify.LENGTH_LONG).show()
+//            viewModel.register2(RegisterModel(name, email, password))
+//            viewLifecycleOwner.lifecycleScope.launch {
+//                viewModel.events.collect { event ->
+//                    when (event) {
+//                        is UserEvent.Error -> {
+//                            // Handle error here
+//                            Log.d("TAG", "event.error: ${event.error}")
+//                            Toast.makeText(context, event.error, Toast.LENGTH_SHORT).show()
+//                        }
+//                        // If you have other events
+//                    }
+//                }
+//            }
 
+             viewModel.register(RegisterModel(name, email, password))
+            viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+                viewModel.registerResult.collectLatest {
+                    when (it) {
+                        is ApiResponse.Success -> {
+                            Snackify.success(
+                                binding.linearLayout,
+                                "Аккаунт создан!",
+                                Snackify.LENGTH_LONG
+                            ).show()
+                            withContext(Dispatchers.Main) {
+                                buttonClickListener.onButtonClicked()
+                            }
+
+                        }
+
+                        is ApiResponse.Failure -> {
+                            Snackify.error(
+                                binding.linearLayout,
+                                "${it.message}",
+                                Snackify.LENGTH_LONG
+                            ).show()
+                        }
+
+                        else -> {}
+                    }
+                }
+            }
         }
 
         binding.tvEmail.doAfterTextChanged {
@@ -66,5 +114,10 @@ class RegisterFragment : Fragment() {
             password = it.toString()
         }
 
+    }
+
+    fun hideKeyboard(view: View) {
+        val inputMethodManager = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
     }
 }

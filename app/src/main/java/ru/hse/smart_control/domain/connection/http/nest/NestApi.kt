@@ -2,6 +2,7 @@ package ru.hse.smart_control.domain.connection.http.nest
 
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
@@ -11,11 +12,11 @@ import ru.hse.smart_control.model.user.RegisterModel
 import ru.hse.smart_control.model.user.TokenModel
 import java.util.concurrent.TimeUnit
 
-const val BASE_URL = "https://8a49-188-66-38-126.ngrok-free.app/"
+const val BASE_URL = "https://0a80-188-66-38-126.ngrok-free.app/"
 
 interface NestApi {
     @POST("auth/register")
-    suspend fun register(@Body user: RegisterModel)
+    suspend fun register(@Body user: RegisterModel): Response<Unit>
 
     @POST("auth/login")
     suspend fun login(@Body user: LoginModel): TokenModel

@@ -119,4 +119,8 @@
             android:id="@+id/action_authControlFragment_to_mainMenuFragment"
             app:destination="@id/mainMenuFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/requireRegisterFragment"
+        android:name="ru.hse.smart_control.ui.fragments.auth.RequireRegisterFragment"
+        android:label="RequireRegisterFragment" />
 </navigation>

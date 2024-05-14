@@ -26,9 +26,11 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI.setupWithNavController
+import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
@@ -43,10 +45,11 @@ import ru.hse.smart_control.utility.ThemeUtils.onActivityCreateSetTheme
 import ru.hse.smart_control.R
 import ru.hse.smart_control.databinding.ActivityMainBinding
 import ru.hse.smart_control.model.prefs.SharedPreferences
+import java.text.SimpleDateFormat
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityMainBinding
+    lateinit var binding: ActivityMainBinding
 
     private val topDestinationIds = setOf(
         R.id.authControlFragment
@@ -59,11 +62,11 @@ class MainActivity : AppCompatActivity() {
     private var token = ""
     private val viewModel: MainViewModel by viewModels()
 
-    public override fun onCreate(savedInstanceState: Bundle?) {
+    private lateinit var navController: NavController
+
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
-
-//        private val graph = inflater.inflate(R.navigation.nav_graph)
 
         token = sharedPreferences.getStringValue("token").toString()
 
@@ -103,35 +106,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setUpNavigation() {
+//        val navHostFragment = supportFragmentManager
+//            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment?
+
+
         val navHostFragment = supportFragmentManager
-            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment?
+            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navController = navHostFragment.navController
 
-        navHostFragment?.let { navHost ->
-            setupWithNavController(
-                binding.bottomnav,
-                navHost.navController
-            )
+        binding.bottomnav.setupWithNavController(navController)
 
-//            navHost.navController.graph.startDestinationId = if (token.isEmpty()) {
-//                R.id.authControlFragment
-//            } else {
-//                R.id.mainMenuFragment
-//            }
 
-//            val navController = navHost.navController
-//            val inflater = navController.navInflater
-//            val graph = inflater.inflate(R.navigation.nav_graph)
-//
-//            if (token.isEmpty()) {
-//                graph.setStartDestination(R.id.authControlFragment)
-//            } else {
-//                graph.setStartDestination(R.id.mainMenuFragment)
-//            }
-//
-//            // Назначьте новый навигационный граф.
-//            navController.graph = graph
+//        navHostFragment?.let { navHost ->
 
-            navHost.navController.addOnDestinationChangedListener { _, destination, _ ->
+        navHostFragment.navController.addOnDestinationChangedListener { _, destination, _ ->
                 Log.e(APP_LOG_TAG, "onDestinationChanged: " + destination.label)
                 viewModel.setCurrentVisibleFragment(destination)
 
@@ -142,24 +130,83 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            binding.bottomnav.setOnItemSelectedListener { item: MenuItem ->
-                return@setOnItemSelectedListener when (item.itemId) {
+//            binding.bottomnav.setOnItemSelectedListener { item: MenuItem ->
+//                return@setOnItemSelectedListener when (item.itemId) {
+//                    R.id.mainMenuFragment -> {
+//                        navHostFragment.navController.navigate(R.id.mainMenuFragment)
+//                        true
+//                    }
+//
+//                    R.id.settingsFragment -> {
+//                        navHost.navController.navigate(R.id.settingsFragment)
+//                        true
+//                    }
+//
+//                    else -> false
+//                }
+//            }
+
+
+            binding.bottomnav.setOnNavigationItemSelectedListener { menuItem ->
+                when (menuItem.itemId) {
                     R.id.mainMenuFragment -> {
-                        navHost.navController.navigate(R.id.mainMenuFragment)
+                        if (!checkAuthTime()) {
+                            findNavController(R.id.nav_host_fragment).navigate(R.id.requireRegisterFragment)
+                        } else {
+                            findNavController(R.id.nav_host_fragment).navigate(R.id.mainMenuFragment)
+                        }
                         true
                     }
 
                     R.id.settingsFragment -> {
-                        navHost.navController.navigate(R.id.settingsFragment)
+                        if (!checkAuthTime()) {
+                            findNavController(R.id.nav_host_fragment).navigate(R.id.requireRegisterFragment)
+                        } else {
+                            findNavController(R.id.nav_host_fragment).navigate(R.id.settingsFragment)
+                        }
                         true
                     }
 
                     else -> false
+
                 }
             }
 
+//            val navController = navHost.navController
+            val inflater = navController.navInflater
+            val graph = inflater.inflate(R.navigation.nav_graph)
 
+           if (!checkAuthTime()) {
+               graph.setStartDestination(R.id.authControlFragment)
+           } else {
+               graph.setStartDestination(R.id.mainMenuFragment)
+           }
+
+            navController.graph = graph
+
+
+
+//        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+
+
+
+    }
+
+    fun saveAuthTime() {
+        val format = SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault())
+        sharedPreferences.save("AUTHORISATION_TIME", format.format(Date()).toString())
+    }
+
+    fun checkAuthTime(): Boolean {
+        try {
+            val format = SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault())
+            val time = format.parse(
+                sharedPreferences.getStringValue("AUTHORISATION_TIME") ?: return false
+            )?.time ?: return false
+            return Date().time < (time + 1000 * 60 * 60 * 24)
+        } catch (_: Exception) {
         }
+        return false
     }
 
     private fun checkForBtAdapter() {

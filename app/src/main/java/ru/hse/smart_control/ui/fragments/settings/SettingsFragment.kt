@@ -27,17 +27,13 @@ class SettingsFragment : Fragment(){
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
 
         val recyclerView = binding.settingItems
         val layoutManager = LinearLayoutManager(requireContext())
         layoutManager.orientation = LinearLayoutManager.VERTICAL
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = SettingsAdapter(getSettingsList()) {
-            settingsItemModel ->
+                settingsItemModel ->
             when(settingsItemModel.itemId){
                 1 -> {
                     checkAndRequestPermission()
@@ -50,6 +46,29 @@ class SettingsFragment : Fragment(){
                 }
             }
         }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+//        val recyclerView = binding.settingItems
+//        val layoutManager = LinearLayoutManager(requireContext())
+//        layoutManager.orientation = LinearLayoutManager.VERTICAL
+//        recyclerView.layoutManager = layoutManager
+//        recyclerView.adapter = SettingsAdapter(getSettingsList()) {
+//            settingsItemModel ->
+//            when(settingsItemModel.itemId){
+//                1 -> {
+//                    checkAndRequestPermission()
+//                }
+//                2 -> {
+//
+//                }
+//                else -> {
+//
+//                }
+//            }
+//        }
     }
 
     private fun getSettingsList(): List<SettingsItemModel> {

@@ -86,4 +86,7 @@
     <string name="arduino_tab">Ардуино</string>
     <string name="ros_tab">ROS</string>
 
+    <string name="ui_control">Управление</string>
+    <string name="settings">Настройки</string>
+
 </resources>

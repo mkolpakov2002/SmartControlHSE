@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".presentation.screens.control.UiSettingsFragment">
+
+    <TextView
+        android:id="@+id/tvCreateWidget"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginTop="45dp"
+        android:text="Создайте элементы управления"
+
+        android:layout_marginStart="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/containerCreateWidget"
+        >
+
+    </TextView>
+
+        <LinearLayout
+            android:id="@+id/containerCreateWidget"
+            android:layout_width="match_parent"
+            android:layout_height="350dp"
+            android:orientation="vertical"
+            android:visibility="visible"
+            android:padding="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvCreateWidget"
+            app:layout_constraintBottom_toTopOf="@+id/tvCreatedElements">
+
+            <LinearLayout
+                android:id="@+id/containerWidgetId"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="Id:"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvWidgetId"
+                    android:layout_marginLeft="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/containerMethodType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="Тип устройства:"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <Spinner
+                    android:id="@+id/spinnerMethodType"
+                    android:layout_width="180dp"
+                    android:textSize="15sp"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/containerCapabilityType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="Тип действия:"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <Spinner
+                    android:id="@+id/spinnerCapabilityType"
+                    android:layout_width="210dp"
+                    android:textSize="15sp"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/containerCapabilitySubType"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="Подтип действия:"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <Spinner
+                    android:id="@+id/spinnerCapabilitySubType"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="15sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/containerWidgetType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="Тип виджета:"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <Spinner
+                    android:id="@+id/spinnerWidgetType"
+                    android:layout_width="210dp"
+                    android:textSize="15sp"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
+            <com.google.android.flexbox.FlexboxLayout
+                android:id="@+id/containerWidgetPosition"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="10dp"
+                app:alignItems="center"
+                app:justifyContent="space_between"
+                android:orientation="horizontal">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:hint="X:">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etPosX"
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:background="@color/white"
+                        android:singleLine="true" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:hint="Y:">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etPosY"
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:background="@color/white"
+                        android:singleLine="true" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:hint="W:">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etWidgetWidth"
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:background="@color/white"
+                        android:singleLine="true" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:hint="H:">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etWidgetHeight"
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:background="@color/white"
+                        android:singleLine="true" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+            </com.google.android.flexbox.FlexboxLayout>
+            <LinearLayout
+                android:id="@+id/containerWidgetHW"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="end">
+                <Button
+                    android:layout_marginTop="4dp"
+                    android:id="@+id/btnCreateWidget"
+                    android:layout_marginEnd="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Добавить" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvCreatedElements"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:text="Элементы управления"
+        app:layout_constraintTop_toBottomOf="@+id/containerCreateWidget"
+        app:layout_constraintBottom_toTopOf="@+id/rvWidgetList"
+        app:layout_constraintStart_toStartOf="parent">
+
+    </TextView>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvWidgetList"
+        android:layout_width="match_parent"
+        android:layout_height="320dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:listitem="@layout/widget_item"
+        app:layout_constraintTop_toBottomOf="@+id/tvCreatedElements"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -169,4 +169,7 @@
     <string name="arduino_tab">Arduino</string>
     <string name="ros_tab">ROS</string>
 
+    <string name="ui_control">Control</string>
+    <string name="settings">Settings</string>
+
 </resources>

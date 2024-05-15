@@ -65,16 +65,7 @@ data class ArduinoPacket(
         for (byteType in configuration.byteOrder) {
             val value = customBytes[byteType] ?: configuration.defaultBytes[byteType]
             value?.let {
-                val byteValue = when (it) {
-                    is CustomByteWrapper -> it.value
-                    is ClassFromDeviceWrapper -> it.value
-                    is TypeFromDeviceWrapper -> it.value
-                    is ClassToDeviceWrapper -> it.value
-                    is TypeToDeviceWrapper -> it.value
-                    is TurnOfCommandWrapper -> it.value
-                    is TypeOfCommandWrapper -> it.value
-                    is TypeOfMoveWrapper -> it.value
-                }
+                val byteValue = value.value
                 bytes.add(byteValue)
             }
         }

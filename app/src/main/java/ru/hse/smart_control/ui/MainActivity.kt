@@ -42,10 +42,11 @@ import ru.hse.smart_control.utility.ThemeUtils.onActivityCreateSetTheme
 import ru.hse.smart_control.R
 import ru.hse.smart_control.databinding.ActivityMainBinding
 import ru.hse.smart_control.model.prefs.SharedPreferences
+import java.text.SimpleDateFormat
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityMainBinding
+    lateinit var binding: ActivityMainBinding
 
     private val topDestinationIds = setOf(
         R.id.authControlFragment
@@ -395,5 +396,22 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val DOUBLE_BACK_PRESS_INTERVAL = 2000L
         private var lastBackPressedTime = 0L
+    }
+
+    fun saveAuthTime() {
+        val format = SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault())
+        sharedPreferences.save("AUTHORISATION_TIME", format.format(Date()).toString())
+    }
+
+    fun checkAuthTime(): Boolean {
+        try {
+            val format = SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault())
+            val time = format.parse(
+                sharedPreferences.getStringValue("AUTHORISATION_TIME") ?: return false
+            )?.time ?: return false
+            return Date().time < (time + 1000 * 60 * 60 * 24)
+        } catch (_: Exception) {
+        }
+        return false
     }
 }

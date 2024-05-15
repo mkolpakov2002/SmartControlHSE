@@ -81,6 +81,8 @@ class YandexSmartHomeClientOnlineTest {
 
                     val currentState = onOffCapabilityStateObjectData?.value?.value
 
+                    println("Id лампы: ${device.id}; Имя ${device.name}")
+
                     println("Текущее состояние лампы ${device.name}: ${if (currentState == true) "включено" else if (currentState == false) "выключено" else "неизвестно"}")
 
                     var newCurrentState = currentState != true
